@@ -162,7 +162,7 @@ Use a standard `TextBox` with these configurations:
 - ✅ Monospace font and word wrap are applied
 - ✅ Keyboard shortcut Ctrl+S works for save
 - ✅ Unsaved changes are tracked
-- ⚠️ Bold/italic shortcuts (Ctrl+B/I/K) not implemented (low priority)
+- ✅ Bold/italic/link shortcuts (Ctrl+B/I/K) implemented (2/6/2026)
 
 ---
 

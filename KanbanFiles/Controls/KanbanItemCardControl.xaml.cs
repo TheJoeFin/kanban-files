@@ -326,14 +326,34 @@ public sealed partial class KanbanItemCardControl : UserControl
 
             saveButton.Click += async (s, args) => await SaveAsync();
 
-            // Add keyboard shortcut handler for Ctrl+S
+            // Add keyboard shortcut handlers
             editor.KeyDown += async (s, args) =>
             {
-                if (args.Key == Windows.System.VirtualKey.S && 
-                    Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Control).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down))
+                var isCtrlPressed = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Control).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
+                
+                // Ctrl+S: Save
+                if (args.Key == Windows.System.VirtualKey.S && isCtrlPressed)
                 {
                     args.Handled = true;
                     await SaveAsync();
+                }
+                // Ctrl+B: Bold
+                else if (args.Key == Windows.System.VirtualKey.B && isCtrlPressed)
+                {
+                    args.Handled = true;
+                    WrapSelection(editor, "**", "**");
+                }
+                // Ctrl+I: Italic
+                else if (args.Key == Windows.System.VirtualKey.I && isCtrlPressed)
+                {
+                    args.Handled = true;
+                    WrapSelection(editor, "*", "*");
+                }
+                // Ctrl+K: Link
+                else if (args.Key == Windows.System.VirtualKey.K && isCtrlPressed)
+                {
+                    args.Handled = true;
+                    InsertLink(editor);
                 }
             };
 
@@ -436,6 +456,80 @@ public sealed partial class KanbanItemCardControl : UserControl
         {
             await ShowErrorAsync($"Failed to open editor: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Wraps the selected text with the specified prefix and suffix.
+    /// If no text is selected, inserts placeholder text with the wrapping.
+    /// </summary>
+    private void WrapSelection(TextBox textBox, string prefix, string suffix)
+    {
+        var selectionStart = textBox.SelectionStart;
+        var selectionLength = textBox.SelectionLength;
+        var text = textBox.Text;
+
+        if (selectionLength > 0)
+        {
+            // Wrap the selected text
+            var selectedText = text.Substring(selectionStart, selectionLength);
+            var wrappedText = prefix + selectedText + suffix;
+            
+            textBox.Text = text.Substring(0, selectionStart) + wrappedText + text.Substring(selectionStart + selectionLength);
+            
+            // Select the wrapped content (excluding the wrapper syntax)
+            textBox.SelectionStart = selectionStart + prefix.Length;
+            textBox.SelectionLength = selectedText.Length;
+        }
+        else
+        {
+            // Insert placeholder with wrapping
+            var placeholder = prefix == "**" ? "bold" : "italic";
+            var wrappedText = prefix + placeholder + suffix;
+            
+            textBox.Text = text.Substring(0, selectionStart) + wrappedText + text.Substring(selectionStart);
+            
+            // Select the placeholder text
+            textBox.SelectionStart = selectionStart + prefix.Length;
+            textBox.SelectionLength = placeholder.Length;
+        }
+        
+        textBox.Focus(FocusState.Programmatic);
+    }
+
+    /// <summary>
+    /// Inserts a markdown link at the cursor position or wraps selected text in a link.
+    /// Places the cursor in the URL portion for easy editing.
+    /// </summary>
+    private void InsertLink(TextBox textBox)
+    {
+        var selectionStart = textBox.SelectionStart;
+        var selectionLength = textBox.SelectionLength;
+        var text = textBox.Text;
+
+        string linkText;
+        string linkMarkdown;
+
+        if (selectionLength > 0)
+        {
+            // Wrap selected text as link
+            linkText = text.Substring(selectionStart, selectionLength);
+            linkMarkdown = $"[{linkText}](url)";
+        }
+        else
+        {
+            // Insert placeholder link
+            linkText = "text";
+            linkMarkdown = "[text](url)";
+        }
+
+        textBox.Text = text.Substring(0, selectionStart) + linkMarkdown + text.Substring(selectionStart + selectionLength);
+        
+        // Position cursor in the URL portion for easy editing
+        var urlStart = selectionStart + linkText.Length + 3; // after "[linkText]("
+        textBox.SelectionStart = urlStart;
+        textBox.SelectionLength = 3; // select "url"
+        
+        textBox.Focus(FocusState.Programmatic);
     }
 
     private async Task ShowErrorAsync(string message)

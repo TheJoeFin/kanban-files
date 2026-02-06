@@ -51,7 +51,7 @@
   - Split-pane layout with TextBox editor and WebView2 preview
   - Markdig integration with HTML/CSS styling and theme support
   - External file change detection with auto-reload and conflict resolution
-  - Keyboard shortcuts: Ctrl+S to save
+  - Keyboard shortcuts: Ctrl+S (save), Ctrl+B (bold), Ctrl+I (italic), Ctrl+K (link)
   - Unsaved changes tracking and prompts on close
   - File watcher event suppression to prevent sync loops
   - See: KanbanFiles/Controls/KanbanItemCardControl.xaml.cs (OnOpenDetailRequested)

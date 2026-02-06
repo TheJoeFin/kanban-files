@@ -46,9 +46,25 @@ Changes:
 **Fix**: Removed `[JsonPropertyName]` attributes from DragPayload.cs to use default PascalCase property names matching the serialized JSON. Items can now be dragged and dropped between columns successfully.
 
 
-## Issue 5 3:41 PM 2/6/2026
+## Issue 5 3:41 PM 2/6/2026 - RESOLVED 2/6/2026 9:45 PM
 - New items do not get added to the column
 - new files do not get discovered and added to the column
+
+**Resolution**: Fixed by adding newly created items to the UI-bound collections (UngroupedItems or Groups). The issue was identical to Issue #1 - items were being added to the Items collection but not to the collections that the UI binds to. 
+
+**Root cause**: 
+- ColumnViewModel.CreateItemAsync() added items to Items but not UngroupedItems/Groups
+- MainViewModel.OnItemCreated() had the same problem for externally created files
+
+**Fix**: After creating a KanbanItemViewModel, check if it has a GroupName and add it to:
+- The matching group's Items collection if grouped
+- UngroupedItems collection if ungrouped
+
+This ensures items appear immediately in the UI whether created through the app or added externally via file system.
+
+Changes:
+- **ColumnViewModel.cs**: Added UI-bound collection logic in CreateItemAsync (lines 82-91)
+- **MainViewModel.cs**: Added UI-bound collection logic in OnItemCreated (lines 269-278)
 
 
 ## Issue 6 3:42 PM 2/6/2026

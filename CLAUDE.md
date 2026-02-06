@@ -137,4 +137,10 @@ All 7 phases complete! KanbanFiles is feature-complete with full markdown editin
   - Solution: Removed [JsonPropertyName] attributes to use default PascalCase matching serialization
   - Items can now be dragged and dropped between columns successfully
   - Build successful (0 errors, expected AOT warnings)
+- **CRITICAL BUG FIX** (2/6/2026 9:45 PM): Fixed new items not appearing in columns (Issue #5)
+  - Root cause: Items added to Items collection but not UI-bound UngroupedItems/Groups collections
+  - Affected both CreateItemAsync (app-created items) and OnItemCreated (externally created files)
+  - Solution: After creating KanbanItemViewModel, add to UngroupedItems or appropriate group's Items
+  - Items now appear immediately whether created in-app or externally
+  - Build successful (0 errors, 25 expected AOT warnings)
 

@@ -265,6 +265,17 @@ namespace KanbanFiles.ViewModels
 
             // Add to column
             columnViewModel.Items.Add(item);
+            
+            // Add to UI-bound collection based on group membership
+            if (!string.IsNullOrEmpty(itemModel.GroupName))
+            {
+                var group = columnViewModel.Groups.FirstOrDefault(g => g.Name == itemModel.GroupName);
+                group?.Items.Add(item);
+            }
+            else
+            {
+                columnViewModel.UngroupedItems.Add(item);
+            }
 
             // Update ItemOrder in config
             var folderName = Path.GetFileName(columnPath);

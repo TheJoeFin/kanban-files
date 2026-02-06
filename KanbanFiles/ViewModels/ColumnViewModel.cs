@@ -78,6 +78,17 @@ public partial class ColumnViewModel : BaseViewModel
             {
                 var itemViewModel = new KanbanItemViewModel(newItem, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService);
                 Items.Add(itemViewModel);
+                
+                // Add to UI-bound collection based on group membership
+                if (!string.IsNullOrEmpty(newItem.GroupName))
+                {
+                    var group = Groups.FirstOrDefault(g => g.Name == newItem.GroupName);
+                    group?.Items.Add(itemViewModel);
+                }
+                else
+                {
+                    UngroupedItems.Add(itemViewModel);
+                }
             }
         }
         catch (UnauthorizedAccessException)

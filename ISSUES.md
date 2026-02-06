@@ -35,5 +35,22 @@ Changes:
 - **MainPage.xaml**: Added recent folders list UI to empty state with card styling and hover effects
 
 
-## Issue 4 3:28 PM 2/6/2026
+## Issue 4 3:28 PM 2/6/2026 - RESOLVED 2/6/2026 9:41 PM
 - drop on other columns does not work, this is core functionality
+
+**Resolution**: Fixed JSON property name mismatch in DragPayload model. The issue was caused by a discrepancy between serialization and deserialization:
+- KanbanItemCardControl serialized with PascalCase property names (FilePath, SourceColumnPath, FileName)
+- DragPayload model had `[JsonPropertyName]` attributes expecting camelCase (filePath, sourceColumnPath, fileName)
+- This caused deserialization to fail silently, resulting in null dragPayload and ignored drop operations
+
+**Fix**: Removed `[JsonPropertyName]` attributes from DragPayload.cs to use default PascalCase property names matching the serialized JSON. Items can now be dragged and dropped between columns successfully.
+
+
+## Issue 5 3:41 PM 2/6/2026
+- New items do not get added to the column
+- new files do not get discovered and added to the column
+
+
+## Issue 6 3:42 PM 2/6/2026
+- The default background color on an item is too close to the text color and the item is not readable
+

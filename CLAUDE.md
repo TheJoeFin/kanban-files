@@ -129,4 +129,12 @@ All 7 phases complete! KanbanFiles is feature-complete with full markdown editin
   - Files: IRecentFoldersService.cs, RecentFoldersService.cs, MainViewModel.cs (updated), MainPage.xaml (updated)
   - Completes Issue #3
   - Build successful (0 errors, 19 expected AOT warnings)
+- **CRITICAL BUG FIX** (2/6/2026 9:41 PM): Fixed drag-drop between columns (Issue #4)
+  - Root cause: JSON property name mismatch in DragPayload serialization/deserialization
+  - KanbanItemCardControl serialized with PascalCase (FilePath, SourceColumnPath, FileName)
+  - DragPayload model expected camelCase via [JsonPropertyName] attributes
+  - Deserialization failed silently, causing drop operations to be ignored
+  - Solution: Removed [JsonPropertyName] attributes to use default PascalCase matching serialization
+  - Items can now be dragged and dropped between columns successfully
+  - Build successful (0 errors, expected AOT warnings)
 

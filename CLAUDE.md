@@ -72,5 +72,8 @@
   - ✅ Window state persistence (width, height, position, maximized state)
   - ✅ Comprehensive error handling with INotificationService (Phase 7.7)
 
+## Housekeeping Items
+- **Git**: .gitignore added (2/6/2026 8:46 PM) - prevents bin/obj tracking
+
 ## Project Status
 All 7 phases complete! KanbanFiles is feature-complete with full markdown editing capabilities and comprehensive error handling.

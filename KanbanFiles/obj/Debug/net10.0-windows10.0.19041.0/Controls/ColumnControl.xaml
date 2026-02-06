@@ -31,7 +31,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock x:ConnectionId='6' Grid.Column="0"
+            <TextBlock x:ConnectionId='10' Grid.Column="0"
                        Text="{Binding Name, Mode=OneWay}"
                        FontSize="16"
                        FontWeight="Bold"
@@ -48,10 +48,14 @@
                     BorderThickness="0">
                 <Button.Flyout>
                     <MenuFlyout>
-                        <MenuFlyoutItem x:ConnectionId='7' Text="Rename" 
+                        <MenuFlyoutItem x:ConnectionId='11' Text="Create Group" 
+                                        Icon="Add"
+                                                                         />
+                        <MenuFlyoutSeparator/>
+                        <MenuFlyoutItem x:ConnectionId='12' Text="Rename" 
                                         Icon="Rename"
                                                                     />
-                        <MenuFlyoutItem x:ConnectionId='8' Text="Delete" 
+                        <MenuFlyoutItem x:ConnectionId='13' Text="Delete" 
                                         Icon="Delete"
                                                                     />
                     </MenuFlyout>
@@ -63,17 +67,46 @@
         <ScrollViewer Grid.Row="1" 
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl x:ConnectionId='4' x:Name="ItemsControlElement"
-                          ItemsSource="{Binding Items, Mode=OneWay}"
-                          AllowDrop="True"
-                                                          
-                                                  >
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <controls:KanbanItemCardControl Margin="0,0,0,8"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <StackPanel>
+                <!-- Ungrouped Items Section -->
+                <ItemsControl x:ConnectionId='4' x:Name="UngroupedItemsControlElement"
+                              ItemsSource="{Binding UngroupedItems, Mode=OneWay}"
+                              AllowDrop="True"
+                                                              
+                                                      >
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <controls:KanbanItemCardControl Margin="0,0,0,8"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Groups Section -->
+                <ItemsControl x:ConnectionId='5' x:Name="GroupsControlElement"
+                              ItemsSource="{Binding Groups, Mode=OneWay}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,0,0,8">
+                                <!-- Group Header -->
+                                <controls:GroupHeaderControl/>
+                                
+                                <!-- Group Items (visible when not collapsed) -->
+                                <ItemsControl x:ConnectionId='7' ItemsSource="{Binding Items, Mode=OneWay}"
+                                              AllowDrop="True"
+                                                                              
+                                                                      
+                                              Visibility="{Binding IsCollapsed, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <controls:KanbanItemCardControl Margin="0,0,0,8"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
         </ScrollViewer>
 
         <!-- Footer -->

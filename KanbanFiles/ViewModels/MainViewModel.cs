@@ -7,6 +7,7 @@ namespace KanbanFiles.ViewModels
     {
         private readonly BoardConfigService _boardConfigService;
         private readonly FileSystemService _fileSystemService;
+        private readonly GroupService _groupService;
         private FileWatcherService? _fileWatcherService;
         private Models.Board? _board;
 
@@ -15,6 +16,7 @@ namespace KanbanFiles.ViewModels
             Title = "Home";
             _boardConfigService = new BoardConfigService();
             _fileSystemService = new FileSystemService();
+            _groupService = new GroupService();
             Columns = new ObservableCollection<ColumnViewModel>();
         }
 
@@ -61,7 +63,7 @@ namespace KanbanFiles.ViewModels
             Columns.Clear();
             foreach (var column in columns)
             {
-                var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _board, _fileWatcherService);
+                var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService);
                 columnViewModel.DeleteRequested += OnColumnDeleteRequested;
                 Columns.Add(columnViewModel);
             }
@@ -106,7 +108,7 @@ namespace KanbanFiles.ViewModels
                 SortOrder = newColumnConfig.SortOrder
             };
 
-            var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _board, _fileWatcherService);
+            var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService);
             columnViewModel.DeleteRequested += OnColumnDeleteRequested;
             Columns.Add(columnViewModel);
         }
@@ -292,15 +294,42 @@ namespace KanbanFiles.ViewModels
         {
             if (_board == null) return;
 
-            // Find the column and item
-            var columnPath = Path.GetDirectoryName(e.FilePath);
-            if (columnPath == null) return;
-
-            var columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
-            if (columnViewModel == null) return;
-
             var fileName = Path.GetFileName(e.FilePath);
-            var item = columnViewModel.Items.FirstOrDefault(i => i.FileName == fileName);
+
+            // Handle groups.json changes
+            if (fileName == "groups.json")
+            {
+                var columnPath = Path.GetDirectoryName(e.FilePath);
+                if (columnPath == null) return;
+
+                var columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
+                if (columnViewModel != null)
+                {
+                    await columnViewModel.LoadGroupsAsync();
+                }
+                return;
+            }
+
+            // Handle .kanban.json changes
+            if (fileName == ".kanban.json")
+            {
+                // TODO: Handle board config changes
+                return;
+            }
+
+            // Handle .md file content changes
+            if (Path.GetExtension(e.FilePath) != ".md")
+                return;
+
+            // Find the column and item
+            var itemColumnPath = Path.GetDirectoryName(e.FilePath);
+            if (itemColumnPath == null) return;
+
+            var itemColumnViewModel = Columns.FirstOrDefault(c => c.FolderPath == itemColumnPath);
+            if (itemColumnViewModel == null) return;
+
+            var itemFileName = Path.GetFileName(e.FilePath);
+            var item = itemColumnViewModel.Items.FirstOrDefault(i => i.FileName == itemFileName);
             if (item != null)
             {
                 // Re-read content

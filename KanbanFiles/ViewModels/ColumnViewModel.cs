@@ -8,6 +8,7 @@ public partial class ColumnViewModel : BaseViewModel
 {
     private readonly FileSystemService _fileSystemService;
     private readonly BoardConfigService _boardConfigService;
+    private readonly GroupService _groupService;
     private readonly Board _board;
     private readonly FileWatcherService? _fileWatcherService;
 
@@ -15,19 +16,24 @@ public partial class ColumnViewModel : BaseViewModel
     private string _name = string.Empty;
 
     public ObservableCollection<KanbanItemViewModel> Items { get; } = new();
+    public ObservableCollection<KanbanItemViewModel> UngroupedItems { get; } = new();
+    public ObservableCollection<GroupViewModel> Groups { get; } = new();
 
     public string FolderPath { get; }
 
     public event EventHandler<string>? DeleteRequested;
     public event EventHandler? AddItemRequested;
     public event EventHandler<string>? RenameRequested;
+    public event EventHandler<GroupViewModel>? GroupRenameRequested;
+    public event EventHandler<GroupViewModel>? GroupDeleteRequested;
 
-    public ColumnViewModel(Column column, FileSystemService fileSystemService, BoardConfigService boardConfigService, Board board, FileWatcherService? fileWatcherService = null)
+    public ColumnViewModel(Column column, FileSystemService fileSystemService, BoardConfigService boardConfigService, GroupService groupService, Board board, FileWatcherService? fileWatcherService = null)
     {
         Name = column.Name;
         FolderPath = column.FolderPath;
         _fileSystemService = fileSystemService;
         _boardConfigService = boardConfigService;
+        _groupService = groupService;
         _board = board;
         _fileWatcherService = fileWatcherService;
 
@@ -183,5 +189,136 @@ public partial class ColumnViewModel : BaseViewModel
         var invalid = Path.GetInvalidFileNameChars();
         var sanitized = string.Join("", name.Split(invalid, StringSplitOptions.RemoveEmptyEntries));
         return string.IsNullOrWhiteSpace(sanitized) ? "Column" : sanitized;
+    }
+
+    public async Task LoadItemsAsync()
+    {
+        await LoadGroupsAsync();
+        
+        // Enumerate items from file system
+        var items = await _fileSystemService.EnumerateItemsAsync(FolderPath);
+        
+        // Clear existing items
+        Items.Clear();
+        UngroupedItems.Clear();
+        foreach (var group in Groups)
+        {
+            group.Items.Clear();
+        }
+        
+        // Create ViewModels and organize into groups
+        foreach (var item in items)
+        {
+            var itemViewModel = new KanbanItemViewModel(item, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService);
+            Items.Add(itemViewModel);
+            
+            // Organize into groups based on group membership
+            var group = Groups.FirstOrDefault(g => g.Name == item.GroupName);
+            if (group != null)
+            {
+                group.Items.Add(itemViewModel);
+            }
+            else
+            {
+                UngroupedItems.Add(itemViewModel);
+            }
+        }
+    }
+
+    public async Task LoadGroupsAsync()
+    {
+        var groupsConfig = await _groupService.LoadGroupsAsync(FolderPath);
+        
+        Groups.Clear();
+        
+        foreach (var group in groupsConfig.Groups)
+        {
+            var groupViewModel = new GroupViewModel(group.Name)
+            {
+                IsCollapsed = group.IsCollapsed
+            };
+            
+            // Wire up events
+            groupViewModel.RenameRequested += (sender, e) => GroupRenameRequested?.Invoke(this, groupViewModel);
+            groupViewModel.DeleteRequested += (sender, e) => GroupDeleteRequested?.Invoke(this, groupViewModel);
+            
+            Groups.Add(groupViewModel);
+        }
+    }
+
+    public async Task CreateGroupAsync(string groupName)
+    {
+        await _groupService.CreateGroupAsync(FolderPath, groupName);
+        await LoadGroupsAsync();
+    }
+
+    public async Task RenameGroupAsync(string oldName, string newName)
+    {
+        await _groupService.RenameGroupAsync(FolderPath, oldName, newName);
+        
+        // Update the group view model
+        var group = Groups.FirstOrDefault(g => g.Name == oldName);
+        if (group != null)
+        {
+            group.Name = newName;
+        }
+    }
+
+    public async Task DeleteGroupAsync(string groupName)
+    {
+        var group = Groups.FirstOrDefault(g => g.Name == groupName);
+        if (group == null) return;
+        
+        // Move all items from group to ungrouped
+        var itemsToMove = group.Items.ToList();
+        foreach (var item in itemsToMove)
+        {
+            await MoveItemToGroupAsync(item.FileName, null);
+        }
+        
+        await _groupService.DeleteGroupAsync(FolderPath, groupName);
+        Groups.Remove(group);
+    }
+
+    public async Task MoveItemToGroupAsync(string itemFileName, string? groupName)
+    {
+        if (groupName == null)
+        {
+            // Move to ungrouped
+            await _groupService.RemoveItemFromGroupAsync(FolderPath, itemFileName);
+        }
+        else
+        {
+            // Move to specified group
+            await _groupService.AddItemToGroupAsync(FolderPath, groupName, itemFileName);
+        }
+        
+        // Update UI organization
+        var item = Items.FirstOrDefault(i => i.FileName == itemFileName);
+        if (item != null)
+        {
+            // Remove from current location
+            UngroupedItems.Remove(item);
+            foreach (var group in Groups)
+            {
+                group.Items.Remove(item);
+            }
+            
+            // Add to new location
+            if (groupName == null)
+            {
+                UngroupedItems.Add(item);
+            }
+            else
+            {
+                var targetGroup = Groups.FirstOrDefault(g => g.Name == groupName);
+                targetGroup?.Items.Add(item);
+            }
+        }
+    }
+
+    public async Task Refresh()
+    {
+        await LoadItemsAsync();
     }
 }

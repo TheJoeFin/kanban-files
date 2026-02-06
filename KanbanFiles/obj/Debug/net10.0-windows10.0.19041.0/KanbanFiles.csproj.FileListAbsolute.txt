@@ -111,3 +111,8 @@ D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\pri.res
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\qualifiers.txt
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\qualifiers.txt.intermediate
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\MultipleQualifiersPerDimensionFound.txt
+D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.g.i.cs
+D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.g.cs
+D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.xaml
+D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.xbf
+D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.xbf

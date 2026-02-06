@@ -42,11 +42,10 @@ public class FileWatcherService : IDisposable
         _folderWatcher.Deleted += OnFolderDeleted;
         _folderWatcher.EnableRaisingEvents = true;
 
-        // Watch for file changes (items) in all subdirectories
+        // Watch for file changes (items and config files) in all subdirectories
         _fileWatcher = new FileSystemWatcher(_rootPath)
         {
             NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite,
-            Filter = "*.md",
             IncludeSubdirectories = true
         };
         _fileWatcher.Created += OnFileCreated;
@@ -129,6 +128,10 @@ public class FileWatcherService : IDisposable
         if (IsEventSuppressed(e.FullPath))
             return;
 
+        // Only handle .md files for item events
+        if (Path.GetExtension(e.FullPath) != ".md")
+            return;
+
         DebounceEvent(e.FullPath, async () =>
         {
             await WaitForFileAvailableAsync(e.FullPath);
@@ -144,6 +147,10 @@ public class FileWatcherService : IDisposable
         if (IsEventSuppressed(e.FullPath))
             return;
 
+        // Only handle .md files for item events
+        if (Path.GetExtension(e.FullPath) != ".md")
+            return;
+
         _dispatcherQueue.TryEnqueue(() =>
         {
             ItemDeleted?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
@@ -153,6 +160,12 @@ public class FileWatcherService : IDisposable
     private void OnFileRenamed(object sender, RenamedEventArgs e)
     {
         if (IsEventSuppressed(e.OldFullPath) || IsEventSuppressed(e.FullPath))
+            return;
+
+        // Only handle .md files for item events
+        var oldExt = Path.GetExtension(e.OldFullPath);
+        var newExt = Path.GetExtension(e.FullPath);
+        if (oldExt != ".md" && newExt != ".md")
             return;
 
         _dispatcherQueue.TryEnqueue(() =>

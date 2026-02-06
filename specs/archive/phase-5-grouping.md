@@ -1,5 +1,16 @@
 # Phase 5 — Grouping
 
+## STATUS: COMPLETED
+**Completion Date**: February 6, 2026
+
+**Summary**: Successfully implemented full grouping functionality for KanbanFiles. Users can now organize items within columns into named, collapsible, draggable groups. All group metadata is persisted in `groups.json` files within each column folder. Key features implemented include:
+- GroupService for managing group metadata with full CRUD operations
+- Updated ColumnControl UI with collapsible group headers and ungrouped items section
+- Drag & drop support for reordering groups within a column
+- Drag & drop support for moving items between groups, into/out of groups, and cross-column moves
+- Group creation, renaming, and deletion via UI controls and dialogs
+- Persistence of collapse state and group order in `groups.json`
+
 ## Objective
 Allow users to organize items within a column into named, collapsible, draggable groups. Group metadata is stored in a `groups.json` file within each column folder.
 

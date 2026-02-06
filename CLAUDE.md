@@ -38,3 +38,4 @@
 - ✅ Phase 2: Basic Board UI with full CRUD operations (create/read/update/delete columns and items)
 - ✅ Phase 3: Drag & Drop (items between/within columns, column reordering)
 - ✅ Phase 4: Two-Way File System Sync (FileWatcherService, external file monitoring)
+- ✅ Phase 5: Grouping (GroupService, GroupViewModel, group CRUD, drag & drop for groups and items, collapse state persistence)

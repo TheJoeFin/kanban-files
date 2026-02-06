@@ -1,0 +1,116 @@
+﻿<UserControl
+    x:Class="KanbanFiles.Controls.GroupHeaderControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="using:KanbanFiles.ViewModels"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=viewmodels:GroupViewModel}">
+
+    <Border x:ConnectionId='2'
+        x:Name="HeaderBorder"
+        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+        CornerRadius="8"
+        Padding="12,8"
+        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+        BorderThickness="1"
+        CanDrag="True"
+                                                
+                                                  
+                                                    
+                                                  >
+        
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:ConnectionId='3' x:Name="CommonStates">
+                <VisualState x:ConnectionId='4' x:Name="Normal" />
+                <VisualState x:ConnectionId='5' x:Name="PointerOver">
+                    <VisualState.Setters>
+                        <Setter Target="HeaderBorder.Background" Value="{ThemeResource CardBackgroundFillColorSecondaryBrush}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Chevron Icon -->
+            <Button x:ConnectionId='6' Grid.Column="0"
+                    x:Name="ChevronButton"
+                    Width="32"
+                    Height="32"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="0"
+                                               
+                    VerticalAlignment="Center">
+                <FontIcon x:ConnectionId='11' x:Name="ChevronIcon"
+                          Glyph="&#xE70D;"
+                          FontSize="12"/>
+            </Button>
+
+            <!-- Group Name -->
+            <Grid Grid.Column="1" 
+                  Margin="8,0,0,0"
+                  VerticalAlignment="Center">
+                <TextBlock x:ConnectionId='9' x:Name="NameTextBlock"
+                           Text="{Binding Name, Mode=OneWay}"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"
+                                                                    
+                           Visibility="Visible"/>
+                
+                <TextBox x:ConnectionId='10' x:Name="NameEditTextBox"
+                         Text="{Binding Name, Mode=TwoWay}"
+                         FontSize="14"
+                         FontWeight="SemiBold"
+                         VerticalAlignment="Center"
+                         Visibility="Collapsed"
+                                                              
+                                                          />
+            </Grid>
+
+            <!-- Item Count Badge -->
+            <Border Grid.Column="2"
+                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                    CornerRadius="10"
+                    Padding="8,2"
+                    Margin="8,0"
+                    VerticalAlignment="Center">
+                <TextBlock Text="{Binding ItemCount, Mode=OneWay}"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Foreground="White"/>
+            </Border>
+
+            <!-- Menu Button -->
+            <Button Grid.Column="3"
+                    Content="&#xE712;"
+                    FontFamily="Segoe MDL2 Assets"
+                    Width="32"
+                    Height="32"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    VerticalAlignment="Center">
+                <Button.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem x:ConnectionId='7' Text="Rename" 
+                                        Icon="Rename"
+                                                                    />
+                        <MenuFlyoutItem x:ConnectionId='8' Text="Delete" 
+                                        Icon="Delete"
+                                                                    />
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+        </Grid>
+    </Border>
+</UserControl>
+

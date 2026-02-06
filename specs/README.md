@@ -30,7 +30,7 @@ Each phase builds on the previous ones:
    - Can proceed with ContentDialog workaround or SDK upgrade
    - Can be done in parallel with Phases 3, 4, 5
 
-7. **Phase 7: Polish & Edge Cases**
+7. **Phase 7: Polish & Edge Cases** ✅ COMPLETE
    - Requires: All previous phases (Phase 6 optional)
    - Final refinements and polish
 
@@ -43,8 +43,8 @@ Each phase builds on the previous ones:
 4. ✅ Phase 4: Two-Way File Sync
 5. ✅ Phase 5: Grouping
 6. 🚫 **Phase 6: Rich Markdown Editing** ← BLOCKED (WindowsAppSDK 1.8 XAML Compiler bug)
-7. 🚧 **Phase 7: Polish & Edge Cases** ← PARTIAL (InfoBar, keyboard shortcuts, corruption handling ✅)
+7. ✅ **Phase 7: Polish & Edge Cases** ← COMPLETE
 
-**Completed:** 5/7 phases fully, 1/7 partial (78.6%)
+**Completed:** 6/7 phases (85.7%)
 **Blocked:** Phase 6 due to tooling bug (see ISSUES.md 2/6/2026 7:56 PM)
-**Last work:** Phase 7 partial implementation (2/6/2026 8:15 PM)
+**Last work:** Phase 7.6 Window State Persistence (2/6/2026 8:10 PM)

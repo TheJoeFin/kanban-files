@@ -220,7 +220,7 @@ If needed, define custom brushes in `App.xaml` `ResourceDictionary`:
 
 ---
 
-## 7.6 — Persist Window Size and Position
+## 7.6 — Persist Window Size and Position ✅
 
 ### What
 Remember the window size and position between app launches.

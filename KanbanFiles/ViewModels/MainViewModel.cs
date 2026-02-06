@@ -11,6 +11,7 @@ namespace KanbanFiles.ViewModels
         private readonly GroupService _groupService;
         private readonly INotificationService _notificationService;
         private readonly IFocusManagerService _focusManagerService;
+        private readonly IRecentFoldersService _recentFoldersService;
         private FileWatcherService? _fileWatcherService;
         private Models.Board? _board;
 
@@ -23,10 +24,17 @@ namespace KanbanFiles.ViewModels
             _notificationService = new NotificationService();
             ((NotificationService)_notificationService).SetMainViewModel(this);
             _focusManagerService = new FocusManagerService();
+            _recentFoldersService = new RecentFoldersService();
             Columns = new ObservableCollection<ColumnViewModel>();
+            RecentFolders = new ObservableCollection<string>();
+            _ = LoadRecentFoldersAsync();
         }
 
         public ObservableCollection<ColumnViewModel> Columns { get; }
+        
+        public ObservableCollection<string> RecentFolders { get; }
+        
+        public bool HasRecentFolders => RecentFolders.Count > 0;
 
         [ObservableProperty]
         private string _boardName = "Kanban Board";
@@ -102,6 +110,17 @@ namespace KanbanFiles.ViewModels
             
             BoardName = _board.Name;
             IsLoaded = true;
+            
+            // Add to recent folders after successful load
+            try
+            {
+                await _recentFoldersService.AddRecentFolderAsync(folderPath);
+                await LoadRecentFoldersAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to add recent folder: {ex.Message}");
+            }
         }
 
         [RelayCommand]
@@ -489,6 +508,85 @@ namespace KanbanFiles.ViewModels
         public (int columnIndex, int itemIndex) GetCurrentFocus()
         {
             return (_focusManagerService.FocusedColumnIndex, _focusManagerService.FocusedItemIndex);
+        }
+        
+        private async Task LoadRecentFoldersAsync()
+        {
+            try
+            {
+                var recentFolders = await _recentFoldersService.GetRecentFoldersAsync();
+                RecentFolders.Clear();
+                foreach (var folder in recentFolders)
+                {
+                    RecentFolders.Add(folder);
+                }
+                OnPropertyChanged(nameof(HasRecentFolders));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to load recent folders: {ex.Message}");
+            }
+        }
+        
+        [RelayCommand]
+        private async Task OpenRecentFolderAsync(string folderPath)
+        {
+            if (string.IsNullOrEmpty(folderPath))
+                return;
+                
+            try
+            {
+                if (!Directory.Exists(folderPath))
+                {
+                    ShowNotification("Folder Not Found", 
+                        $"The folder '{folderPath}' no longer exists.", 
+                        InfoBarSeverity.Error);
+                    
+                    await _recentFoldersService.RemoveRecentFolderAsync(folderPath);
+                    await LoadRecentFoldersAsync();
+                    return;
+                }
+                
+                await LoadBoardAsync(folderPath);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                ShowNotification("Permission Denied", 
+                    $"Cannot access folder '{folderPath}'. Check file permissions.", 
+                    InfoBarSeverity.Error);
+            }
+            catch (IOException ex)
+            {
+                ShowNotification("Error Opening Folder", 
+                    ex.Message, 
+                    InfoBarSeverity.Error);
+            }
+            catch (Exception ex)
+            {
+                ShowNotification("Error Opening Folder", 
+                    $"An unexpected error occurred: {ex.Message}", 
+                    InfoBarSeverity.Error);
+            }
+        }
+        
+        [RelayCommand]
+        private async Task RemoveRecentFolderAsync(string folderPath)
+        {
+            if (string.IsNullOrEmpty(folderPath))
+                return;
+                
+            try
+            {
+                await _recentFoldersService.RemoveRecentFolderAsync(folderPath);
+                await LoadRecentFoldersAsync();
+                OnPropertyChanged(nameof(HasRecentFolders));
+            }
+            catch (Exception ex)
+            {
+                ShowNotification("Error Removing Folder", 
+                    $"Failed to remove folder from recent list: {ex.Message}", 
+                    InfoBarSeverity.Error);
+            }
         }
     }
 }

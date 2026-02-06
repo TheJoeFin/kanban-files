@@ -19,8 +19,20 @@ Changes:
 
 
 
-## Issue 3 3:18 PM 2/6/2026
+## Issue 3 3:18 PM 2/6/2026 - RESOLVED
 - The initial launch screen should display a list of recently opened folders for quicker access
+
+**Resolution**: Implemented recent folders list feature with RecentFoldersService. The empty state (when no board is loaded) now displays up to 10 recently opened folders. Features include:
+- JSON persistence in %LOCALAPPDATA%\KanbanFiles\recent-folders.json
+- Click folder to open, or click X button to remove from list
+- Auto-removes invalid/deleted folders on app startup
+- Thread-safe operations with case-insensitive path deduplication
+- Professional card-style UI with tooltips showing full paths
+
+Changes:
+- **IRecentFoldersService.cs, RecentFoldersService.cs**: New service for recent folders management
+- **MainViewModel.cs**: Added RecentFolders collection, LoadRecentFoldersAsync(), OpenRecentFolderCommand, RemoveRecentFolderCommand
+- **MainPage.xaml**: Added recent folders list UI to empty state with card styling and hover effects
 
 
 ## Issue 4 3:28 PM 2/6/2026

@@ -119,4 +119,14 @@ All 7 phases complete! KanbanFiles is feature-complete with full markdown editin
   - Keyboard shortcut (Ctrl+N) still works via AddItemRequested event
   - Changes: ColumnControl.xaml (added collapsible StackPanel), ColumnControl.xaml.cs (UI toggle logic)
   - Build successful (0 errors, 19 expected AOT warnings)
+- **Recent Folders List** (2/6/2026 9:35 PM): Implemented persistent recent folders tracking
+  - Added RecentFoldersService with JSON storage in %LOCALAPPDATA%\KanbanFiles\recent-folders.json
+  - Stores up to 10 most recent folders with case-insensitive deduplication
+  - Empty state UI shows clickable recent folders list
+  - Auto-removes invalid/deleted folders on load
+  - Features: Click to open, remove button (X icon), full path tooltips
+  - Thread-safe file operations with SemaphoreSlim
+  - Files: IRecentFoldersService.cs, RecentFoldersService.cs, MainViewModel.cs (updated), MainPage.xaml (updated)
+  - Completes Issue #3
+  - Build successful (0 errors, 19 expected AOT warnings)
 

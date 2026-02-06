@@ -198,3 +198,25 @@ No issues encountered. All acceptance criteria met:
 - ✅ All operations update .kanban.json configuration
 - ✅ Build successful (0 errors, 5 AOT warnings expected for WinUI3)
 
+===================
+
+2/6/2026 7:16 PM
+
+Phase 5 - Grouping: COMPLETED
+
+Successfully implemented all grouping features:
+- ✅ GroupService with full CRUD operations (load, save, create, delete, rename, reorder)
+- ✅ GroupViewModel with collapse/expand state and commands
+- ✅ ColumnViewModel updated with UngroupedItems and Groups collections
+- ✅ GroupHeaderControl with collapsible headers and inline editing
+- ✅ ColumnControl rendering ungrouped and grouped item sections
+- ✅ Group-aware drag & drop:
+  * Items movable between groups and ungrouped area
+  * Groups reorderable by dragging headers
+  * Cross-column moves remove items from source groups
+- ✅ InverseBoolToVisibilityConverter for UI state management
+- ✅ All operations persist to groups.json with camelCase
+- ✅ File watcher support for groups.json changes
+- ✅ Collapse state and group order persistence
+- ✅ Build successful (0 errors, 10 AOT warnings expected)
+

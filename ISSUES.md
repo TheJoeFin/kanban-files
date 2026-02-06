@@ -516,3 +516,33 @@ HOUSEKEEPING: Removed bin/obj artifacts from git tracking
 **Commit**: aa977c8 "Remove bin and obj artifacts from git tracking - .gitignore working correctly"
 
 ===================
+
+2/6/2026 9:02 PM
+
+ISSUE: Missing Error Handling in RenameColumnAsync
+
+**Problem**: ColumnViewModel.RenameColumnAsync() lacked try-catch blocks, making it inconsistent with other async operations (CreateItemAsync, DeleteColumnAsync, RenameAsync). Unhandled exceptions during column rename operations could crash the app or show generic error messages.
+
+**Root Cause**: Code quality analysis identified that Directory.Move() in RenameColumnAsync (line 114) can throw:
+- UnauthorizedAccessException (insufficient permissions)
+- IOException (folder locked, target exists, etc.)
+
+Without proper error handling, these exceptions would propagate unhandled to the caller.
+
+**Resolution**: Added comprehensive try-catch blocks following the established pattern:
+- Wrapped entire RenameColumnAsync method in try-catch
+- Catches UnauthorizedAccessException with user-friendly "Permission Denied" notification
+- Catches IOException with detailed error message
+- Both exceptions re-thrown after notification (allows caller to handle if needed)
+- Consistent with CreateItemAsync and DeleteColumnAsync error handling
+
+**Files Modified**:
+- KanbanFiles/ViewModels/ColumnViewModel.cs (lines 103-141)
+
+**Testing**:
+- Build succeeds (0 errors, 19 expected AOT warnings)
+- Error notifications use INotificationService for proper UI integration
+
+**Impact**: All async CRUD operations now have consistent error handling. Users will see helpful error messages instead of app crashes when file operations fail.
+
+===================

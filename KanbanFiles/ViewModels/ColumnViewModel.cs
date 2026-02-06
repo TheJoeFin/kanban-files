@@ -102,27 +102,44 @@ public partial class ColumnViewModel : BaseViewModel
 
     public async Task RenameColumnAsync(string newName)
     {
-        var sanitizedName = SanitizeFolderName(newName);
-        var oldFolderPath = FolderPath;
-        var newFolderPath = Path.Combine(Path.GetDirectoryName(FolderPath)!, sanitizedName);
-
-        // Suppress the folder watcher events
-        _fileWatcherService?.SuppressNextEvent(oldFolderPath);
-        _fileWatcherService?.SuppressNextEvent(newFolderPath);
-
-        // Rename folder
-        await Task.Run(() => Directory.Move(oldFolderPath, newFolderPath));
-
-        // Update config
-        var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(oldFolderPath));
-        if (columnConfig != null)
+        try
         {
-            columnConfig.FolderName = sanitizedName;
-            columnConfig.DisplayName = newName;
-            await _boardConfigService.SaveAsync(_board);
-        }
+            var sanitizedName = SanitizeFolderName(newName);
+            var oldFolderPath = FolderPath;
+            var newFolderPath = Path.Combine(Path.GetDirectoryName(FolderPath)!, sanitizedName);
 
-        Name = newName;
+            // Suppress the folder watcher events
+            _fileWatcherService?.SuppressNextEvent(oldFolderPath);
+            _fileWatcherService?.SuppressNextEvent(newFolderPath);
+
+            // Rename folder
+            await Task.Run(() => Directory.Move(oldFolderPath, newFolderPath));
+
+            // Update config
+            var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(oldFolderPath));
+            if (columnConfig != null)
+            {
+                columnConfig.FolderName = sanitizedName;
+                columnConfig.DisplayName = newName;
+                await _boardConfigService.SaveAsync(_board);
+            }
+
+            Name = newName;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _notificationService?.ShowNotification("Permission Denied", 
+                $"Cannot rename column '{Name}'. Check file permissions.", 
+                InfoBarSeverity.Error);
+            throw;
+        }
+        catch (IOException ex)
+        {
+            _notificationService?.ShowNotification("Error Renaming Column", 
+                ex.Message, 
+                InfoBarSeverity.Error);
+            throw;
+        }
     }
 
     [RelayCommand]

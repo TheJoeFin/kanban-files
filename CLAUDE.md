@@ -87,3 +87,11 @@
 
 ## Project Status
 All 7 phases complete! KanbanFiles is feature-complete with full markdown editing capabilities, comprehensive error handling with proper logging, and zero remaining TODOs.
+
+## Post-Launch Improvements
+- **Error Handling Enhancement** (2/6/2026 9:02 PM): Added missing try-catch blocks to ColumnViewModel.RenameColumnAsync()
+  - Follows same pattern as CreateItemAsync() and DeleteColumnAsync()
+  - Catches UnauthorizedAccessException and IOException
+  - Shows user-friendly notifications via INotificationService
+  - Prevents unhandled exceptions from crashing the app during column rename operations
+  - Build successful (0 errors, 19 expected AOT warnings)

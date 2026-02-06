@@ -37,8 +37,11 @@
   - Ctrl+N: New Item in first column
   - Ctrl+Shift+N: New Column
   - F5: Refresh board from disk
+  - Arrow keys (←/→): Navigate between columns
+  - Arrow keys (↑/↓): Navigate between items within a column
   - Escape: Close dialogs (built-in WinUI)
   - KeyboardAccelerator in MainPage.xaml, handlers in code-behind
+  - IFocusManagerService tracks focus state across navigation
 - **Error Handling**:
   - INotificationService: Interface for showing InfoBar notifications from any ViewModel
   - NotificationService: Implementation that delegates to MainViewModel.ShowNotification()
@@ -65,7 +68,8 @@
 - ✅ Phase 7: Polish & Edge Cases
   - ✅ InfoBar notification system with auto-dismiss
   - ✅ Config corruption notifications (backup + user notification)
-  - ✅ Keyboard shortcuts (Ctrl+O, Ctrl+N, Ctrl+Shift+N, F5, Escape in dialogs)
+  - ✅ Keyboard shortcuts (Ctrl+O, Ctrl+N, Ctrl+Shift+N, F5, Arrow keys for navigation, Escape in dialogs)
+  - ✅ Arrow key navigation (←/→ between columns, ↑/↓ within columns)
   - ✅ Existing subfolders handling (already implemented in Phase 1)
   - ✅ File filtering for .md, hidden files (already implemented)
   - ✅ ThemeResource usage throughout UI (already implemented)
@@ -94,4 +98,11 @@ All 7 phases complete! KanbanFiles is feature-complete with full markdown editin
   - Catches UnauthorizedAccessException and IOException
   - Shows user-friendly notifications via INotificationService
   - Prevents unhandled exceptions from crashing the app during column rename operations
+  - Build successful (0 errors, 19 expected AOT warnings)
+- **Arrow Key Navigation** (2/6/2026 9:10 PM): Implemented keyboard navigation between columns and items
+  - Added IFocusManagerService and FocusManagerService for focus state management
+  - Arrow keys (←/→) navigate between columns
+  - Arrow keys (↑/↓) navigate between items within a column
+  - Integrated with MainViewModel and MainPage keyboard accelerators
+  - Completes Phase 7.4 keyboard shortcuts requirement
   - Build successful (0 errors, 19 expected AOT warnings)

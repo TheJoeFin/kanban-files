@@ -10,6 +10,7 @@ namespace KanbanFiles.ViewModels
         private readonly FileSystemService _fileSystemService;
         private readonly GroupService _groupService;
         private readonly INotificationService _notificationService;
+        private readonly IFocusManagerService _focusManagerService;
         private FileWatcherService? _fileWatcherService;
         private Models.Board? _board;
 
@@ -21,6 +22,7 @@ namespace KanbanFiles.ViewModels
             _groupService = new GroupService();
             _notificationService = new NotificationService();
             ((NotificationService)_notificationService).SetMainViewModel(this);
+            _focusManagerService = new FocusManagerService();
             Columns = new ObservableCollection<ColumnViewModel>();
         }
 
@@ -420,6 +422,69 @@ namespace KanbanFiles.ViewModels
                     }
                 });
             }
+        }
+        
+        public void NavigateLeft()
+        {
+            if (!IsLoaded || Columns.Count == 0) return;
+            
+            if (_focusManagerService.FocusedColumnIndex < 0)
+            {
+                _focusManagerService.SetFocus(0, 0);
+            }
+            else
+            {
+                _focusManagerService.MoveLeft(Columns.Count);
+            }
+        }
+        
+        public void NavigateRight()
+        {
+            if (!IsLoaded || Columns.Count == 0) return;
+            
+            if (_focusManagerService.FocusedColumnIndex < 0)
+            {
+                _focusManagerService.SetFocus(0, 0);
+            }
+            else
+            {
+                _focusManagerService.MoveRight(Columns.Count);
+            }
+        }
+        
+        public void NavigateUp()
+        {
+            if (!IsLoaded || Columns.Count == 0) return;
+            
+            var colIndex = _focusManagerService.FocusedColumnIndex;
+            if (colIndex < 0 || colIndex >= Columns.Count)
+            {
+                _focusManagerService.SetFocus(0, 0);
+                return;
+            }
+            
+            var column = Columns[colIndex];
+            _focusManagerService.MoveUp(column.Items.Count);
+        }
+        
+        public void NavigateDown()
+        {
+            if (!IsLoaded || Columns.Count == 0) return;
+            
+            var colIndex = _focusManagerService.FocusedColumnIndex;
+            if (colIndex < 0 || colIndex >= Columns.Count)
+            {
+                _focusManagerService.SetFocus(0, 0);
+                return;
+            }
+            
+            var column = Columns[colIndex];
+            _focusManagerService.MoveDown(column.Items.Count);
+        }
+        
+        public (int columnIndex, int itemIndex) GetCurrentFocus()
+        {
+            return (_focusManagerService.FocusedColumnIndex, _focusManagerService.FocusedItemIndex);
         }
     }
 }

@@ -19,6 +19,10 @@
         <KeyboardAccelerator Modifiers="Control" Key="N" Invoked="NewItem_Invoked" />
         <KeyboardAccelerator Modifiers="Control,Shift" Key="N" Invoked="NewColumn_Invoked" />
         <KeyboardAccelerator Key="F5" Invoked="Refresh_Invoked" />
+        <KeyboardAccelerator Key="Left" Invoked="NavigateLeft_Invoked" />
+        <KeyboardAccelerator Key="Right" Invoked="NavigateRight_Invoked" />
+        <KeyboardAccelerator Key="Up" Invoked="NavigateUp_Invoked" />
+        <KeyboardAccelerator Key="Down" Invoked="NavigateDown_Invoked" />
     </Page.KeyboardAccelerators>
 
     <Grid>

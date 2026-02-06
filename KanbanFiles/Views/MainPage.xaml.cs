@@ -226,5 +226,29 @@ namespace KanbanFiles.Views
                 }
             }
         }
+        
+        private void NavigateLeft_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            args.Handled = true;
+            ViewModel.NavigateLeft();
+        }
+        
+        private void NavigateRight_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            args.Handled = true;
+            ViewModel.NavigateRight();
+        }
+        
+        private void NavigateUp_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            args.Handled = true;
+            ViewModel.NavigateUp();
+        }
+        
+        private void NavigateDown_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            args.Handled = true;
+            ViewModel.NavigateDown();
+        }
     }
 }

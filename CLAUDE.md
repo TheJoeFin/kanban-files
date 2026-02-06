@@ -74,6 +74,7 @@
 
 ## Housekeeping Items
 - **Git**: .gitignore added (2/6/2026 8:46 PM) - prevents bin/obj tracking
+- **Git Cleanup**: Removed tracked bin/obj artifacts (2/6/2026 8:59 PM) - repository now properly ignores build artifacts
 - **TODO Fix**: .kanban.json auto-reload implemented (2/6/2026 8:50 PM) - external config changes now automatically refresh the board
 - **Error Handling**: Empty catch blocks fixed (2/6/2026 8:54 PM) - all exceptions now logged with diagnostic context
 

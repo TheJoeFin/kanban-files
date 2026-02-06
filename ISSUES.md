@@ -493,3 +493,26 @@ ERROR HANDLING IMPROVEMENTS: Fixed Critical Empty Exception Catch Blocks
 **Commit**: Error handling improvements - fix empty exception catch blocks
 
 ===================
+
+2/6/2026 8:59 PM
+
+HOUSEKEEPING: Removed bin/obj artifacts from git tracking
+
+**Issue**: Build artifacts (bin/ and obj/ folders) were tracked by git before .gitignore was added (2/6/2026 8:46 PM). This caused unnecessary repository bloat and false "modified files" in git status.
+
+**Resolution**: Removed all build artifacts from git tracking while keeping .gitignore rules intact:
+- Ran `git rm -r --cached KanbanFiles/bin KanbanFiles/obj` to untrack 145 files
+- All bin/Debug and obj/Debug artifacts removed from repository
+- .gitignore now properly prevents future tracking of build artifacts
+- Repository size reduced by 9,530 lines of unnecessary binary/generated content
+
+**Files Removed from Tracking**:
+- KanbanFiles/bin/Debug/net10.0-windows10.0.19041.0/** (75 files)
+- KanbanFiles/obj/Debug/net10.0-windows10.0.19041.0/** (65 files)
+- KanbanFiles/obj/project.* (5 NuGet cache files)
+
+**Verification**: `git status` now shows "working tree clean" with no false-positive modifications.
+
+**Commit**: aa977c8 "Remove bin and obj artifacts from git tracking - .gitignore working correctly"
+
+===================

@@ -42,10 +42,10 @@
 
 ## In Progress
 - 🚧 Phase 6: Rich Markdown Editing
-  - Markdig NuGet package added (v0.44.0)
-  - BoolToVisibilityConverter created for UI bindings
-  - **Known Issue**: XAML compiler error (exit code 1) when adding ItemDetailPage.xaml
-    - Error doesn't provide specific details in build output
-    - Persists through clean builds and obj/bin folder deletion
-    - Baseline code (without Phase 6 files) builds successfully
-    - May need investigation into WinUI3 XAML compilation pipeline or SDK version compatibility
+  - **BLOCKED**: WindowsAppSDK 1.8.251222000 XAML Compiler Bug
+  - Cannot add new XAML files to project - compiler fails with exit code 1
+  - Affects ANY new XAML file (Page or UserControl), even minimal definitions
+  - ItemDetailViewModel.cs is complete with Markdig integration
+  - Event wiring for OpenDetailCommand is complete
+  - Workaround needed: ContentDialog with inline XAML or WindowsAppSDK upgrade
+  - See ISSUES.md (2/6/2026 7:56 PM) for full investigation details

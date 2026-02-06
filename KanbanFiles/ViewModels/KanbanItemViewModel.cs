@@ -1,4 +1,5 @@
 using KanbanFiles.Services;
+using Microsoft.UI.Xaml.Controls;
 
 namespace KanbanFiles.ViewModels;
 
@@ -9,6 +10,7 @@ public partial class KanbanItemViewModel : BaseViewModel
     private readonly Models.Board _board;
     private ColumnViewModel _parentColumn;
     private readonly FileWatcherService? _fileWatcherService;
+    private readonly INotificationService? _notificationService;
 
     [ObservableProperty]
     private string _contentPreview = string.Empty;
@@ -30,7 +32,7 @@ public partial class KanbanItemViewModel : BaseViewModel
     public event EventHandler? RenameRequested;
     public event EventHandler? OpenDetailRequested;
 
-    public KanbanItemViewModel(Models.KanbanItem item, FileSystemService fileSystemService, BoardConfigService boardConfigService, Models.Board board, ColumnViewModel parentColumn, FileWatcherService? fileWatcherService = null)
+    public KanbanItemViewModel(Models.KanbanItem item, FileSystemService fileSystemService, BoardConfigService boardConfigService, Models.Board board, ColumnViewModel parentColumn, FileWatcherService? fileWatcherService = null, INotificationService? notificationService = null)
     {
         Title = item.Title;
         ContentPreview = item.ContentPreview;
@@ -43,6 +45,7 @@ public partial class KanbanItemViewModel : BaseViewModel
         _board = board;
         _parentColumn = parentColumn;
         _fileWatcherService = fileWatcherService;
+        _notificationService = notificationService;
     }
 
     [RelayCommand]
@@ -59,20 +62,37 @@ public partial class KanbanItemViewModel : BaseViewModel
 
     public async Task DeleteAsync()
     {
-        // Suppress the file watcher event
-        _fileWatcherService?.SuppressNextEvent(FilePath);
-
-        await _fileSystemService.DeleteItemAsync(FilePath);
-
-        // Update item order in config
-        var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(Path.GetDirectoryName(FilePath)));
-        if (columnConfig != null)
+        try
         {
-            columnConfig.ItemOrder.Remove(FileName);
-            await _boardConfigService.SaveAsync(_board);
-        }
+            // Suppress the file watcher event
+            _fileWatcherService?.SuppressNextEvent(FilePath);
 
-        _parentColumn.RemoveItem(this);
+            await _fileSystemService.DeleteItemAsync(FilePath);
+
+            // Update item order in config
+            var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(Path.GetDirectoryName(FilePath)));
+            if (columnConfig != null)
+            {
+                columnConfig.ItemOrder.Remove(FileName);
+                await _boardConfigService.SaveAsync(_board);
+            }
+
+            _parentColumn.RemoveItem(this);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _notificationService?.ShowNotification("Permission Denied", 
+                $"Cannot delete '{FileName}'. Check file permissions.", 
+                InfoBarSeverity.Error);
+            throw;
+        }
+        catch (IOException ex)
+        {
+            _notificationService?.ShowNotification("Error Deleting Item", 
+                ex.Message, 
+                InfoBarSeverity.Error);
+            throw;
+        }
     }
 
     [RelayCommand]
@@ -83,65 +103,82 @@ public partial class KanbanItemViewModel : BaseViewModel
 
     public async Task RenameAsync(string newTitle)
     {
-        var folderPath = Path.GetDirectoryName(FilePath)!;
-        var sanitizedTitle = SanitizeFileName(newTitle);
-        var newFileName = sanitizedTitle + ".md";
-        var newFilePath = Path.Combine(folderPath, newFileName);
-
-        // Ensure unique filename
-        var counter = 1;
-        while (File.Exists(newFilePath) && newFilePath != FilePath)
+        try
         {
-            newFileName = $"{sanitizedTitle}-{counter}.md";
-            newFilePath = Path.Combine(folderPath, newFileName);
-            counter++;
-        }
+            var folderPath = Path.GetDirectoryName(FilePath)!;
+            var sanitizedTitle = SanitizeFileName(newTitle);
+            var newFileName = sanitizedTitle + ".md";
+            var newFilePath = Path.Combine(folderPath, newFileName);
 
-        // Read content
-        var content = await _fileSystemService.ReadItemContentAsync(FilePath);
-
-        // Update first line if it's a heading
-        var lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.None);
-        if (lines.Length > 0 && lines[0].StartsWith("# "))
-        {
-            lines[0] = $"# {newTitle}";
-            content = string.Join(Environment.NewLine, lines);
-        }
-
-        // Suppress the file watcher events
-        _fileWatcherService?.SuppressNextEvent(newFilePath); // Write
-        if (newFilePath != FilePath)
-        {
-            _fileWatcherService?.SuppressNextEvent(FilePath); // Delete old
-            _fileWatcherService?.SuppressNextEvent(newFilePath); // Rename detection
-        }
-        else
-        {
-            _fileWatcherService?.SuppressNextEvent(FilePath); // Content change
-        }
-
-        // Write to new file
-        await _fileSystemService.WriteItemContentAsync(newFilePath, content);
-
-        // Delete old file if renamed
-        if (newFilePath != FilePath)
-        {
-            await _fileSystemService.DeleteItemAsync(FilePath);
-        }
-
-        // Update config
-        var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(folderPath));
-        if (columnConfig != null)
-        {
-            var index = columnConfig.ItemOrder.IndexOf(FileName);
-            if (index >= 0)
+            // Ensure unique filename
+            var counter = 1;
+            while (File.Exists(newFilePath) && newFilePath != FilePath)
             {
-                columnConfig.ItemOrder[index] = newFileName;
+                newFileName = $"{sanitizedTitle}-{counter}.md";
+                newFilePath = Path.Combine(folderPath, newFileName);
+                counter++;
             }
-            await _boardConfigService.SaveAsync(_board);
-        }
 
-        Title = newTitle;
+            // Read content
+            var content = await _fileSystemService.ReadItemContentAsync(FilePath);
+
+            // Update first line if it's a heading
+            var lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.None);
+            if (lines.Length > 0 && lines[0].StartsWith("# "))
+            {
+                lines[0] = $"# {newTitle}";
+                content = string.Join(Environment.NewLine, lines);
+            }
+
+            // Suppress the file watcher events
+            _fileWatcherService?.SuppressNextEvent(newFilePath); // Write
+            if (newFilePath != FilePath)
+            {
+                _fileWatcherService?.SuppressNextEvent(FilePath); // Delete old
+                _fileWatcherService?.SuppressNextEvent(newFilePath); // Rename detection
+            }
+            else
+            {
+                _fileWatcherService?.SuppressNextEvent(FilePath); // Content change
+            }
+
+            // Write to new file
+            await _fileSystemService.WriteItemContentAsync(newFilePath, content);
+
+            // Delete old file if renamed
+            if (newFilePath != FilePath)
+            {
+                await _fileSystemService.DeleteItemAsync(FilePath);
+            }
+
+            // Update config
+            var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(folderPath));
+            if (columnConfig != null)
+            {
+                var index = columnConfig.ItemOrder.IndexOf(FileName);
+                if (index >= 0)
+                {
+                    columnConfig.ItemOrder[index] = newFileName;
+                }
+                await _boardConfigService.SaveAsync(_board);
+            }
+
+            Title = newTitle;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _notificationService?.ShowNotification("Permission Denied", 
+                $"Cannot rename '{FileName}'. Check file permissions.", 
+                InfoBarSeverity.Error);
+            throw;
+        }
+        catch (IOException ex)
+        {
+            _notificationService?.ShowNotification("Error Renaming Item", 
+                ex.Message, 
+                InfoBarSeverity.Error);
+            throw;
+        }
     }
 
     public void UpdateParentColumn(ColumnViewModel newParentColumn)

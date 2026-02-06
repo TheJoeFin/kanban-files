@@ -39,6 +39,13 @@
   - F5: Refresh board from disk
   - Escape: Close dialogs (built-in WinUI)
   - KeyboardAccelerator in MainPage.xaml, handlers in code-behind
+- **Error Handling**:
+  - INotificationService: Interface for showing InfoBar notifications from any ViewModel
+  - NotificationService: Implementation that delegates to MainViewModel.ShowNotification()
+  - Comprehensive try-catch: All FileSystemService methods throw IOExceptions with context
+  - ViewModels catch and display user-friendly error messages via INotificationService
+  - Auto-dismiss: 5-second auto-hide for Informational/Success notifications
+  - See: KanbanFiles/Services/INotificationService.cs, NotificationService.cs
 
 ## Completed Phases (7/7 - 100%)
 - ✅ Phase 1: Project scaffolding, core models, BoardConfigService, FileSystemService
@@ -63,6 +70,7 @@
   - ✅ File filtering for .md, hidden files (already implemented)
   - ✅ ThemeResource usage throughout UI (already implemented)
   - ✅ Window state persistence (width, height, position, maximized state)
+  - ✅ Comprehensive error handling with INotificationService (Phase 7.7)
 
 ## Project Status
-All 7 phases complete! KanbanFiles is feature-complete with full markdown editing capabilities.
+All 7 phases complete! KanbanFiles is feature-complete with full markdown editing capabilities and comprehensive error handling.

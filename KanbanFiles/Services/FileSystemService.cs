@@ -134,69 +134,139 @@ public class FileSystemService
 
     public async Task<string> CreateItemAsync(string folderPath, string title)
     {
-        var fileName = SanitizeFileName(title) + ".md";
-        var filePath = Path.Combine(folderPath, fileName);
-
-        // Ensure unique filename
-        var counter = 1;
-        while (File.Exists(filePath))
+        try
         {
-            fileName = $"{SanitizeFileName(title)}-{counter}.md";
-            filePath = Path.Combine(folderPath, fileName);
-            counter++;
-        }
+            if (!Directory.Exists(folderPath))
+            {
+                throw new DirectoryNotFoundException($"Column folder does not exist: {folderPath}");
+            }
 
-        await File.WriteAllTextAsync(filePath, $"# {title}\n\n", Encoding.UTF8);
-        return filePath;
+            var fileName = SanitizeFileName(title) + ".md";
+            var filePath = Path.Combine(folderPath, fileName);
+
+            // Ensure unique filename
+            var counter = 1;
+            while (File.Exists(filePath))
+            {
+                fileName = $"{SanitizeFileName(title)}-{counter}.md";
+                filePath = Path.Combine(folderPath, fileName);
+                counter++;
+            }
+
+            await File.WriteAllTextAsync(filePath, $"# {title}\n\n", Encoding.UTF8);
+            return filePath;
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            throw new IOException($"Permission denied creating file '{title}' in {folderPath}", ex);
+        }
+        catch (IOException ex)
+        {
+            throw new IOException($"Failed to create file '{title}': {ex.Message}", ex);
+        }
     }
 
     public async Task DeleteItemAsync(string filePath)
     {
-        await Task.Run(() =>
+        try
         {
-            if (File.Exists(filePath))
+            await Task.Run(() =>
             {
-                File.Delete(filePath);
-            }
-        });
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+            });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            throw new IOException($"Permission denied deleting file: {Path.GetFileName(filePath)}", ex);
+        }
+        catch (IOException ex)
+        {
+            throw new IOException($"Failed to delete file '{Path.GetFileName(filePath)}': {ex.Message}", ex);
+        }
     }
 
     public async Task<string> MoveItemAsync(string sourceFilePath, string targetFolderPath)
     {
-        var fileName = Path.GetFileName(sourceFilePath);
-        var targetFilePath = Path.Combine(targetFolderPath, fileName);
-
-        // Ensure unique filename in target
-        var counter = 1;
-        var baseFileName = Path.GetFileNameWithoutExtension(fileName);
-        var extension = Path.GetExtension(fileName);
-
-        while (File.Exists(targetFilePath))
+        try
         {
-            fileName = $"{baseFileName}-{counter}{extension}";
-            targetFilePath = Path.Combine(targetFolderPath, fileName);
-            counter++;
-        }
+            if (!File.Exists(sourceFilePath))
+            {
+                throw new FileNotFoundException($"Source file not found: {sourceFilePath}");
+            }
 
-        await Task.Run(() => File.Move(sourceFilePath, targetFilePath));
-        return targetFilePath;
+            if (!Directory.Exists(targetFolderPath))
+            {
+                throw new DirectoryNotFoundException($"Target folder does not exist: {targetFolderPath}");
+            }
+
+            var fileName = Path.GetFileName(sourceFilePath);
+            var targetFilePath = Path.Combine(targetFolderPath, fileName);
+
+            // Ensure unique filename in target
+            var counter = 1;
+            var baseFileName = Path.GetFileNameWithoutExtension(fileName);
+            var extension = Path.GetExtension(fileName);
+
+            while (File.Exists(targetFilePath))
+            {
+                fileName = $"{baseFileName}-{counter}{extension}";
+                targetFilePath = Path.Combine(targetFolderPath, fileName);
+                counter++;
+            }
+
+            await Task.Run(() => File.Move(sourceFilePath, targetFilePath));
+            return targetFilePath;
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            throw new IOException($"Permission denied moving file: {Path.GetFileName(sourceFilePath)}", ex);
+        }
+        catch (IOException ex)
+        {
+            throw new IOException($"Failed to move file '{Path.GetFileName(sourceFilePath)}': {ex.Message}", ex);
+        }
     }
 
     public async Task CreateColumnFolderAsync(string rootPath, string folderName)
     {
-        var folderPath = Path.Combine(rootPath, folderName);
-        await Task.Run(() => Directory.CreateDirectory(folderPath));
+        try
+        {
+            var folderPath = Path.Combine(rootPath, folderName);
+            await Task.Run(() => Directory.CreateDirectory(folderPath));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            throw new IOException($"Permission denied creating folder: {folderName}", ex);
+        }
+        catch (IOException ex)
+        {
+            throw new IOException($"Failed to create folder '{folderName}': {ex.Message}", ex);
+        }
     }
 
     public async Task DeleteColumnFolderAsync(string folderPath)
     {
-        await Task.Run(() =>
+        try
         {
-            if (Directory.Exists(folderPath))
+            await Task.Run(() =>
             {
-                Directory.Delete(folderPath, recursive: true);
-            }
-        });
+                if (Directory.Exists(folderPath))
+                {
+                    Directory.Delete(folderPath, recursive: true);
+                }
+            });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            throw new IOException($"Permission denied deleting folder: {Path.GetFileName(folderPath)}", ex);
+        }
+        catch (IOException ex)
+        {
+            throw new IOException($"Failed to delete folder '{Path.GetFileName(folderPath)}': {ex.Message}", ex);
+        }
     }
 
     public static string GenerateContentPreview(string content)

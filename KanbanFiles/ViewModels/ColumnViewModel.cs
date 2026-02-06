@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using KanbanFiles.Models;
 using KanbanFiles.Services;
+using Microsoft.UI.Xaml.Controls;
 
 namespace KanbanFiles.ViewModels;
 
@@ -11,6 +12,7 @@ public partial class ColumnViewModel : BaseViewModel
     private readonly GroupService _groupService;
     private readonly Board _board;
     private readonly FileWatcherService? _fileWatcherService;
+    private readonly INotificationService? _notificationService;
 
     [ObservableProperty]
     private string _name = string.Empty;
@@ -27,7 +29,7 @@ public partial class ColumnViewModel : BaseViewModel
     public event EventHandler<GroupViewModel>? GroupRenameRequested;
     public event EventHandler<GroupViewModel>? GroupDeleteRequested;
 
-    public ColumnViewModel(Column column, FileSystemService fileSystemService, BoardConfigService boardConfigService, GroupService groupService, Board board, FileWatcherService? fileWatcherService = null)
+    public ColumnViewModel(Column column, FileSystemService fileSystemService, BoardConfigService boardConfigService, GroupService groupService, Board board, FileWatcherService? fileWatcherService = null, INotificationService? notificationService = null)
     {
         Name = column.Name;
         FolderPath = column.FolderPath;
@@ -36,10 +38,11 @@ public partial class ColumnViewModel : BaseViewModel
         _groupService = groupService;
         _board = board;
         _fileWatcherService = fileWatcherService;
+        _notificationService = notificationService;
 
         foreach (var item in column.Items)
         {
-            var itemViewModel = new KanbanItemViewModel(item, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService);
+            var itemViewModel = new KanbanItemViewModel(item, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService);
             Items.Add(itemViewModel);
         }
     }
@@ -52,27 +55,42 @@ public partial class ColumnViewModel : BaseViewModel
 
     public async Task CreateItemAsync(string title)
     {
-        var filePath = await _fileSystemService.CreateItemAsync(FolderPath, title);
-        var fileName = Path.GetFileName(filePath);
-
-        // Suppress the file watcher event
-        _fileWatcherService?.SuppressNextEvent(filePath);
-
-        // Update item order in config
-        var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == FolderPath);
-        if (columnConfig != null)
+        try
         {
-            columnConfig.ItemOrder.Add(fileName);
-            await _boardConfigService.SaveAsync(_board);
+            var filePath = await _fileSystemService.CreateItemAsync(FolderPath, title);
+            var fileName = Path.GetFileName(filePath);
+
+            // Suppress the file watcher event
+            _fileWatcherService?.SuppressNextEvent(filePath);
+
+            // Update item order in config
+            var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == FolderPath);
+            if (columnConfig != null)
+            {
+                columnConfig.ItemOrder.Add(fileName);
+                await _boardConfigService.SaveAsync(_board);
+            }
+
+            // Read the newly created item
+            var items = await _fileSystemService.EnumerateItemsAsync(FolderPath);
+            var newItem = items.FirstOrDefault(i => i.FileName == fileName);
+            if (newItem != null)
+            {
+                var itemViewModel = new KanbanItemViewModel(newItem, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService);
+                Items.Add(itemViewModel);
+            }
         }
-
-        // Read the newly created item
-        var items = await _fileSystemService.EnumerateItemsAsync(FolderPath);
-        var newItem = items.FirstOrDefault(i => i.FileName == fileName);
-        if (newItem != null)
+        catch (UnauthorizedAccessException)
         {
-            var itemViewModel = new KanbanItemViewModel(newItem, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService);
-            Items.Add(itemViewModel);
+            _notificationService?.ShowNotification("Permission Denied", 
+                $"Cannot create item '{title}'. Check file permissions.", 
+                InfoBarSeverity.Error);
+        }
+        catch (IOException ex)
+        {
+            _notificationService?.ShowNotification("Error Creating Item", 
+                ex.Message, 
+                InfoBarSeverity.Error);
         }
     }
 
@@ -115,18 +133,35 @@ public partial class ColumnViewModel : BaseViewModel
 
     public async Task DeleteColumnAsync()
     {
-        // Suppress the folder watcher event
-        _fileWatcherService?.SuppressNextEvent(FolderPath);
-
-        // Delete folder
-        await _fileSystemService.DeleteColumnFolderAsync(FolderPath);
-
-        // Update config
-        var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(FolderPath));
-        if (columnConfig != null)
+        try
         {
-            _board.Columns.Remove(columnConfig);
-            await _boardConfigService.SaveAsync(_board);
+            // Suppress the folder watcher event
+            _fileWatcherService?.SuppressNextEvent(FolderPath);
+
+            // Delete folder
+            await _fileSystemService.DeleteColumnFolderAsync(FolderPath);
+
+            // Update config
+            var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(FolderPath));
+            if (columnConfig != null)
+            {
+                _board.Columns.Remove(columnConfig);
+                await _boardConfigService.SaveAsync(_board);
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _notificationService?.ShowNotification("Permission Denied", 
+                $"Cannot delete column '{Name}'. Check file permissions.", 
+                InfoBarSeverity.Error);
+            throw;
+        }
+        catch (IOException ex)
+        {
+            _notificationService?.ShowNotification("Error Deleting Column", 
+                ex.Message, 
+                InfoBarSeverity.Error);
+            throw;
         }
     }
 
@@ -177,9 +212,25 @@ public partial class ColumnViewModel : BaseViewModel
 
             return true;
         }
+        catch (UnauthorizedAccessException)
+        {
+            _notificationService?.ShowNotification("Permission Denied", 
+                $"Cannot move item '{sourceItem.FileName}'. Check file permissions.", 
+                InfoBarSeverity.Error);
+            return false;
+        }
+        catch (IOException ex)
+        {
+            _notificationService?.ShowNotification("Error Moving Item", 
+                ex.Message, 
+                InfoBarSeverity.Error);
+            return false;
+        }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error moving item: {ex.Message}");
+            _notificationService?.ShowNotification("Error", 
+                $"An unexpected error occurred: {ex.Message}", 
+                InfoBarSeverity.Error);
             return false;
         }
     }
@@ -209,7 +260,7 @@ public partial class ColumnViewModel : BaseViewModel
         // Create ViewModels and organize into groups
         foreach (var item in items)
         {
-            var itemViewModel = new KanbanItemViewModel(item, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService);
+            var itemViewModel = new KanbanItemViewModel(item, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService);
             Items.Add(itemViewModel);
             
             // Organize into groups based on group membership

@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using KanbanFiles.Services;
+using Microsoft.UI.Xaml.Controls;
 
 namespace KanbanFiles.ViewModels
 {
@@ -8,6 +9,7 @@ namespace KanbanFiles.ViewModels
         private readonly BoardConfigService _boardConfigService;
         private readonly FileSystemService _fileSystemService;
         private readonly GroupService _groupService;
+        private readonly INotificationService _notificationService;
         private FileWatcherService? _fileWatcherService;
         private Models.Board? _board;
 
@@ -17,6 +19,8 @@ namespace KanbanFiles.ViewModels
             _boardConfigService = new BoardConfigService();
             _fileSystemService = new FileSystemService();
             _groupService = new GroupService();
+            _notificationService = new NotificationService();
+            ((NotificationService)_notificationService).SetMainViewModel(this);
             Columns = new ObservableCollection<ColumnViewModel>();
         }
 
@@ -38,7 +42,7 @@ namespace KanbanFiles.ViewModels
         private string _notificationMessage = string.Empty;
         
         [ObservableProperty]
-        private Microsoft.UI.Xaml.Controls.InfoBarSeverity _notificationSeverity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational;
+        private InfoBarSeverity _notificationSeverity = InfoBarSeverity.Informational;
 
         public event EventHandler? OpenFolderRequested;
         public event EventHandler<string>? AddColumnRequested;
@@ -62,7 +66,7 @@ namespace KanbanFiles.ViewModels
                 ShowNotification(
                     "Configuration Recovered",
                     "Board configuration was corrupted and has been reset. A backup was saved.",
-                    Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning);
+                    InfoBarSeverity.Warning);
                 _boardConfigService.ResetCorruptionFlag();
             }
 
@@ -85,7 +89,7 @@ namespace KanbanFiles.ViewModels
             Columns.Clear();
             foreach (var column in columns)
             {
-                var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService);
+                var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService, _notificationService);
                 columnViewModel.DeleteRequested += OnColumnDeleteRequested;
                 Columns.Add(columnViewModel);
             }
@@ -104,35 +108,50 @@ namespace KanbanFiles.ViewModels
         {
             if (_board == null) return;
 
-            var sanitizedName = SanitizeFolderName(columnName);
-            var newFolderPath = Path.Combine(_board.RootPath, sanitizedName);
-
-            // Suppress the folder watcher event
-            _fileWatcherService?.SuppressNextEvent(newFolderPath);
-
-            await _fileSystemService.CreateColumnFolderAsync(_board.RootPath, sanitizedName);
-
-            var newColumnConfig = new Models.ColumnConfig
+            try
             {
-                FolderName = sanitizedName,
-                DisplayName = columnName,
-                SortOrder = _board.Columns.Count,
-                ItemOrder = new List<string>()
-            };
+                var sanitizedName = SanitizeFolderName(columnName);
+                var newFolderPath = Path.Combine(_board.RootPath, sanitizedName);
 
-            _board.Columns.Add(newColumnConfig);
-            await _boardConfigService.SaveAsync(_board);
+                // Suppress the folder watcher event
+                _fileWatcherService?.SuppressNextEvent(newFolderPath);
 
-            var column = new Models.Column
+                await _fileSystemService.CreateColumnFolderAsync(_board.RootPath, sanitizedName);
+
+                var newColumnConfig = new Models.ColumnConfig
+                {
+                    FolderName = sanitizedName,
+                    DisplayName = columnName,
+                    SortOrder = _board.Columns.Count,
+                    ItemOrder = new List<string>()
+                };
+
+                _board.Columns.Add(newColumnConfig);
+                await _boardConfigService.SaveAsync(_board);
+
+                var column = new Models.Column
+                {
+                    Name = columnName,
+                    FolderPath = newFolderPath,
+                    SortOrder = newColumnConfig.SortOrder
+                };
+
+                var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService, _notificationService);
+                columnViewModel.DeleteRequested += OnColumnDeleteRequested;
+                Columns.Add(columnViewModel);
+            }
+            catch (UnauthorizedAccessException)
             {
-                Name = columnName,
-                FolderPath = newFolderPath,
-                SortOrder = newColumnConfig.SortOrder
-            };
-
-            var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService);
-            columnViewModel.DeleteRequested += OnColumnDeleteRequested;
-            Columns.Add(columnViewModel);
+                ShowNotification("Permission Denied", 
+                    $"Cannot create column '{columnName}'. Check file permissions.", 
+                    InfoBarSeverity.Error);
+            }
+            catch (IOException ex)
+            {
+                ShowNotification("Error Creating Column", 
+                    ex.Message, 
+                    InfoBarSeverity.Error);
+            }
         }
 
         private void OnColumnDeleteRequested(object? sender, string folderPath)
@@ -217,7 +236,7 @@ namespace KanbanFiles.ViewModels
             };
 
             // Create the item viewmodel
-            var item = new KanbanItemViewModel(itemModel, _fileSystemService, _boardConfigService, _board, columnViewModel, _fileWatcherService);
+            var item = new KanbanItemViewModel(itemModel, _fileSystemService, _boardConfigService, _board, columnViewModel, _fileWatcherService, _notificationService);
 
             // Add to column
             columnViewModel.Items.Add(item);
@@ -378,7 +397,7 @@ namespace KanbanFiles.ViewModels
             }
         }
         
-        public void ShowNotification(string title, string message, Microsoft.UI.Xaml.Controls.InfoBarSeverity severity)
+        public void ShowNotification(string title, string message, InfoBarSeverity severity)
         {
             NotificationTitle = title;
             NotificationMessage = message;
@@ -386,8 +405,8 @@ namespace KanbanFiles.ViewModels
             IsNotificationVisible = true;
             
             // Auto-dismiss for informational and success notifications after 5 seconds
-            if (severity == Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational || 
-                severity == Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success)
+            if (severity == InfoBarSeverity.Informational || 
+                severity == InfoBarSeverity.Success)
             {
                 Task.Delay(5000).ContinueWith(_ =>
                 {

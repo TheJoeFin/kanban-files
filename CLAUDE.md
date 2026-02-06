@@ -39,3 +39,13 @@
 - ✅ Phase 3: Drag & Drop (items between/within columns, column reordering)
 - ✅ Phase 4: Two-Way File System Sync (FileWatcherService, external file monitoring)
 - ✅ Phase 5: Grouping (GroupService, GroupViewModel, group CRUD, drag & drop for groups and items, collapse state persistence)
+
+## In Progress
+- 🚧 Phase 6: Rich Markdown Editing
+  - Markdig NuGet package added (v0.44.0)
+  - BoolToVisibilityConverter created for UI bindings
+  - **Known Issue**: XAML compiler error (exit code 1) when adding ItemDetailPage.xaml
+    - Error doesn't provide specific details in build output
+    - Persists through clean builds and obj/bin folder deletion
+    - Baseline code (without Phase 6 files) builds successfully
+    - May need investigation into WinUI3 XAML compilation pipeline or SDK version compatibility

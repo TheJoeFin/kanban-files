@@ -64,6 +64,7 @@ public sealed partial class KanbanItemCardControl : UserControl
         {
             e.AcceptedOperation = DataPackageOperation.Move;
             e.DragUIOverride.Caption = "Move item";
+            e.Handled = true; // Prevent event bubbling to avoid conflicts
         }
         else
         {

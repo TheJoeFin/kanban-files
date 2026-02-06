@@ -443,6 +443,16 @@ public sealed partial class ColumnControl : UserControl
         }
     }
 
+    private void GroupItemsControl_Loaded(object sender, RoutedEventArgs e)
+    {
+        // Wire up DragOver and Drop handlers for the nested ItemsControl in groups
+        if (sender is ItemsControl itemsControl)
+        {
+            itemsControl.DragOver += ItemsControl_DragOver;
+            itemsControl.Drop += ItemsControl_Drop;
+        }
+    }
+
     private async Task HandleGroupReorderDropAsync(DragEventArgs e)
     {
         if (DataContext is not ViewModels.ColumnViewModel viewModel) return;

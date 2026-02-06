@@ -164,7 +164,7 @@ All 7 phases complete! KanbanFiles is feature-complete with full markdown editin
   - Automatic theme adaptation ensures proper contrast in light/dark modes
   - Changes: KanbanItemCardControl.xaml.cs (CardBorder_PointerEntered/Exited methods)
   - Build successful (0 errors, 19 expected AOT warnings)
-- **CRITICAL BUG FIX** (2/6/2026 9:55 PM): Fixed drag/drop showing 🚫 cursor (Issue #9)
+- **CRITICAL BUG FIX** (2/6/2026 9:55 PM): Fixed drag/drop showing 🚫 cursor (Issue #9 - First Attempt)
   - Root cause: Individual KanbanItemCardControl elements lacked AllowDrop/DragOver handlers
   - Cards captured drag events but didn't accept drops, blocking parent ItemsControl handlers
   - Solution: Added card-level drag/drop event handlers to enable drop targeting
@@ -173,6 +173,17 @@ All 7 phases complete! KanbanFiles is feature-complete with full markdown editin
   - Parent ColumnControl still handles actual file movement logic
   - Item reordering within columns now works (was already implemented, just needed proper event handling)
   - Changes: KanbanItemCardControl.xaml (added handlers), KanbanItemCardControl.xaml.cs (implemented methods)
+  - Build successful (0 errors, 19 expected AOT warnings)
+- **CRITICAL BUG FIX** (2/6/2026 10:15 PM): Fixed drag-drop 🚫 cursor and event wiring issues (Issue #11)
+  - Root cause: Nested ItemsControl inside group DataTemplate had non-functional event handlers
+  - Event handlers (DragOver/Drop) declared in XAML DataTemplate don't wire up to code-behind methods
+  - Solution: Programmatic event handler attachment via Loaded event
+    - XAML: Replaced DragOver/Drop attributes with Loaded="GroupItemsControl_Loaded" on nested ItemsControl
+    - Code: Added GroupItemsControl_Loaded handler that wires up DragOver and Drop events programmatically
+    - Added MinHeight="40" to both UngroupedItemsControlElement and group ItemsControl for empty drop zones
+    - Added e.Handled = true in KanbanItemCardControl.CardBorder_DragOver to prevent event bubbling conflicts
+  - Files: ColumnControl.xaml, ColumnControl.xaml.cs, KanbanItemCardControl.xaml.cs
+  - All drag-drop scenarios now functional: between columns, within column, into empty groups/columns
   - Build successful (0 errors, 19 expected AOT warnings)
 
 

@@ -71,6 +71,7 @@
                 <!-- Ungrouped Items Section -->
                 <ItemsControl x:Name="UngroupedItemsControlElement"
                               ItemsSource="{Binding UngroupedItems, Mode=OneWay}"
+                              MinHeight="40"
                               AllowDrop="True"
                               DragOver="ItemsControl_DragOver"
                               Drop="ItemsControl_Drop">
@@ -92,9 +93,9 @@
                                 
                                 <!-- Group Items (visible when not collapsed) -->
                                 <ItemsControl ItemsSource="{Binding Items, Mode=OneWay}"
+                                              MinHeight="40"
                                               AllowDrop="True"
-                                              DragOver="ItemsControl_DragOver"
-                                              Drop="ItemsControl_Drop"
+                                              Loaded="GroupItemsControl_Loaded"
                                               Visibility="{Binding IsCollapsed, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>

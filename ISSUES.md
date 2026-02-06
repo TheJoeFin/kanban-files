@@ -135,4 +135,36 @@ Changes:
 Item reordering within the same column was already implemented in ColumnControl (HandleReorderAsync method) and now works properly with these fixes.
 
 
+# issue 10 4:06 PM 2/6/2026
+- the updating files info notification is too disruptive, it should be subtle, smooth, and natural
+
+
+# Issue 11 4:13 PM 2/6/2026 - RESOLVED 2/6/2026 10:15 PM
+- There are still issues with the dropping. the 🚫 still occurs, cannot reorder, cannot drop on other columns
+
+**Resolution**: Fixed by implementing proper event handler wiring for nested ItemsControl elements inside group DataTemplates. The core issue was that event handlers (DragOver/Drop) declared directly in XAML inside a DataTemplate don't automatically wire up to code-behind methods.
+
+**Root Causes**:
+1. Nested ItemsControl inside group DataTemplate had DragOver/Drop attributes in XAML but these were non-functional
+2. Event handlers need to be attached programmatically when the control is loaded
+3. Empty columns/groups had no visible drop zone
+4. Event bubbling conflicts between card-level and parent-level DragOver handlers
+
+**Fixes Applied**:
+1. **Programmatic Event Wiring**: Replaced static XAML event handlers with `Loaded="GroupItemsControl_Loaded"` on nested ItemsControl elements. The code-behind handler wires up DragOver and Drop events at runtime.
+2. **Empty Drop Zones**: Added `MinHeight="40"` to both UngroupedItemsControlElement and group ItemsControl to provide a visible drop target even when empty.
+3. **Event Bubbling Fix**: Added `e.Handled = true` in KanbanItemCardControl.CardBorder_DragOver to prevent conflicts with parent ItemsControl handlers.
+
+**Changes**:
+- **ColumnControl.xaml**: Replaced DragOver/Drop with Loaded handler, added MinHeight to ItemsControl elements
+- **ColumnControl.xaml.cs**: Added GroupItemsControl_Loaded method (lines 446-453) to programmatically attach event handlers
+- **KanbanItemCardControl.xaml.cs**: Added e.Handled = true in CardBorder_DragOver (line 68)
+
+All drag-drop scenarios now work correctly:
+- ✅ Drag and drop between columns
+- ✅ Reorder items within same column
+- ✅ Drop into empty columns
+- ✅ Drop into empty groups
+- ✅ Drop into populated groups
+- ✅ No 🚫 cursor appearing during valid drops
 

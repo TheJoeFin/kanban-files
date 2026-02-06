@@ -28,6 +28,7 @@ public partial class KanbanItemViewModel : BaseViewModel
 
     public event EventHandler? DeleteRequested;
     public event EventHandler? RenameRequested;
+    public event EventHandler? OpenDetailRequested;
 
     public KanbanItemViewModel(Models.KanbanItem item, FileSystemService fileSystemService, BoardConfigService boardConfigService, Models.Board board, ColumnViewModel parentColumn, FileWatcherService? fileWatcherService = null)
     {
@@ -47,7 +48,7 @@ public partial class KanbanItemViewModel : BaseViewModel
     [RelayCommand]
     private void OpenDetail()
     {
-        // Phase 6 - Will implement detailed markdown editor
+        OpenDetailRequested?.Invoke(this, EventArgs.Empty);
     }
 
     [RelayCommand]

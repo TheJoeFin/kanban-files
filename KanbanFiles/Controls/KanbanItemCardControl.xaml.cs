@@ -5,6 +5,9 @@ using Microsoft.UI;
 using Windows.UI;
 using Windows.ApplicationModel.DataTransfer;
 using System.Text.Json;
+using Microsoft.Web.WebView2.Core;
+using KanbanFiles.Services;
+using KanbanFiles.ViewModels;
 
 namespace KanbanFiles.Controls;
 
@@ -25,6 +28,7 @@ public sealed partial class KanbanItemCardControl : UserControl
         {
             viewModel.DeleteRequested += OnDeleteRequested;
             viewModel.RenameRequested += OnRenameRequested;
+            viewModel.OpenDetailRequested += OnOpenDetailRequested;
         }
     }
 
@@ -162,6 +166,275 @@ public sealed partial class KanbanItemCardControl : UserControl
             {
                 await ShowErrorAsync($"Failed to delete item: {ex.Message}");
             }
+        }
+    }
+
+    private async void OnOpenDetailRequested(object? sender, EventArgs e)
+    {
+        if (DataContext is not KanbanItemViewModel kanbanItemViewModel) return;
+
+        try
+        {
+            // Get required services from ViewModel
+            var fileSystemService = kanbanItemViewModel.GetType()
+                .GetField("_fileSystemService", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
+                .GetValue(kanbanItemViewModel) as FileSystemService;
+            
+            var fileWatcherService = kanbanItemViewModel.GetType()
+                .GetField("_fileWatcherService", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
+                .GetValue(kanbanItemViewModel) as FileWatcherService;
+
+            if (fileSystemService == null) return;
+
+            // Create item model for ItemDetailViewModel
+            var itemModel = new Models.KanbanItem
+            {
+                Title = kanbanItemViewModel.Title,
+                FilePath = kanbanItemViewModel.FilePath,
+                FileName = kanbanItemViewModel.FileName,
+                ContentPreview = kanbanItemViewModel.ContentPreview,
+                FullContent = kanbanItemViewModel.FullContent,
+                LastModified = kanbanItemViewModel.LastModified
+            };
+
+            // Create ItemDetailViewModel
+            var detailViewModel = new ItemDetailViewModel(itemModel, fileSystemService, fileWatcherService);
+            await detailViewModel.LoadContentAsync();
+
+            // Create the editor UI
+            var editor = new TextBox
+            {
+                Text = detailViewModel.Content,
+                AcceptsReturn = true,
+                TextWrapping = TextWrapping.Wrap,
+                FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Cascadia Code, Consolas, Courier New"),
+                FontSize = 14,
+                Margin = new Thickness(0)
+            };
+
+            // Subscribe to content changes to update ViewModel
+            editor.TextChanged += (s, args) => detailViewModel.Content = editor.Text;
+
+            // Create WebView2 for preview
+            var webView = new WebView2
+            {
+                Margin = new Thickness(0)
+            };
+
+            // Initialize WebView2 and navigate to content
+            await webView.EnsureCoreWebView2Async();
+            webView.NavigateToString(detailViewModel.RenderedHtml);
+
+            // Update preview when content changes
+            detailViewModel.PropertyChanged += (s, args) =>
+            {
+                if (args.PropertyName == nameof(ItemDetailViewModel.RenderedHtml))
+                {
+                    webView.NavigateToString(detailViewModel.RenderedHtml);
+                }
+            };
+
+            // Create split view with editor and preview
+            var leftColumn = new Grid
+            {
+                Padding = new Thickness(8)
+            };
+            leftColumn.Children.Add(editor);
+
+            var rightColumn = new Grid
+            {
+                Padding = new Thickness(8)
+            };
+            rightColumn.Children.Add(webView);
+
+            var splitGrid = new Grid
+            {
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
+                },
+                MinHeight = 500,
+                MinWidth = 800
+            };
+
+            Grid.SetColumn(leftColumn, 0);
+            Grid.SetColumn(rightColumn, 1);
+            splitGrid.Children.Add(leftColumn);
+            splitGrid.Children.Add(rightColumn);
+
+            // Create save button with Ctrl+S handler
+            var saveButton = new Button
+            {
+                Content = "Save",
+                Margin = new Thickness(0, 12, 0, 0)
+            };
+
+            var rootStack = new StackPanel();
+            rootStack.Children.Add(splitGrid);
+            rootStack.Children.Add(saveButton);
+
+            // Create the dialog
+            var dialog = new ContentDialog
+            {
+                Title = kanbanItemViewModel.Title,
+                Content = rootStack,
+                CloseButtonText = "Close",
+                XamlRoot = this.XamlRoot,
+                DefaultButton = ContentDialogButton.Close,
+                Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style
+            };
+
+            // Track if save is in progress
+            bool isSaving = false;
+
+            // Save handler
+            async Task SaveAsync()
+            {
+                if (isSaving) return;
+                isSaving = true;
+
+                try
+                {
+                    saveButton.IsEnabled = false;
+                    saveButton.Content = "Saving...";
+                    await detailViewModel.SaveCommand.ExecuteAsync(null);
+                    saveButton.Content = "Saved ✓";
+                    
+                    // Update the KanbanItemViewModel with new content
+                    kanbanItemViewModel.FullContent = detailViewModel.Content;
+                    kanbanItemViewModel.ContentPreview = FileSystemService.GenerateContentPreview(detailViewModel.Content);
+                    kanbanItemViewModel.LastModified = detailViewModel.LastModified;
+
+                    await Task.Delay(1500);
+                    if (detailViewModel.HasUnsavedChanges)
+                    {
+                        saveButton.Content = "Save";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await ShowErrorAsync($"Failed to save: {ex.Message}");
+                    saveButton.Content = "Save";
+                }
+                finally
+                {
+                    saveButton.IsEnabled = true;
+                    isSaving = false;
+                }
+            }
+
+            saveButton.Click += async (s, args) => await SaveAsync();
+
+            // Add keyboard shortcut handler for Ctrl+S
+            editor.KeyDown += async (s, args) =>
+            {
+                if (args.Key == Windows.System.VirtualKey.S && 
+                    Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Control).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down))
+                {
+                    args.Handled = true;
+                    await SaveAsync();
+                }
+            };
+
+            // External file change detection
+            EventHandler<ItemChangedEventArgs>? fileChangedHandler = null;
+            if (fileWatcherService != null)
+            {
+                fileChangedHandler = async (s, e) =>
+                {
+                    if (e.FilePath != kanbanItemViewModel.FilePath) return;
+
+                    // Read the new content from disk
+                    string? newContent = null;
+                    try
+                    {
+                        newContent = await File.ReadAllTextAsync(e.FilePath);
+                    }
+                    catch
+                    {
+                        return; // File might be temporarily locked
+                    }
+
+                    // If content is the same, nothing to do
+                    if (newContent == detailViewModel.Content) return;
+
+                    // Dispatch to UI thread
+                    App.MainDispatcher!.TryEnqueue(async () =>
+                    {
+                        if (detailViewModel.HasUnsavedChanges)
+                        {
+                            // User has unsaved changes - prompt them
+                            var conflictDialog = new ContentDialog
+                            {
+                                Title = "External File Change Detected",
+                                Content = "This file was modified externally. Do you want to reload it? Your unsaved changes will be lost.",
+                                PrimaryButtonText = "Reload",
+                                SecondaryButtonText = "Keep My Changes",
+                                CloseButtonText = "Cancel",
+                                XamlRoot = this.XamlRoot
+                            };
+
+                            var result = await conflictDialog.ShowAsync();
+                            if (result == ContentDialogResult.Primary)
+                            {
+                                detailViewModel.ReloadFromDisk(newContent);
+                                editor.Text = detailViewModel.Content;
+                            }
+                        }
+                        else
+                        {
+                            // No unsaved changes - auto-reload
+                            detailViewModel.ReloadFromDisk(newContent);
+                            editor.Text = detailViewModel.Content;
+                        }
+                    });
+                };
+
+                fileWatcherService.ItemContentChanged += fileChangedHandler;
+            }
+
+            // Show unsaved changes prompt on close
+            dialog.Closing += async (s, args) =>
+            {
+                // Unsubscribe from file watcher
+                if (fileWatcherService != null && fileChangedHandler != null)
+                {
+                    fileWatcherService.ItemContentChanged -= fileChangedHandler;
+                }
+
+                if (detailViewModel.HasUnsavedChanges)
+                {
+                    args.Cancel = true;
+
+                    var confirmDialog = new ContentDialog
+                    {
+                        Title = "Unsaved Changes",
+                        Content = "You have unsaved changes. Do you want to save before closing?",
+                        PrimaryButtonText = "Save",
+                        SecondaryButtonText = "Don't Save",
+                        CloseButtonText = "Cancel",
+                        XamlRoot = this.XamlRoot
+                    };
+
+                    var confirmResult = await confirmDialog.ShowAsync();
+                    if (confirmResult == ContentDialogResult.Primary)
+                    {
+                        await SaveAsync();
+                        dialog.Hide();
+                    }
+                    else if (confirmResult == ContentDialogResult.Secondary)
+                    {
+                        dialog.Hide();
+                    }
+                }
+            };
+
+            await dialog.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAsync($"Failed to open editor: {ex.Message}");
         }
     }
 

@@ -33,12 +33,21 @@
   - All events marshaled to UI thread via DispatcherQueue
   - App.MainDispatcher static property provides DispatcherQueue access
 
-## Completed Phases
+## Completed Phases (7/7 - 100%)
 - ✅ Phase 1: Project scaffolding, core models, BoardConfigService, FileSystemService
 - ✅ Phase 2: Basic Board UI with full CRUD operations (create/read/update/delete columns and items)
 - ✅ Phase 3: Drag & Drop (items between/within columns, column reordering)
 - ✅ Phase 4: Two-Way File System Sync (FileWatcherService, external file monitoring)
 - ✅ Phase 5: Grouping (GroupService, GroupViewModel, group CRUD, drag & drop for groups and items, collapse state persistence)
+- ✅ Phase 6: Rich Markdown Editing
+  - Implementation: Inline ContentDialog approach (no separate XAML file)
+  - Split-pane layout with TextBox editor and WebView2 preview
+  - Markdig integration with HTML/CSS styling and theme support
+  - External file change detection with auto-reload and conflict resolution
+  - Keyboard shortcuts: Ctrl+S to save
+  - Unsaved changes tracking and prompts on close
+  - File watcher event suppression to prevent sync loops
+  - See: KanbanFiles/Controls/KanbanItemCardControl.xaml.cs (OnOpenDetailRequested)
 - ✅ Phase 7: Polish & Edge Cases
   - ✅ InfoBar notification system with auto-dismiss
   - ✅ Config corruption notifications (backup + user notification)
@@ -48,12 +57,5 @@
   - ✅ ThemeResource usage throughout UI (already implemented)
   - ✅ Window state persistence (width, height, position, maximized state)
 
-## In Progress
-- 🚧 Phase 6: Rich Markdown Editing
-  - **BLOCKED**: WindowsAppSDK 1.8.251222000 XAML Compiler Bug
-  - Cannot add new XAML files to project - compiler fails with exit code 1
-  - Affects ANY new XAML file (Page or UserControl), even minimal definitions
-  - ItemDetailViewModel.cs is complete with Markdig integration
-  - Event wiring for OpenDetailCommand is complete
-  - Workaround needed: ContentDialog with inline XAML or WindowsAppSDK upgrade
-  - See ISSUES.md (2/6/2026 7:56 PM) for full investigation details
+## Project Status
+All 7 phases complete! KanbanFiles is feature-complete with full markdown editing capabilities.

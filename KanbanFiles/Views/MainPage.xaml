@@ -158,7 +158,7 @@
                                     <!-- Clickable folder path -->
                                     <Button
                                         Grid.Column="0"
-                                        Command="{Binding ViewModel.OpenRecentFolderCommand, ElementName=RootPage}"
+                                        Click="RecentFolderButton_Click"
                                         CommandParameter="{x:Bind}"
                                         HorizontalAlignment="Stretch"
                                         HorizontalContentAlignment="Left"
@@ -184,7 +184,7 @@
                                     <!-- Remove button -->
                                     <Button
                                         Grid.Column="1"
-                                        Command="{Binding ViewModel.RemoveRecentFolderCommand, ElementName=RootPage}"
+                                        Click="RemoveRecentFolderButton_Click"
                                         CommandParameter="{x:Bind}"
                                         Width="28"
                                         Height="28"

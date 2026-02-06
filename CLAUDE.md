@@ -129,6 +129,13 @@ All 7 phases complete! KanbanFiles is feature-complete with full markdown editin
   - Files: IRecentFoldersService.cs, RecentFoldersService.cs, MainViewModel.cs (updated), MainPage.xaml (updated)
   - Completes Issue #3
   - Build successful (0 errors, 19 expected AOT warnings)
+- **Recent Folders Clickability Fix** (2/6/2026 9:59 PM): Fixed non-responsive click on recent folders (Issue #8)
+  - Root cause: ElementName binding from DataTemplate had runtime resolution issues in WinUI 3
+  - Command binding `{Binding ViewModel.OpenRecentFolderCommand, ElementName=RootPage}` failed to resolve correctly
+  - Solution: Replaced with Click event handlers in code-behind that call Command.ExecuteAsync() directly
+  - Changes: MainPage.xaml (replaced Command with Click), MainPage.xaml.cs (added handlers)
+  - Recent folders now fully functional and clickable
+  - Build successful (0 errors, 19 expected AOT warnings)
 - **CRITICAL BUG FIX** (2/6/2026 9:41 PM): Fixed drag-drop between columns (Issue #4)
   - Root cause: JSON property name mismatch in DragPayload serialization/deserialization
   - KanbanItemCardControl serialized with PascalCase (FilePath, SourceColumnPath, FileName)

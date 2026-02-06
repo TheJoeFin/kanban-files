@@ -95,10 +95,20 @@ Changes:
 - **KanbanItemCardControl.xaml.cs**: Updated CardBorder_PointerEntered() and CardBorder_PointerExited() to use Application.Current.Resources lookups
 
 
-# issue 8 3:51 PM 2/6/2026
+# issue 8 3:51 PM 2/6/2026 - RESOLVED 2/6/2026 9:59 PM
 - The recently opened directory on the launching page is not clickable, it should be
 
-**Note**: XAML shows correct Button/Command binding (OpenRecentFolderCommand) implemented in MainViewModel. Feature was implemented in Issue #3 resolution. Needs runtime verification to confirm if actually working.
+**Resolution**: Fixed by replacing Command binding with Click event handlers in code-behind. The issue was that `{Binding ViewModel.OpenRecentFolderCommand, ElementName=RootPage}` inside a DataTemplate with `x:DataType="x:String"` had runtime resolution issues in WinUI 3.
+
+**Root Cause**: ElementName binding from within ItemsControl DataTemplates can fail at runtime in WinUI 3. The binding path needed to traverse from the string DataContext up to the Page level to access ViewModel, which wasn't reliably working.
+
+**Solution**: Changed approach to use Click event handlers in MainPage.xaml.cs that call the Command properties directly via `ViewModel.OpenRecentFolderCommand.ExecuteAsync()`. This is more reliable than ElementName bindings in DataTemplates.
+
+Changes:
+- **MainPage.xaml** (lines 159-162, 185-188): Replaced Command binding with Click event handlers
+- **MainPage.xaml.cs** (lines 255-270): Added RecentFolderButton_Click and RemoveRecentFolderButton_Click handlers
+
+The recent folders list is now fully clickable and functional.
 
 
 # Issue 9 3:51 PM 2/6/2026 - RESOLVED 2/6/2026 9:55 PM

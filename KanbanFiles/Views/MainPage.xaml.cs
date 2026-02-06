@@ -250,5 +250,27 @@ namespace KanbanFiles.Views
             args.Handled = true;
             ViewModel.NavigateDown();
         }
+        
+        private async void RecentFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.CommandParameter is string folderPath)
+            {
+                if (ViewModel.OpenRecentFolderCommand.CanExecute(folderPath))
+                {
+                    await ViewModel.OpenRecentFolderCommand.ExecuteAsync(folderPath);
+                }
+            }
+        }
+        
+        private async void RemoveRecentFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.CommandParameter is string folderPath)
+            {
+                if (ViewModel.RemoveRecentFolderCommand.CanExecute(folderPath))
+                {
+                    await ViewModel.RemoveRecentFolderCommand.ExecuteAsync(folderPath);
+                }
+            }
+        }
     }
 }

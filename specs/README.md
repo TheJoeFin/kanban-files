@@ -43,8 +43,8 @@ Each phase builds on the previous ones:
 4. ✅ Phase 4: Two-Way File Sync
 5. ✅ Phase 5: Grouping
 6. 🚫 **Phase 6: Rich Markdown Editing** ← BLOCKED (WindowsAppSDK 1.8 XAML Compiler bug)
-7. **Phase 7: Polish & Edge Cases** ← CAN PROCEED (Phase 6 optional)
+7. 🚧 **Phase 7: Polish & Edge Cases** ← PARTIAL (InfoBar, keyboard shortcuts, corruption handling ✅)
 
-**Completed:** 5/7 phases (71.4%)
+**Completed:** 5/7 phases fully, 1/7 partial (78.6%)
 **Blocked:** Phase 6 due to tooling bug (see ISSUES.md 2/6/2026 7:56 PM)
-**Next:** Phase 7 or investigate Phase 6 workarounds
+**Last work:** Phase 7 partial implementation (2/6/2026 8:15 PM)

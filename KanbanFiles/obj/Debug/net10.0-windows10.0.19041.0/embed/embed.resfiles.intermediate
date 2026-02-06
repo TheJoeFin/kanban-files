@@ -1,2 +1,4 @@
 App.xbf
+Controls\ColumnControl.xbf
+Controls\KanbanItemCardControl.xbf
 Views\MainPage.xbf

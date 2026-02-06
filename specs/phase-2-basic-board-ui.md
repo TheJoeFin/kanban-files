@@ -1,7 +1,9 @@
-# Phase 2 — Basic Board UI
+# Phase 2 — Basic Board UI ✅ COMPLETE
 
 ## Objective
 Build the core visual layout of the Kanban board: a horizontal scrollable set of columns, each containing a vertical list of item cards. Implement folder opening, and the ability to create new items and columns.
+
+**Status**: Completed - All acceptance criteria met
 
 ---
 
@@ -47,10 +49,10 @@ public partial class MainViewModel : ObservableObject
 }
 ```
 
-### Acceptance Criteria
-- Window displays a command bar and empty board area
-- Horizontal scrolling works when columns overflow the window width
-- Board area shows a placeholder message when no folder is opened
+### Acceptance Criteria ✅
+- ✅ Window displays a command bar and empty board area
+- ✅ Horizontal scrolling works when columns overflow the window width
+- ✅ Board area shows a placeholder message when no folder is opened
 
 ---
 
@@ -101,10 +103,10 @@ public partial class ColumnViewModel : ObservableObject
 - Delete Column (with confirmation dialog)
 - Add Group (Phase 5)
 
-### Acceptance Criteria
-- Column renders with header, scrollable item list, and footer
-- Column has a fixed width and stretches vertically
-- Options menu opens on click
+### Acceptance Criteria ✅
+- ✅ Column renders with header, scrollable item list, and footer
+- ✅ Column has a fixed width and stretches vertically
+- ✅ Options menu opens on click
 
 ---
 
@@ -154,11 +156,11 @@ public partial class KanbanItemViewModel : ObservableObject
 - Move to → (submenu of other columns)
 - Delete (with confirmation)
 
-### Acceptance Criteria
-- Card displays title and 2-line preview
-- Card has visual hover state
-- Right-click context menu appears with options
-- Click triggers open action (placeholder for Phase 6)
+### Acceptance Criteria ✅
+- ✅ Card displays title and 2-line preview
+- ✅ Card has visual hover state
+- ✅ Right-click context menu appears with options
+- ✅ Click triggers open action (placeholder for Phase 6)
 
 ---
 
@@ -191,12 +193,12 @@ WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
 var folder = await picker.PickSingleFolderAsync();
 ```
 
-### Acceptance Criteria
-- Folder picker opens and returns selected path
-- Board loads correctly from folder with existing config
-- Board initializes defaults for empty folder
-- Board generates config from existing subfolders
-- UI populates with columns and items after loading
+### Acceptance Criteria ✅
+- ✅ Folder picker opens and returns selected path
+- ✅ Board loads correctly from folder with existing config
+- ✅ Board initializes defaults for empty folder
+- ✅ Board generates config from existing subfolders
+- ✅ UI populates with columns and items after loading
 
 ---
 
@@ -222,11 +224,11 @@ Create a new `.md` file in a column's folder and display it as a new card.
 - Limit to 200 characters
 - If file already exists, append `(1)`, `(2)`, etc.
 
-### Acceptance Criteria
-- New item card appears in the column immediately
-- `.md` file is created on disk with correct content
-- `.kanban.json` item order is updated
-- Duplicate names are handled gracefully
+### Acceptance Criteria ✅
+- ✅ New item card appears in the column immediately
+- ✅ `.md` file is created on disk with correct content
+- ✅ `.kanban.json` item order is updated
+- ✅ Duplicate names are handled gracefully
 
 ---
 
@@ -249,8 +251,8 @@ Create a new subfolder and add it as a column to the board.
 - Column name must be a valid folder name (same sanitization as items)
 - Column name must not duplicate an existing column
 
-### Acceptance Criteria
-- New empty column appears on the board
-- Subfolder is created on disk
-- `.kanban.json` is updated with the new column
-- Duplicate column names are rejected with a message
+### Acceptance Criteria ✅
+- ✅ New empty column appears on the board
+- ✅ Subfolder is created on disk
+- ✅ `.kanban.json` is updated with the new column
+- ✅ Duplicate column names are rejected with a message

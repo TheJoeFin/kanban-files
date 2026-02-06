@@ -7,7 +7,9 @@ namespace KanbanFiles
     /// </summary>
     public partial class App : Application
     {
-        private Window window = Window.Current;
+        private Window? window;
+
+        public static Window? MainWindow { get; private set; }
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -26,6 +28,7 @@ namespace KanbanFiles
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
             window ??= new Window();
+            MainWindow = window;
 
             if (window.Content is not Frame rootFrame)
             {

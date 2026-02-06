@@ -25,8 +25,8 @@ namespace KanbanFiles
         private const string WINDOW_X_KEY = "WindowX";
         private const string WINDOW_Y_KEY = "WindowY";
         private const string IS_MAXIMIZED_KEY = "IsMaximized";
-        private const int DEFAULT_WIDTH = 1280;
-        private const int DEFAULT_HEIGHT = 800;
+        private const int DEFAULT_WIDTH = 1400;
+        private const int DEFAULT_HEIGHT = 900;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code

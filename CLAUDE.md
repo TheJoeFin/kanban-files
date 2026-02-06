@@ -202,5 +202,19 @@ All 7 phases complete! KanbanFiles is feature-complete with full markdown editin
   - Files: ColumnControl.xaml, ColumnControl.xaml.cs, KanbanItemCardControl.xaml.cs
   - All drag-drop scenarios now functional: between columns, within column, into empty groups/columns
   - Build successful (0 errors, 19 expected AOT warnings)
+- **CRITICAL BUG FIX** (2/6/2026 10:32 PM): Fixed drag-drop requiring two drags and 🚫 cursor over columns (Issue #14)
+  - Root cause: `e.Handled = true` in CardBorder_DragOver prevented event bubbling to parent ItemsControl
+  - This created "dead zones" where drops over cards couldn't reach the column's drop handler
+  - First drag appeared to work but didn't complete, requiring a second drag to succeed
+  - Solution: Removed `e.Handled = true` from KanbanItemCardControl.CardBorder_DragOver to allow event propagation
+  - Changes: KanbanItemCardControl.xaml.cs (line 67 removed)
+  - Single-drag operations now work correctly for all scenarios
+  - Build successful (0 errors, 19 expected AOT warnings)
+- **Window Size Increase** (2/6/2026 10:32 PM): Increased default window size for better UX (Issue #13)
+  - Previous default: 1280x800 pixels
+  - New default: 1400x900 pixels (12% larger)
+  - Provides more comfortable workspace for kanban boards
+  - Changes: App.xaml.cs (DEFAULT_WIDTH and DEFAULT_HEIGHT constants)
+  - Build successful (0 errors, 19 expected AOT warnings)
 
 

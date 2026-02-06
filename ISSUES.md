@@ -205,10 +205,37 @@ All drag-drop scenarios now work correctly:
 Build successful (0 errors, 19 expected AOT warnings)
 
 
-## Issue 13 4:26 PM 2/6/2026
+## Issue 13 4:26 PM 2/6/2026 - RESOLVED 2/6/2026 10:32 PM
 - The starting size window is too small
 
+**Resolution**: Increased default window size from 1280x800 to 1400x900 pixels. This provides 12% more screen space and a more comfortable workspace for managing kanban boards with multiple columns. The larger default size improves usability without being overwhelming on standard displays.
 
-## Issue 14 4:27 PM 2/6/2026
+Changes:
+- **App.xaml.cs** (lines 28-29): Updated DEFAULT_WIDTH from 1280 to 1400 and DEFAULT_HEIGHT from 800 to 900
+
+Build successful (0 errors, 19 expected AOT warnings)
+
+
+## Issue 14 4:27 PM 2/6/2026 - RESOLVED 2/6/2026 10:32 PM
 - interesting drag behavior, it is working now, but only when the drag happens over another item, if the drag is over the column the 🚫 still appears
 - Also to move a file you have to drag it twice, that is not right, it should be just the once
+
+**Resolution**: Fixed by removing `e.Handled = true` from CardBorder_DragOver handler. The root cause was that marking the event as handled prevented it from bubbling up to the parent ItemsControl's DragOver handler, which is required for the drop to complete.
+
+**Root Causes**:
+1. CardBorder_DragOver set `e.Handled = true` to "prevent conflicts" (added in Issue #11 fix)
+2. This blocked event propagation to ColumnControl.ItemsControl_DragOver
+3. Without the parent handler accepting the drop, the first drag appeared to work but didn't execute
+4. User had to drag again, this time avoiding cards, for the drop to reach the parent handler
+
+**How It Works Now**:
+- CardBorder_DragOver accepts the drop operation (`e.AcceptedOperation = DataPackageOperation.Move`)
+- Event continues bubbling to ItemsControl_DragOver (parent handler)
+- Parent handler calculates drop position and executes the actual file move
+- Single drag operation completes successfully whether dragging over cards or empty column space
+
+Changes:
+- **KanbanItemCardControl.xaml.cs** (line 67): Removed `e.Handled = true` and added comment explaining event bubbling is intentional
+
+Build successful (0 errors, 19 expected AOT warnings)
+

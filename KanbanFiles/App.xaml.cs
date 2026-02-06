@@ -138,7 +138,10 @@ namespace KanbanFiles
                 {
                     appWindow.Resize(new SizeInt32(DEFAULT_WIDTH, DEFAULT_HEIGHT));
                 }
-                catch { }
+                catch (Exception fallbackEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error setting fallback window size: {fallbackEx.Message}");
+                }
             }
         }
 

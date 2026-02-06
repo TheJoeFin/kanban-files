@@ -453,3 +453,43 @@ When .kanban.json was edited externally, the FileWatcherService detected the cha
 All 7 phases complete. Zero TODOs remaining. Project fully complete.
 
 ===================
+
+2/6/2026 8:54 PM
+
+ERROR HANDLING IMPROVEMENTS: Fixed Critical Empty Exception Catch Blocks
+
+**Issue Identified**: Code quality analysis revealed empty or minimal exception catch blocks that silently swallowed errors without logging, making debugging difficult.
+
+**Resolution**: Improved error handling in 3 critical locations:
+
+1. **App.xaml.cs (line 141)**: Fixed empty catch block in window state restoration fallback
+   - Before: `catch { }` - completely silent
+   - After: `catch (Exception fallbackEx) { Debug.WriteLine($"Error setting fallback window size: {fallbackEx.Message}"); }`
+   - Impact: Now logs errors when fallback window sizing fails
+
+2. **ItemDetailViewModel.cs (line 61-66)**: Enhanced file read error handling
+   - Before: `catch (Exception) { }` - no diagnostic information
+   - After: `catch (Exception ex) { Debug.WriteLine($"Error loading file content from {_filePath}: {ex.Message}"); }`
+   - Impact: Now logs file path and error message when markdown files fail to load
+
+3. **ItemDetailViewModel.cs (line 185-188)**: Clarified re-throw exception handling
+   - Before: Generic comment "Handle save errors (will be handled in view)"
+   - After: Explicit logging + comment explaining re-throw purpose
+   - Impact: Error context logged before propagating to UI layer
+
+**Build Status**: Successful (0 errors, 19 expected AOT warnings)
+
+**Code Quality Impact**: 
+- All critical empty catch blocks now have diagnostic logging
+- Debugging file I/O errors is significantly easier
+- Window state restoration issues can now be diagnosed
+- Only intentional error suppression remains (FileSystemService.IsHiddenOrSystem)
+
+**Remaining Code Quality Opportunities** (for future iterations):
+- Hardcoded UI strings could be extracted to constants/resources
+- Backup logic duplicated in BoardConfigService and GroupService
+- Unique name generation logic repeated across services
+
+**Commit**: Error handling improvements - fix empty exception catch blocks
+
+===================

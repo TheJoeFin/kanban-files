@@ -75,6 +75,14 @@
 ## Housekeeping Items
 - **Git**: .gitignore added (2/6/2026 8:46 PM) - prevents bin/obj tracking
 - **TODO Fix**: .kanban.json auto-reload implemented (2/6/2026 8:50 PM) - external config changes now automatically refresh the board
+- **Error Handling**: Empty catch blocks fixed (2/6/2026 8:54 PM) - all exceptions now logged with diagnostic context
+
+## Code Quality
+- **Exception Logging**: All catch blocks now use Debug.WriteLine() for diagnostics
+  - App.xaml.cs: Window state restoration errors logged
+  - ItemDetailViewModel.cs: File read/write errors logged with file paths
+  - Only intentional error suppression: FileSystemService.IsHiddenOrSystem()
+- **No Empty Catch Blocks**: All critical error handling now includes diagnostic output
 
 ## Project Status
-All 7 phases complete! KanbanFiles is feature-complete with full markdown editing capabilities, comprehensive error handling, and zero remaining TODOs.
+All 7 phases complete! KanbanFiles is feature-complete with full markdown editing capabilities, comprehensive error handling with proper logging, and zero remaining TODOs.

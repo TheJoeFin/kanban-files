@@ -58,9 +58,10 @@ public partial class ItemDetailViewModel : ObservableObject
             HasUnsavedChanges = false;
             UpdateRenderedHtml();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Handle file read errors
+            System.Diagnostics.Debug.WriteLine($"Error loading file content from {_filePath}: {ex.Message}");
+            // Set empty content as fallback
             Content = string.Empty;
             _originalContent = string.Empty;
         }
@@ -182,9 +183,10 @@ public partial class ItemDetailViewModel : ObservableObject
             var fileInfo = new FileInfo(_filePath);
             LastModified = fileInfo.LastWriteTime;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Handle save errors (will be handled in view)
+            System.Diagnostics.Debug.WriteLine($"Error saving file {_filePath}: {ex.Message}");
+            // Re-throw to let caller (view) handle with user notification
             throw;
         }
     }

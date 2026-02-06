@@ -56,6 +56,10 @@
               "target": "Package",
               "version": "[8.*, )"
             },
+            "Markdig": {
+              "target": "Package",
+              "version": "[0.44.0, )"
+            },
             "Microsoft.Web.WebView2": {
               "target": "Package",
               "version": "[1.*, )"

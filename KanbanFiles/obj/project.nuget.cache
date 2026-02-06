@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "L25sOULd9aA=",
+  "dgSpecHash": "Z7MQQOaOLvI=",
   "success": true,
   "projectFilePath": "D:\\source\\kanban-files\\KanbanFiles\\KanbanFiles.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\josep\\.nuget\\packages\\communitytoolkit.mvvm\\8.4.0\\communitytoolkit.mvvm.8.4.0.nupkg.sha512",
+    "C:\\Users\\josep\\.nuget\\packages\\markdig\\0.44.0\\markdig.0.44.0.nupkg.sha512",
     "C:\\Users\\josep\\.nuget\\packages\\microsoft.web.webview2\\1.0.3719.77\\microsoft.web.webview2.1.0.3719.77.nupkg.sha512",
     "C:\\Users\\josep\\.nuget\\packages\\microsoft.windows.sdk.buildtools\\10.0.26100.7463\\microsoft.windows.sdk.buildtools.10.0.26100.7463.nupkg.sha512",
     "C:\\Users\\josep\\.nuget\\packages\\microsoft.windows.sdk.buildtools.msix\\1.7.20250829.1\\microsoft.windows.sdk.buildtools.msix.1.7.20250829.1.nupkg.sha512",

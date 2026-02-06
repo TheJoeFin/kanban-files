@@ -1,3 +1,4 @@
+D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\KanbanFiles.csproj.AssemblyReference.cache
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Assets\LockScreenLogo.png
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Assets\LockScreenLogo.scale-200.png
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Assets\SplashScreen.png
@@ -13,6 +14,7 @@ D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Assets\
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\KanbanFiles.exe
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\App.xbf
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Controls\ColumnControl.xbf
+D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.xbf
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Controls\KanbanItemCardControl.xbf
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Views\MainPage.xbf
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\KanbanFiles.deps.json
@@ -22,6 +24,7 @@ D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\KanbanF
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\KanbanFiles.pri
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Microsoft.Web.WebView2.Core.dll
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\CommunityToolkit.Mvvm.dll
+D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Markdig.dll
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Microsoft.Graphics.Imaging.Projection.dll
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Microsoft.Windows.AI.ContentSafety.Projection.dll
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Microsoft.Windows.AI.Foundation.Projection.dll
@@ -67,11 +70,12 @@ D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\runtime
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Microsoft.Windows.SDK.NET.dll
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\WinRT.Runtime.dll
 D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Microsoft.Web.WebView2.Core.Projection.dll
-D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\KanbanFiles.csproj.AssemblyReference.cache
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\App.g.i.cs
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\App.g.cs
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\ColumnControl.g.i.cs
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\ColumnControl.g.cs
+D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.g.i.cs
+D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.g.cs
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\KanbanItemCardControl.g.i.cs
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\KanbanItemCardControl.g.cs
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Views\MainPage.g.i.cs
@@ -79,10 +83,12 @@ D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Views\M
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\XamlTypeInfo.g.cs
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\App.xaml
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\ColumnControl.xaml
+D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.xaml
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\KanbanItemCardControl.xaml
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Views\MainPage.xaml
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\App.xbf
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\ColumnControl.xbf
+D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.xbf
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\KanbanItemCardControl.xbf
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Views\MainPage.xbf
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\XamlSaveStateFile.xml
@@ -111,8 +117,8 @@ D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\pri.res
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\qualifiers.txt
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\qualifiers.txt.intermediate
 D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\MultipleQualifiersPerDimensionFound.txt
-D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.g.i.cs
-D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.g.cs
-D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.xaml
-D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.xbf
-D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Controls\GroupHeaderControl.xbf
+D:\source\kanban-files\KanbanFiles\bin\Debug\net10.0-windows10.0.19041.0\Views\ItemDetailView.xbf
+D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Views\ItemDetailView.g.i.cs
+D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Views\ItemDetailView.g.cs
+D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Views\ItemDetailView.xaml
+D:\source\kanban-files\KanbanFiles\obj\Debug\net10.0-windows10.0.19041.0\Views\ItemDetailView.xbf

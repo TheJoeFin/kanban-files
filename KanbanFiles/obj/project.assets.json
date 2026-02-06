@@ -18,6 +18,19 @@
           "buildTransitive/CommunityToolkit.Mvvm.targets": {}
         }
       },
+      "Markdig/0.44.0": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/Markdig.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Markdig.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.Web.WebView2/1.0.3719.77": {
         "type": "package",
         "build": {
@@ -380,6 +393,19 @@
           "buildTransitive/CommunityToolkit.Mvvm.targets": {}
         }
       },
+      "Markdig/0.44.0": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/Markdig.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Markdig.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.Web.WebView2/1.0.3719.77": {
         "type": "package",
         "native": {
@@ -701,6 +727,19 @@
           "buildTransitive/CommunityToolkit.Mvvm.targets": {}
         }
       },
+      "Markdig/0.44.0": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/Markdig.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Markdig.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.Web.WebView2/1.0.3719.77": {
         "type": "package",
         "native": {
@@ -1020,6 +1059,19 @@
         },
         "build": {
           "buildTransitive/CommunityToolkit.Mvvm.targets": {}
+        }
+      },
+      "Markdig/0.44.0": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/Markdig.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Markdig.dll": {
+            "related": ".xml"
+          }
         }
       },
       "Microsoft.Web.WebView2/1.0.3719.77": {
@@ -1368,6 +1420,29 @@
         "lib/netstandard2.1/CommunityToolkit.Mvvm.dll",
         "lib/netstandard2.1/CommunityToolkit.Mvvm.pdb",
         "lib/netstandard2.1/CommunityToolkit.Mvvm.xml"
+      ]
+    },
+    "Markdig/0.44.0": {
+      "sha512": "X+CYMjcUnh/yO24wOSQxVFLiGqWrrtXJ5M7toHiM1Zk4Fg9UMLN5fkaq6FSOWH+mIprsHHgDMlq3MJhmrXalhg==",
+      "type": "package",
+      "path": "markdig/0.44.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net462/Markdig.dll",
+        "lib/net462/Markdig.xml",
+        "lib/net8.0/Markdig.dll",
+        "lib/net8.0/Markdig.xml",
+        "lib/net9.0/Markdig.dll",
+        "lib/net9.0/Markdig.xml",
+        "lib/netstandard2.0/Markdig.dll",
+        "lib/netstandard2.0/Markdig.xml",
+        "lib/netstandard2.1/Markdig.dll",
+        "lib/netstandard2.1/Markdig.xml",
+        "markdig.0.44.0.nupkg.sha512",
+        "markdig.nuspec",
+        "markdig.png",
+        "readme.md"
       ]
     },
     "Microsoft.Web.WebView2/1.0.3719.77": {
@@ -3281,6 +3356,7 @@
   "projectFileDependencyGroups": {
     "net10.0-windows10.0.19041": [
       "CommunityToolkit.Mvvm >= 8.*",
+      "Markdig >= 0.44.0",
       "Microsoft.Web.WebView2 >= 1.*",
       "Microsoft.Windows.SDK.BuildTools >= 10.*",
       "Microsoft.WindowsAppSDK >= 1.*"
@@ -3341,6 +3417,10 @@
           "CommunityToolkit.Mvvm": {
             "target": "Package",
             "version": "[8.*, )"
+          },
+          "Markdig": {
+            "target": "Package",
+            "version": "[0.44.0, )"
           },
           "Microsoft.Web.WebView2": {
             "target": "Package",

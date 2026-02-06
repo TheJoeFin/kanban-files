@@ -226,7 +226,7 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
         
         private void InitTypeTables()
         {
-            _typeNameTable = new string[36];
+            _typeNameTable = new string[34];
             _typeNameTable[0] = "Microsoft.UI.Xaml.Controls.XamlControlsResources";
             _typeNameTable[1] = "Microsoft.UI.Xaml.ResourceDictionary";
             _typeNameTable[2] = "Object";
@@ -242,29 +242,27 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
             _typeNameTable[12] = "KanbanFiles.ViewModels.BaseViewModel";
             _typeNameTable[13] = "CommunityToolkit.Mvvm.ComponentModel.ObservableObject";
             _typeNameTable[14] = "KanbanFiles.Controls.ColumnControl";
-            _typeNameTable[15] = "KanbanFiles.Converters.BoolToVisibilityConverter";
-            _typeNameTable[16] = "KanbanFiles.Views.ItemDetailView";
-            _typeNameTable[17] = "KanbanFiles.ViewModels.MainViewModel";
-            _typeNameTable[18] = "System.Collections.ObjectModel.ObservableCollection`1<KanbanFiles.ViewModels.ColumnViewModel>";
-            _typeNameTable[19] = "System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.ColumnViewModel>";
-            _typeNameTable[20] = "KanbanFiles.ViewModels.ColumnViewModel";
-            _typeNameTable[21] = "System.Collections.ObjectModel.ObservableCollection`1<KanbanFiles.ViewModels.KanbanItemViewModel>";
-            _typeNameTable[22] = "System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.KanbanItemViewModel>";
-            _typeNameTable[23] = "String";
-            _typeNameTable[24] = "System.DateTime";
-            _typeNameTable[25] = "CommunityToolkit.Mvvm.Input.IRelayCommand";
-            _typeNameTable[26] = "System.Collections.ObjectModel.ObservableCollection`1<KanbanFiles.ViewModels.GroupViewModel>";
-            _typeNameTable[27] = "System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.GroupViewModel>";
-            _typeNameTable[28] = "KanbanFiles.ViewModels.GroupViewModel";
-            _typeNameTable[29] = "Int32";
-            _typeNameTable[30] = "Microsoft.UI.Xaml.Controls.Button";
-            _typeNameTable[31] = "KanbanFiles.Views.MainPage";
-            _typeNameTable[32] = "Microsoft.UI.Xaml.Controls.Page";
-            _typeNameTable[33] = "Microsoft.UI.Xaml.Controls.TreeViewNode";
-            _typeNameTable[34] = "Microsoft.UI.Xaml.DependencyObject";
-            _typeNameTable[35] = "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>";
+            _typeNameTable[15] = "KanbanFiles.ViewModels.MainViewModel";
+            _typeNameTable[16] = "System.Collections.ObjectModel.ObservableCollection`1<KanbanFiles.ViewModels.ColumnViewModel>";
+            _typeNameTable[17] = "System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.ColumnViewModel>";
+            _typeNameTable[18] = "KanbanFiles.ViewModels.ColumnViewModel";
+            _typeNameTable[19] = "System.Collections.ObjectModel.ObservableCollection`1<KanbanFiles.ViewModels.KanbanItemViewModel>";
+            _typeNameTable[20] = "System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.KanbanItemViewModel>";
+            _typeNameTable[21] = "String";
+            _typeNameTable[22] = "System.DateTime";
+            _typeNameTable[23] = "CommunityToolkit.Mvvm.Input.IRelayCommand";
+            _typeNameTable[24] = "System.Collections.ObjectModel.ObservableCollection`1<KanbanFiles.ViewModels.GroupViewModel>";
+            _typeNameTable[25] = "System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.GroupViewModel>";
+            _typeNameTable[26] = "KanbanFiles.ViewModels.GroupViewModel";
+            _typeNameTable[27] = "Int32";
+            _typeNameTable[28] = "Microsoft.UI.Xaml.Controls.Button";
+            _typeNameTable[29] = "KanbanFiles.Views.MainPage";
+            _typeNameTable[30] = "Microsoft.UI.Xaml.Controls.Page";
+            _typeNameTable[31] = "Microsoft.UI.Xaml.Controls.TreeViewNode";
+            _typeNameTable[32] = "Microsoft.UI.Xaml.DependencyObject";
+            _typeNameTable[33] = "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>";
 
-            _typeTable = new global::System.Type[36];
+            _typeTable = new global::System.Type[34];
             _typeTable[0] = typeof(global::Microsoft.UI.Xaml.Controls.XamlControlsResources);
             _typeTable[1] = typeof(global::Microsoft.UI.Xaml.ResourceDictionary);
             _typeTable[2] = typeof(global::System.Object);
@@ -280,27 +278,25 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
             _typeTable[12] = typeof(global::KanbanFiles.ViewModels.BaseViewModel);
             _typeTable[13] = typeof(global::CommunityToolkit.Mvvm.ComponentModel.ObservableObject);
             _typeTable[14] = typeof(global::KanbanFiles.Controls.ColumnControl);
-            _typeTable[15] = typeof(global::KanbanFiles.Converters.BoolToVisibilityConverter);
-            _typeTable[16] = typeof(global::KanbanFiles.Views.ItemDetailView);
-            _typeTable[17] = typeof(global::KanbanFiles.ViewModels.MainViewModel);
-            _typeTable[18] = typeof(global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.ColumnViewModel>);
-            _typeTable[19] = typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.ColumnViewModel>);
-            _typeTable[20] = typeof(global::KanbanFiles.ViewModels.ColumnViewModel);
-            _typeTable[21] = typeof(global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.KanbanItemViewModel>);
-            _typeTable[22] = typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.KanbanItemViewModel>);
-            _typeTable[23] = typeof(global::System.String);
-            _typeTable[24] = typeof(global::System.DateTime);
-            _typeTable[25] = typeof(global::CommunityToolkit.Mvvm.Input.IRelayCommand);
-            _typeTable[26] = typeof(global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.GroupViewModel>);
-            _typeTable[27] = typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.GroupViewModel>);
-            _typeTable[28] = typeof(global::KanbanFiles.ViewModels.GroupViewModel);
-            _typeTable[29] = typeof(global::System.Int32);
-            _typeTable[30] = typeof(global::Microsoft.UI.Xaml.Controls.Button);
-            _typeTable[31] = typeof(global::KanbanFiles.Views.MainPage);
-            _typeTable[32] = typeof(global::Microsoft.UI.Xaml.Controls.Page);
-            _typeTable[33] = typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode);
-            _typeTable[34] = typeof(global::Microsoft.UI.Xaml.DependencyObject);
-            _typeTable[35] = typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>);
+            _typeTable[15] = typeof(global::KanbanFiles.ViewModels.MainViewModel);
+            _typeTable[16] = typeof(global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.ColumnViewModel>);
+            _typeTable[17] = typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.ColumnViewModel>);
+            _typeTable[18] = typeof(global::KanbanFiles.ViewModels.ColumnViewModel);
+            _typeTable[19] = typeof(global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.KanbanItemViewModel>);
+            _typeTable[20] = typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.KanbanItemViewModel>);
+            _typeTable[21] = typeof(global::System.String);
+            _typeTable[22] = typeof(global::System.DateTime);
+            _typeTable[23] = typeof(global::CommunityToolkit.Mvvm.Input.IRelayCommand);
+            _typeTable[24] = typeof(global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.GroupViewModel>);
+            _typeTable[25] = typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.GroupViewModel>);
+            _typeTable[26] = typeof(global::KanbanFiles.ViewModels.GroupViewModel);
+            _typeTable[27] = typeof(global::System.Int32);
+            _typeTable[28] = typeof(global::Microsoft.UI.Xaml.Controls.Button);
+            _typeTable[29] = typeof(global::KanbanFiles.Views.MainPage);
+            _typeTable[30] = typeof(global::Microsoft.UI.Xaml.Controls.Page);
+            _typeTable[31] = typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode);
+            _typeTable[32] = typeof(global::Microsoft.UI.Xaml.DependencyObject);
+            _typeTable[33] = typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -341,17 +337,15 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
         private object Activate_10_KanbanItemCardControl() { return new global::KanbanFiles.Controls.KanbanItemCardControl(); }
         private object Activate_12_BaseViewModel() { return new global::KanbanFiles.ViewModels.BaseViewModel(); }
         private object Activate_14_ColumnControl() { return new global::KanbanFiles.Controls.ColumnControl(); }
-        private object Activate_15_BoolToVisibilityConverter() { return new global::KanbanFiles.Converters.BoolToVisibilityConverter(); }
-        private object Activate_16_ItemDetailView() { return new global::KanbanFiles.Views.ItemDetailView(); }
-        private object Activate_17_MainViewModel() { return new global::KanbanFiles.ViewModels.MainViewModel(); }
-        private object Activate_18_ObservableCollection() { return new global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.ColumnViewModel>(); }
-        private object Activate_19_Collection() { return new global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.ColumnViewModel>(); }
-        private object Activate_21_ObservableCollection() { return new global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.KanbanItemViewModel>(); }
-        private object Activate_22_Collection() { return new global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.KanbanItemViewModel>(); }
-        private object Activate_26_ObservableCollection() { return new global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.GroupViewModel>(); }
-        private object Activate_27_Collection() { return new global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.GroupViewModel>(); }
-        private object Activate_31_MainPage() { return new global::KanbanFiles.Views.MainPage(); }
-        private object Activate_33_TreeViewNode() { return new global::Microsoft.UI.Xaml.Controls.TreeViewNode(); }
+        private object Activate_15_MainViewModel() { return new global::KanbanFiles.ViewModels.MainViewModel(); }
+        private object Activate_16_ObservableCollection() { return new global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.ColumnViewModel>(); }
+        private object Activate_17_Collection() { return new global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.ColumnViewModel>(); }
+        private object Activate_19_ObservableCollection() { return new global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.KanbanItemViewModel>(); }
+        private object Activate_20_Collection() { return new global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.KanbanItemViewModel>(); }
+        private object Activate_24_ObservableCollection() { return new global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.GroupViewModel>(); }
+        private object Activate_25_Collection() { return new global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.GroupViewModel>(); }
+        private object Activate_29_MainPage() { return new global::KanbanFiles.Views.MainPage(); }
+        private object Activate_31_TreeViewNode() { return new global::Microsoft.UI.Xaml.Controls.TreeViewNode(); }
         private void StaticInitializer_0_XamlControlsResources() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.XamlControlsResources).TypeHandle);
         private void StaticInitializer_4_InverseBoolToVisibilityConverter() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.Converters.InverseBoolToVisibilityConverter).TypeHandle);
         private void StaticInitializer_5_Color() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Windows.UI.Color).TypeHandle);
@@ -363,22 +357,20 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
         private void StaticInitializer_12_BaseViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.ViewModels.BaseViewModel).TypeHandle);
         private void StaticInitializer_13_ObservableObject() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::CommunityToolkit.Mvvm.ComponentModel.ObservableObject).TypeHandle);
         private void StaticInitializer_14_ColumnControl() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.Controls.ColumnControl).TypeHandle);
-        private void StaticInitializer_15_BoolToVisibilityConverter() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.Converters.BoolToVisibilityConverter).TypeHandle);
-        private void StaticInitializer_16_ItemDetailView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.Views.ItemDetailView).TypeHandle);
-        private void StaticInitializer_17_MainViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.ViewModels.MainViewModel).TypeHandle);
-        private void StaticInitializer_18_ObservableCollection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.ColumnViewModel>).TypeHandle);
-        private void StaticInitializer_19_Collection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.ColumnViewModel>).TypeHandle);
-        private void StaticInitializer_20_ColumnViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.ViewModels.ColumnViewModel).TypeHandle);
-        private void StaticInitializer_21_ObservableCollection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.KanbanItemViewModel>).TypeHandle);
-        private void StaticInitializer_22_Collection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.KanbanItemViewModel>).TypeHandle);
-        private void StaticInitializer_24_DateTime() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.DateTime).TypeHandle);
-        private void StaticInitializer_25_IRelayCommand() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::CommunityToolkit.Mvvm.Input.IRelayCommand).TypeHandle);
-        private void StaticInitializer_26_ObservableCollection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.GroupViewModel>).TypeHandle);
-        private void StaticInitializer_27_Collection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.GroupViewModel>).TypeHandle);
-        private void StaticInitializer_28_GroupViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.ViewModels.GroupViewModel).TypeHandle);
-        private void StaticInitializer_31_MainPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.Views.MainPage).TypeHandle);
-        private void StaticInitializer_33_TreeViewNode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode).TypeHandle);
-        private void StaticInitializer_35_IList() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>).TypeHandle);
+        private void StaticInitializer_15_MainViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.ViewModels.MainViewModel).TypeHandle);
+        private void StaticInitializer_16_ObservableCollection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.ColumnViewModel>).TypeHandle);
+        private void StaticInitializer_17_Collection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.ColumnViewModel>).TypeHandle);
+        private void StaticInitializer_18_ColumnViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.ViewModels.ColumnViewModel).TypeHandle);
+        private void StaticInitializer_19_ObservableCollection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.KanbanItemViewModel>).TypeHandle);
+        private void StaticInitializer_20_Collection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.KanbanItemViewModel>).TypeHandle);
+        private void StaticInitializer_22_DateTime() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.DateTime).TypeHandle);
+        private void StaticInitializer_23_IRelayCommand() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::CommunityToolkit.Mvvm.Input.IRelayCommand).TypeHandle);
+        private void StaticInitializer_24_ObservableCollection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.GroupViewModel>).TypeHandle);
+        private void StaticInitializer_25_Collection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.GroupViewModel>).TypeHandle);
+        private void StaticInitializer_26_GroupViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.ViewModels.GroupViewModel).TypeHandle);
+        private void StaticInitializer_29_MainPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.Views.MainPage).TypeHandle);
+        private void StaticInitializer_31_TreeViewNode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode).TypeHandle);
+        private void StaticInitializer_33_IList() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>).TypeHandle);
         private void MapAdd_0_XamlControlsResources(object instance, object key, object item)
         {
             var collection = (global::System.Collections.Generic.IDictionary<global::System.Object, global::System.Object>)instance;
@@ -386,43 +378,43 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
             var newItem = (global::System.Object)item;
             collection.Add(newKey, newItem);
         }
-        private void VectorAdd_18_ObservableCollection(object instance, object item)
+        private void VectorAdd_16_ObservableCollection(object instance, object item)
         {
             var collection = (global::System.Collections.Generic.ICollection<global::KanbanFiles.ViewModels.ColumnViewModel>)instance;
             var newItem = (global::KanbanFiles.ViewModels.ColumnViewModel)item;
             collection.Add(newItem);
         }
-        private void VectorAdd_19_Collection(object instance, object item)
+        private void VectorAdd_17_Collection(object instance, object item)
         {
             var collection = (global::System.Collections.Generic.ICollection<global::KanbanFiles.ViewModels.ColumnViewModel>)instance;
             var newItem = (global::KanbanFiles.ViewModels.ColumnViewModel)item;
             collection.Add(newItem);
         }
-        private void VectorAdd_21_ObservableCollection(object instance, object item)
+        private void VectorAdd_19_ObservableCollection(object instance, object item)
         {
             var collection = (global::System.Collections.Generic.ICollection<global::KanbanFiles.ViewModels.KanbanItemViewModel>)instance;
             var newItem = (global::KanbanFiles.ViewModels.KanbanItemViewModel)item;
             collection.Add(newItem);
         }
-        private void VectorAdd_22_Collection(object instance, object item)
+        private void VectorAdd_20_Collection(object instance, object item)
         {
             var collection = (global::System.Collections.Generic.ICollection<global::KanbanFiles.ViewModels.KanbanItemViewModel>)instance;
             var newItem = (global::KanbanFiles.ViewModels.KanbanItemViewModel)item;
             collection.Add(newItem);
         }
-        private void VectorAdd_26_ObservableCollection(object instance, object item)
+        private void VectorAdd_24_ObservableCollection(object instance, object item)
         {
             var collection = (global::System.Collections.Generic.ICollection<global::KanbanFiles.ViewModels.GroupViewModel>)instance;
             var newItem = (global::KanbanFiles.ViewModels.GroupViewModel)item;
             collection.Add(newItem);
         }
-        private void VectorAdd_27_Collection(object instance, object item)
+        private void VectorAdd_25_Collection(object instance, object item)
         {
             var collection = (global::System.Collections.Generic.ICollection<global::KanbanFiles.ViewModels.GroupViewModel>)instance;
             var newItem = (global::KanbanFiles.ViewModels.GroupViewModel)item;
             collection.Add(newItem);
         }
-        private void VectorAdd_35_IList(object instance, object item)
+        private void VectorAdd_33_IList(object instance, object item)
         {
             var collection = (global::System.Collections.Generic.ICollection<global::Microsoft.UI.Xaml.Controls.TreeViewNode>)instance;
             var newItem = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)item;
@@ -552,26 +544,10 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 15:   //  KanbanFiles.Converters.BoolToVisibilityConverter
-                userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                userType.Activator = Activate_15_BoolToVisibilityConverter;
-                userType.StaticInitializer = StaticInitializer_15_BoolToVisibilityConverter;
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 16:   //  KanbanFiles.Views.ItemDetailView
-                userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.UserControl"));
-                userType.Activator = Activate_16_ItemDetailView;
-                userType.StaticInitializer = StaticInitializer_16_ItemDetailView;
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 17:   //  KanbanFiles.ViewModels.MainViewModel
+            case 15:   //  KanbanFiles.ViewModels.MainViewModel
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("KanbanFiles.ViewModels.BaseViewModel"));
-                userType.Activator = Activate_17_MainViewModel;
-                userType.StaticInitializer = StaticInitializer_17_MainViewModel;
+                userType.Activator = Activate_15_MainViewModel;
+                userType.StaticInitializer = StaticInitializer_15_MainViewModel;
                 userType.AddMemberName("Columns");
                 userType.AddMemberName("BoardName");
                 userType.AddMemberName("IsLoaded");
@@ -581,25 +557,25 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 18:   //  System.Collections.ObjectModel.ObservableCollection`1<KanbanFiles.ViewModels.ColumnViewModel>
+            case 16:   //  System.Collections.ObjectModel.ObservableCollection`1<KanbanFiles.ViewModels.ColumnViewModel>
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.ColumnViewModel>"));
-                userType.StaticInitializer = StaticInitializer_18_ObservableCollection;
-                userType.CollectionAdd = VectorAdd_18_ObservableCollection;
+                userType.StaticInitializer = StaticInitializer_16_ObservableCollection;
+                userType.CollectionAdd = VectorAdd_16_ObservableCollection;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 19:   //  System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.ColumnViewModel>
+            case 17:   //  System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.ColumnViewModel>
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                userType.Activator = Activate_19_Collection;
-                userType.StaticInitializer = StaticInitializer_19_Collection;
-                userType.CollectionAdd = VectorAdd_19_Collection;
+                userType.Activator = Activate_17_Collection;
+                userType.StaticInitializer = StaticInitializer_17_Collection;
+                userType.CollectionAdd = VectorAdd_17_Collection;
                 xamlType = userType;
                 break;
 
-            case 20:   //  KanbanFiles.ViewModels.ColumnViewModel
+            case 18:   //  KanbanFiles.ViewModels.ColumnViewModel
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("KanbanFiles.ViewModels.BaseViewModel"));
-                userType.StaticInitializer = StaticInitializer_20_ColumnViewModel;
+                userType.StaticInitializer = StaticInitializer_18_ColumnViewModel;
                 userType.AddMemberName("Items");
                 userType.AddMemberName("UngroupedItems");
                 userType.AddMemberName("Groups");
@@ -612,59 +588,59 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 21:   //  System.Collections.ObjectModel.ObservableCollection`1<KanbanFiles.ViewModels.KanbanItemViewModel>
+            case 19:   //  System.Collections.ObjectModel.ObservableCollection`1<KanbanFiles.ViewModels.KanbanItemViewModel>
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.KanbanItemViewModel>"));
-                userType.StaticInitializer = StaticInitializer_21_ObservableCollection;
-                userType.CollectionAdd = VectorAdd_21_ObservableCollection;
+                userType.StaticInitializer = StaticInitializer_19_ObservableCollection;
+                userType.CollectionAdd = VectorAdd_19_ObservableCollection;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 22:   //  System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.KanbanItemViewModel>
+            case 20:   //  System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.KanbanItemViewModel>
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                userType.Activator = Activate_22_Collection;
-                userType.StaticInitializer = StaticInitializer_22_Collection;
-                userType.CollectionAdd = VectorAdd_22_Collection;
+                userType.Activator = Activate_20_Collection;
+                userType.StaticInitializer = StaticInitializer_20_Collection;
+                userType.CollectionAdd = VectorAdd_20_Collection;
                 xamlType = userType;
                 break;
 
-            case 23:   //  String
+            case 21:   //  String
                 xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 24:   //  System.DateTime
+            case 22:   //  System.DateTime
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.ValueType"));
-                userType.StaticInitializer = StaticInitializer_24_DateTime;
+                userType.StaticInitializer = StaticInitializer_22_DateTime;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 25:   //  CommunityToolkit.Mvvm.Input.IRelayCommand
+            case 23:   //  CommunityToolkit.Mvvm.Input.IRelayCommand
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, null);
-                userType.StaticInitializer = StaticInitializer_25_IRelayCommand;
+                userType.StaticInitializer = StaticInitializer_23_IRelayCommand;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 26:   //  System.Collections.ObjectModel.ObservableCollection`1<KanbanFiles.ViewModels.GroupViewModel>
+            case 24:   //  System.Collections.ObjectModel.ObservableCollection`1<KanbanFiles.ViewModels.GroupViewModel>
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.GroupViewModel>"));
-                userType.StaticInitializer = StaticInitializer_26_ObservableCollection;
-                userType.CollectionAdd = VectorAdd_26_ObservableCollection;
+                userType.StaticInitializer = StaticInitializer_24_ObservableCollection;
+                userType.CollectionAdd = VectorAdd_24_ObservableCollection;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
 
-            case 27:   //  System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.GroupViewModel>
+            case 25:   //  System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.GroupViewModel>
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                userType.Activator = Activate_27_Collection;
-                userType.StaticInitializer = StaticInitializer_27_Collection;
-                userType.CollectionAdd = VectorAdd_27_Collection;
+                userType.Activator = Activate_25_Collection;
+                userType.StaticInitializer = StaticInitializer_25_Collection;
+                userType.CollectionAdd = VectorAdd_25_Collection;
                 xamlType = userType;
                 break;
 
-            case 28:   //  KanbanFiles.ViewModels.GroupViewModel
+            case 26:   //  KanbanFiles.ViewModels.GroupViewModel
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("KanbanFiles.ViewModels.BaseViewModel"));
-                userType.StaticInitializer = StaticInitializer_28_GroupViewModel;
+                userType.StaticInitializer = StaticInitializer_26_GroupViewModel;
                 userType.AddMemberName("Items");
                 userType.AddMemberName("ItemCount");
                 userType.AddMemberName("Name");
@@ -676,30 +652,30 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 29:   //  Int32
+            case 27:   //  Int32
                 xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 30:   //  Microsoft.UI.Xaml.Controls.Button
+            case 28:   //  Microsoft.UI.Xaml.Controls.Button
                 xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 31:   //  KanbanFiles.Views.MainPage
+            case 29:   //  KanbanFiles.Views.MainPage
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_31_MainPage;
-                userType.StaticInitializer = StaticInitializer_31_MainPage;
+                userType.Activator = Activate_29_MainPage;
+                userType.StaticInitializer = StaticInitializer_29_MainPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 32:   //  Microsoft.UI.Xaml.Controls.Page
+            case 30:   //  Microsoft.UI.Xaml.Controls.Page
                 xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 33:   //  Microsoft.UI.Xaml.Controls.TreeViewNode
+            case 31:   //  Microsoft.UI.Xaml.Controls.TreeViewNode
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.DependencyObject"));
-                userType.Activator = Activate_33_TreeViewNode;
-                userType.StaticInitializer = StaticInitializer_33_TreeViewNode;
+                userType.Activator = Activate_31_TreeViewNode;
+                userType.StaticInitializer = StaticInitializer_31_TreeViewNode;
                 userType.AddMemberName("Children");
                 userType.AddMemberName("Content");
                 userType.AddMemberName("Depth");
@@ -711,14 +687,14 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 34:   //  Microsoft.UI.Xaml.DependencyObject
+            case 32:   //  Microsoft.UI.Xaml.DependencyObject
                 xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 35:   //  System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>
+            case 33:   //  System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, null);
-                userType.StaticInitializer = StaticInitializer_35_IList;
-                userType.CollectionAdd = VectorAdd_35_IList;
+                userType.StaticInitializer = StaticInitializer_33_IList;
+                userType.CollectionAdd = VectorAdd_33_IList;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;

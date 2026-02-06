@@ -10,7 +10,7 @@
 
     <Border
         x:Name="CardBorder"
-        Background="#F9F9F9"
+        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
         CornerRadius="8"
         Padding="12"
         CanDrag="True"
@@ -49,13 +49,14 @@
                 Text="{x:Bind ViewModel.Title, Mode=OneWay}"
                 FontSize="14"
                 FontWeight="Bold"
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                 TextWrapping="WrapWholeWords"
                 TextTrimming="CharacterEllipsis" />
 
             <TextBlock
                 Text="{x:Bind ViewModel.ContentPreview, Mode=OneWay}"
                 FontSize="12"
-                Foreground="#666666"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 MaxLines="2"
                 TextWrapping="Wrap"
                 TextTrimming="CharacterEllipsis"
@@ -64,7 +65,7 @@
             <TextBlock
                 Text="{x:Bind ViewModel.LastModifiedDisplay, Mode=OneWay}"
                 FontSize="10"
-                Foreground="#999999"
+                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                 HorizontalAlignment="Right" />
         </StackPanel>
     </Border>

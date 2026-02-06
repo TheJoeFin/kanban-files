@@ -67,6 +67,17 @@ Changes:
 - **MainViewModel.cs**: Added UI-bound collection logic in OnItemCreated (lines 269-278)
 
 
-## Issue 6 3:42 PM 2/6/2026
+## Issue 6 3:42 PM 2/6/2026 - RESOLVED 2/6/2026 9:47 PM
 - The default background color on an item is too close to the text color and the item is not readable
+
+**Resolution**: Replaced hardcoded color values with WinUI3 theme resources for proper contrast in both light and dark modes. The KanbanItemCardControl now uses:
+- Background: `CardBackgroundFillColorDefaultBrush` (replaces `#F9F9F9`)
+- Title text: `TextFillColorPrimaryBrush` (explicit foreground for title)
+- Content preview: `TextFillColorSecondaryBrush` (replaces `#666666`)
+- Last modified: `TextFillColorTertiaryBrush` (replaces `#999999`)
+
+These theme resources automatically adjust based on the system theme (light/dark mode), ensuring optimal contrast and readability in all scenarios.
+
+Changes:
+- **KanbanItemCardControl.xaml**: Updated Border Background and all TextBlock Foreground properties to use ThemeResource bindings
 

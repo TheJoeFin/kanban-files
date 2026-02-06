@@ -143,4 +143,11 @@ All 7 phases complete! KanbanFiles is feature-complete with full markdown editin
   - Solution: After creating KanbanItemViewModel, add to UngroupedItems or appropriate group's Items
   - Items now appear immediately whether created in-app or externally
   - Build successful (0 errors, 25 expected AOT warnings)
+- **Theme-Aware Colors** (2/6/2026 9:47 PM): Fixed poor contrast in Kanban item cards (Issue #6)
+  - Root cause: Hardcoded hex colors (#F9F9F9, #666666, #999999) didn't adapt to light/dark mode
+  - Solution: Replaced with WinUI3 theme resources for automatic theme adaptation
+  - Background: CardBackgroundFillColorDefaultBrush
+  - Text: TextFillColorPrimaryBrush, TextFillColorSecondaryBrush, TextFillColorTertiaryBrush
+  - Ensures proper contrast and readability in both light and dark modes
+  - Build successful (0 errors, 19 expected AOT warnings)
 

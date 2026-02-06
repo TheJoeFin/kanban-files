@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "KanbanFiles (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "KanbanFiles (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

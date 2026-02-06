@@ -93,6 +93,10 @@ namespace KanbanFiles.ViewModels
             {
                 var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService, _notificationService);
                 columnViewModel.DeleteRequested += OnColumnDeleteRequested;
+                
+                // Load groups and populate UngroupedItems/Groups collections
+                await columnViewModel.LoadItemsAsync();
+                
                 Columns.Add(columnViewModel);
             }
             

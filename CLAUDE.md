@@ -106,3 +106,9 @@ All 7 phases complete! KanbanFiles is feature-complete with full markdown editin
   - Integrated with MainViewModel and MainPage keyboard accelerators
   - Completes Phase 7.4 keyboard shortcuts requirement
   - Build successful (0 errors, 19 expected AOT warnings)
+- **CRITICAL BUG FIX** (2/6/2026 9:19 PM): Fixed columns not populating with files on board load (Issue #1)
+  - Root cause: LoadBoardAsync created ColumnViewModels but never called LoadItemsAsync()
+  - Items were added to the Items collection but UI binds to UngroupedItems/Groups which remained empty
+  - Solution: Added await columnViewModel.LoadItemsAsync() after creating each column
+  - This properly loads groups and distributes items into UngroupedItems/Groups collections for UI display
+  - Build successful (0 errors, expected AOT warnings)

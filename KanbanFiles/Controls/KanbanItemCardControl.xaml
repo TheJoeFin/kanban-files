@@ -13,6 +13,9 @@
         Background="#F9F9F9"
         CornerRadius="8"
         Padding="12"
+        CanDrag="True"
+        DragStarting="CardBorder_DragStarting"
+        DropCompleted="CardBorder_DropCompleted"
         PointerEntered="CardBorder_PointerEntered"
         PointerExited="CardBorder_PointerExited">
         

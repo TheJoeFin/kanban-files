@@ -1,7 +1,9 @@
 using KanbanFiles.ViewModels;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace KanbanFiles.Views
 {
@@ -10,6 +12,8 @@ namespace KanbanFiles.Views
     /// </summary>
     public partial class MainPage : Page
     {
+        private const string ColumnDragDataFormat = "KanbanColumnReorder";
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -102,6 +106,79 @@ namespace KanbanFiles.Views
                 XamlRoot = this.XamlRoot
             };
             await dialog.ShowAsync();
+        }
+
+        private void ColumnsItemsControl_DragOver(object sender, DragEventArgs e)
+        {
+            // Check if this is a column drag operation
+            if (e.DataView.Properties.ContainsKey(ColumnDragDataFormat))
+            {
+                e.AcceptedOperation = DataPackageOperation.Move;
+                e.DragUIOverride.IsCaptionVisible = false;
+                e.DragUIOverride.IsGlyphVisible = false;
+            }
+            else
+            {
+                e.AcceptedOperation = DataPackageOperation.None;
+            }
+        }
+
+        private async void ColumnsItemsControl_Drop(object sender, DragEventArgs e)
+        {
+            // Check if this is a column drag operation
+            if (!e.DataView.Properties.ContainsKey(ColumnDragDataFormat))
+                return;
+
+            // Get the dragged column folder name from the data package
+            var folderName = e.DataView.Properties[ColumnDragDataFormat] as string;
+            if (string.IsNullOrEmpty(folderName))
+                return;
+
+            // Find the source column
+            var sourceColumn = ViewModel.Columns.FirstOrDefault(c => 
+                Path.GetFileName(c.FolderPath) == folderName);
+            if (sourceColumn == null)
+                return;
+
+            // Calculate drop position
+            var dropPosition = e.GetPosition(ColumnsItemsControl);
+            var targetIndex = CalculateDropIndex(dropPosition);
+
+            // Don't reorder if dropping in the same position
+            var currentIndex = ViewModel.Columns.IndexOf(sourceColumn);
+            if (currentIndex == targetIndex || (currentIndex + 1 == targetIndex))
+                return;
+
+            try
+            {
+                await ViewModel.ReorderColumnAsync(sourceColumn, targetIndex);
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorDialogAsync($"Failed to reorder column: {ex.Message}");
+            }
+        }
+
+        private int CalculateDropIndex(Windows.Foundation.Point dropPosition)
+        {
+            var columnWidth = 280.0; // ColumnControl width
+            var spacing = 16.0; // StackPanel spacing
+            var margin = 16.0; // StackPanel margin
+
+            // Calculate the index based on horizontal position
+            var adjustedX = dropPosition.X - margin;
+            if (adjustedX < 0)
+                return 0;
+
+            var index = (int)((adjustedX + spacing / 2) / (columnWidth + spacing));
+            
+            // Clamp to valid range
+            if (index < 0)
+                return 0;
+            if (index > ViewModel.Columns.Count)
+                return ViewModel.Columns.Count;
+
+            return index;
         }
     }
 }

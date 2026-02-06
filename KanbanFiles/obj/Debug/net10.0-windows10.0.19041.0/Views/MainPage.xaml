@@ -54,7 +54,12 @@
                 HorizontalScrollMode="Enabled"
                 VerticalScrollMode="Disabled">
                 
-                <ItemsControl x:ConnectionId='8'                                                      >
+                <ItemsControl x:ConnectionId='8' 
+                    x:Name="ColumnsItemsControl"
+                                                                         
+                    AllowDrop="True"
+                                                           
+                                                   >
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel 

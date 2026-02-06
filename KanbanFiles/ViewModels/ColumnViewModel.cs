@@ -127,6 +127,40 @@ public partial class ColumnViewModel : BaseViewModel
         }
     }
 
+    public async Task<bool> MoveItemToColumnAsync(KanbanItemViewModel sourceItem, ColumnViewModel sourceColumnViewModel, int targetIndex)
+    {
+        try
+        {
+            // Move the physical file
+            var newFilePath = await _fileSystemService.MoveItemAsync(sourceItem.FilePath, FolderPath);
+
+            // Remove from source column
+            sourceColumnViewModel.Items.Remove(sourceItem);
+
+            // Update the item's parent column and file path
+            sourceItem.UpdateParentColumn(this);
+            sourceItem.UpdateFilePath(newFilePath);
+
+            // Insert at target index in this column
+            if (targetIndex < 0 || targetIndex > Items.Count)
+            {
+                targetIndex = Items.Count;
+            }
+            Items.Insert(targetIndex, sourceItem);
+
+            // Update item order in both columns
+            await sourceColumnViewModel.UpdateItemOrderAsync();
+            await UpdateItemOrderAsync();
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error moving item: {ex.Message}");
+            return false;
+        }
+    }
+
     private string SanitizeFolderName(string name)
     {
         var invalid = Path.GetInvalidFileNameChars();

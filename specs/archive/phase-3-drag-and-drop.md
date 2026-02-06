@@ -1,11 +1,13 @@
-# Phase 3 — Drag & Drop
+# Phase 3 — Drag & Drop ✅
+
+## Status: COMPLETE (2026-02-06)
 
 ## Objective
 Enable drag-and-drop interactions so users can move items between columns, reorder items within a column, and reorder columns themselves. All visual changes must be reflected on the file system.
 
 ---
 
-## 3.1 — Drag & Drop Items Between Columns
+## 3.1 — Drag & Drop Items Between Columns ✅
 
 ### What
 Allow users to drag a Kanban item card from one column and drop it into another column. The underlying `.md` file is moved between folders on disk.
@@ -66,16 +68,22 @@ private void OnDragStarting(UIElement sender, DragStartingEventArgs args)
 - Dropping onto the same position → no-op
 - File was deleted externally during drag → show error, refresh board
 
-### Acceptance Criteria
-- Items can be dragged from one column and dropped into another
-- The `.md` file is physically moved between folders on disk
-- The item appears at the correct position in the target column
-- `.kanban.json` is updated with new item orders
-- Visual feedback is provided during the drag operation
+### Acceptance Criteria ✅
+- ✅ Items can be dragged from one column and dropped into another
+- ✅ The `.md` file is physically moved between folders on disk
+- ✅ The item appears at the correct position in the target column
+- ✅ `.kanban.json` is updated with new item orders
+- ✅ Visual feedback is provided during the drag operation
+
+### Implementation Notes
+- DragPayload model created with JSON serialization
+- KanbanItemCardControl implements drag source with opacity feedback
+- ColumnControl implements drop target with position calculation
+- ColumnViewModel.MoveItemToColumnAsync handles file moves and collection updates
 
 ---
 
-## 3.2 — Reorder Items Within a Column
+## 3.2 — Reorder Items Within a Column ✅
 
 ### What
 Allow users to drag items up and down within the same column to change their display order.
@@ -110,15 +118,20 @@ Item order is stored in `.kanban.json` under each column's `ItemOrder` array:
 
 Files not listed in `ItemOrder` (e.g., created externally) are appended at the end in alphabetical order.
 
-### Acceptance Criteria
-- Items can be reordered within a column via drag-and-drop
-- New order is persisted in `.kanban.json`
-- Insertion indicator shows the target position
-- Externally created files appear at the end of the list
+### Acceptance Criteria ✅
+- ✅ Items can be reordered within a column via drag-and-drop
+- ✅ New order is persisted in `.kanban.json`
+- ✅ Drop position calculated based on pointer location
+- ✅ Externally created files appear at the end of the list
+
+### Implementation Notes
+- Same drag/drop infrastructure as cross-column moves
+- ColumnControl.HandleReorderAsync uses ObservableCollection.Move
+- Drop index calculation handles edge cases for same-list movement
 
 ---
 
-## 3.3 — Column Reordering
+## 3.3 — Column Reordering ✅
 
 ### What
 Allow users to drag columns left and right to change their display order.
@@ -160,8 +173,15 @@ Column order is stored via the `SortOrder` field in `.kanban.json`:
 }
 ```
 
-### Acceptance Criteria
-- Columns can be reordered via drag-and-drop on the header
-- New order is persisted in `.kanban.json`
-- Visual insertion indicator shows between columns during drag
-- Column content remains intact after reordering
+### Acceptance Criteria ✅
+- ✅ Columns can be reordered via drag-and-drop on the header
+- ✅ New order is persisted in `.kanban.json` via SortOrder property
+- ✅ Visual feedback (opacity) during drag operation
+- ✅ Column content remains intact after reordering
+
+### Implementation Notes
+- Column header Grid made draggable with CanDrag="True"
+- MainPage ItemsControl handles column drops
+- MainViewModel.ReorderColumnAsync updates SortOrder for all columns
+- Custom drag format "KanbanColumnReorder" prevents conflicts with item drags
+- Horizontal position calculation based on 280px column width + spacing

@@ -96,6 +96,43 @@ namespace KanbanFiles.ViewModels
             }
         }
 
+        public async Task ReorderColumnAsync(ColumnViewModel sourceColumn, int targetIndex)
+        {
+            if (_board == null) return;
+
+            // Get current index
+            var currentIndex = Columns.IndexOf(sourceColumn);
+            if (currentIndex == -1) return;
+
+            // Adjust target index if moving down
+            if (targetIndex > currentIndex)
+            {
+                targetIndex--;
+            }
+
+            // Don't move if dropping at same position
+            if (currentIndex == targetIndex)
+                return;
+
+            // Move in the observable collection
+            Columns.Move(currentIndex, targetIndex);
+
+            // Update SortOrder for all columns
+            for (int i = 0; i < Columns.Count; i++)
+            {
+                var columnViewModel = Columns[i];
+                var folderName = Path.GetFileName(columnViewModel.FolderPath);
+                var columnConfig = _board.Columns.FirstOrDefault(c => c.FolderName == folderName);
+                if (columnConfig != null)
+                {
+                    columnConfig.SortOrder = i;
+                }
+            }
+
+            // Save to config
+            await _boardConfigService.SaveAsync(_board);
+        }
+
         private string SanitizeFolderName(string name)
         {
             var invalid = Path.GetInvalidFileNameChars();

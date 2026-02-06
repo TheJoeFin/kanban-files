@@ -54,7 +54,12 @@
                 HorizontalScrollMode="Enabled"
                 VerticalScrollMode="Disabled">
                 
-                <ItemsControl ItemsSource="{x:Bind ViewModel.Columns, Mode=OneWay}">
+                <ItemsControl 
+                    x:Name="ColumnsItemsControl"
+                    ItemsSource="{x:Bind ViewModel.Columns, Mode=OneWay}"
+                    AllowDrop="True"
+                    DragOver="ColumnsItemsControl_DragOver"
+                    Drop="ColumnsItemsControl_Drop">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel 

@@ -7,13 +7,18 @@ public partial class KanbanItemViewModel : BaseViewModel
     private readonly FileSystemService _fileSystemService;
     private readonly BoardConfigService _boardConfigService;
     private readonly Models.Board _board;
-    private readonly ColumnViewModel _parentColumn;
+    private ColumnViewModel _parentColumn;
 
     [ObservableProperty]
     private string _contentPreview = string.Empty;
 
-    public string FilePath { get; }
-    public string FileName { get; }
+    [ObservableProperty]
+    private string _filePath = string.Empty;
+
+    [ObservableProperty]
+    private string _fileName = string.Empty;
+
+    public string SourceColumnPath => _parentColumn.FolderPath;
     public DateTime LastModified { get; }
     public string LastModifiedDisplay => LastModified.ToString("MMM d, yyyy");
 
@@ -115,6 +120,18 @@ public partial class KanbanItemViewModel : BaseViewModel
         }
 
         Title = newTitle;
+    }
+
+    public void UpdateParentColumn(ColumnViewModel newParentColumn)
+    {
+        _parentColumn = newParentColumn;
+        OnPropertyChanged(nameof(SourceColumnPath));
+    }
+
+    public void UpdateFilePath(string newFilePath)
+    {
+        FilePath = newFilePath;
+        FileName = Path.GetFileName(newFilePath);
     }
 
     private string SanitizeFileName(string fileName)

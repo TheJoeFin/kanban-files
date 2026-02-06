@@ -3,6 +3,8 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI;
 using Windows.UI;
+using Windows.ApplicationModel.DataTransfer;
+using System.Text.Json;
 
 namespace KanbanFiles.Controls;
 
@@ -24,6 +26,31 @@ public sealed partial class KanbanItemCardControl : UserControl
             viewModel.DeleteRequested += OnDeleteRequested;
             viewModel.RenameRequested += OnRenameRequested;
         }
+    }
+
+    private void CardBorder_DragStarting(UIElement sender, DragStartingEventArgs args)
+    {
+        if (ViewModel == null) return;
+
+        var dragPayload = new
+        {
+            FilePath = ViewModel.FilePath,
+            SourceColumnPath = ViewModel.SourceColumnPath,
+            FileName = ViewModel.FileName
+        };
+
+        var json = JsonSerializer.Serialize(dragPayload);
+        args.Data.SetText(json);
+        args.Data.RequestedOperation = DataPackageOperation.Move;
+
+        // Reduce opacity during drag
+        CardBorder.Opacity = 0.5;
+    }
+
+    private void CardBorder_DropCompleted(UIElement sender, DropCompletedEventArgs args)
+    {
+        // Restore opacity after drag
+        CardBorder.Opacity = 1.0;
     }
 
     private void CardBorder_PointerEntered(object sender, PointerRoutedEventArgs e)

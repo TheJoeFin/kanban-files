@@ -25,8 +25,16 @@
   - Drop index calculation based on pointer position relative to element midpoints
   - FileSystemService.MoveItemAsync handles physical file moves
   - ItemOrder/SortOrder persisted to `.kanban.json`
+- **File Watching**:
+  - FileWatcherService monitors all file system changes with two FileSystemWatcher instances
+  - Self-initiated change suppression prevents duplicate events during app operations
+  - Debouncing (300ms) for creates/changes to handle multiple events
+  - Retry logic (3 attempts, 500ms) for file access errors
+  - All events marshaled to UI thread via DispatcherQueue
+  - App.MainDispatcher static property provides DispatcherQueue access
 
 ## Completed Phases
 - ✅ Phase 1: Project scaffolding, core models, BoardConfigService, FileSystemService
 - ✅ Phase 2: Basic Board UI with full CRUD operations (create/read/update/delete columns and items)
 - ✅ Phase 3: Drag & Drop (items between/within columns, column reordering)
+- ✅ Phase 4: Two-Way File System Sync (FileWatcherService, external file monitoring)

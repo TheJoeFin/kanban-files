@@ -199,7 +199,7 @@ public class FileSystemService
         });
     }
 
-    public string GenerateContentPreview(string content)
+    public static string GenerateContentPreview(string content)
     {
         if (string.IsNullOrWhiteSpace(content))
         {

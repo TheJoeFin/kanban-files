@@ -16,7 +16,7 @@ Each phase builds on the previous ones:
    - Requires: Phase 2
    - Required by: Phase 5 (grouping with drag/drop)
 
-4. **Phase 4: Two-Way File Sync**
+4. **Phase 4: Two-Way File Sync** ✅ COMPLETE
    - Requires: Phase 2
    - Can be done in parallel with Phase 3
 
@@ -38,9 +38,9 @@ Each phase builds on the previous ones:
 1. ✅ Phase 1: Scaffolding & Core Models
 2. ✅ Phase 2: Basic Board UI
 3. ✅ Phase 3: Drag & Drop
-4. **Phase 4: Two-Way File Sync** ← NEXT
-5. Phase 5: Grouping
+4. ✅ Phase 4: Two-Way File Sync
+5. **Phase 5: Grouping** ← NEXT
 6. Phase 6: Rich Markdown Editing
 7. Phase 7: Polish & Edge Cases
 
-**Completed:** 3/7 phases (42.9%)
+**Completed:** 4/7 phases (57.1%)

@@ -7,6 +7,7 @@ namespace KanbanFiles.ViewModels
     {
         private readonly BoardConfigService _boardConfigService;
         private readonly FileSystemService _fileSystemService;
+        private FileWatcherService? _fileWatcherService;
         private Models.Board? _board;
 
         public MainViewModel()
@@ -36,13 +37,31 @@ namespace KanbanFiles.ViewModels
 
         public async Task LoadBoardAsync(string folderPath)
         {
+            // Stop any existing file watcher
+            _fileWatcherService?.Dispose();
+            
             _board = await _boardConfigService.LoadOrInitializeAsync(folderPath);
+
+            // Start file watcher first
+            var dispatcher = App.MainDispatcher;
+            if (dispatcher != null)
+            {
+                _fileWatcherService = new FileWatcherService(_board.RootPath, dispatcher);
+                _fileWatcherService.ItemCreated += OnItemCreated;
+                _fileWatcherService.ItemDeleted += OnItemDeleted;
+                _fileWatcherService.ItemRenamed += OnItemRenamed;
+                _fileWatcherService.ItemContentChanged += OnItemContentChanged;
+                _fileWatcherService.ColumnCreated += OnColumnCreated;
+                _fileWatcherService.ColumnDeleted += OnColumnDeleted;
+                _fileWatcherService.Start();
+            }
+
             var columns = await _fileSystemService.EnumerateColumnsAsync(_board);
             
             Columns.Clear();
             foreach (var column in columns)
             {
-                var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _board);
+                var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _board, _fileWatcherService);
                 columnViewModel.DeleteRequested += OnColumnDeleteRequested;
                 Columns.Add(columnViewModel);
             }
@@ -62,6 +81,11 @@ namespace KanbanFiles.ViewModels
             if (_board == null) return;
 
             var sanitizedName = SanitizeFolderName(columnName);
+            var newFolderPath = Path.Combine(_board.RootPath, sanitizedName);
+
+            // Suppress the folder watcher event
+            _fileWatcherService?.SuppressNextEvent(newFolderPath);
+
             await _fileSystemService.CreateColumnFolderAsync(_board.RootPath, sanitizedName);
 
             var newColumnConfig = new Models.ColumnConfig
@@ -78,11 +102,11 @@ namespace KanbanFiles.ViewModels
             var column = new Models.Column
             {
                 Name = columnName,
-                FolderPath = Path.Combine(_board.RootPath, sanitizedName),
+                FolderPath = newFolderPath,
                 SortOrder = newColumnConfig.SortOrder
             };
 
-            var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _board);
+            var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _board, _fileWatcherService);
             columnViewModel.DeleteRequested += OnColumnDeleteRequested;
             Columns.Add(columnViewModel);
         }
@@ -138,6 +162,169 @@ namespace KanbanFiles.ViewModels
             var invalid = Path.GetInvalidFileNameChars();
             var sanitized = string.Join("", name.Split(invalid, StringSplitOptions.RemoveEmptyEntries));
             return string.IsNullOrWhiteSpace(sanitized) ? "New Column" : sanitized;
+        }
+
+        private async void OnItemCreated(object? sender, ItemChangedEventArgs e)
+        {
+            if (_board == null) return;
+
+            // Find the column for this item
+            var columnPath = Path.GetDirectoryName(e.FilePath);
+            if (columnPath == null) return;
+
+            var columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
+            if (columnViewModel == null) return;
+
+            // Read the item content
+            var content = await _fileSystemService.ReadItemContentAsync(e.FilePath);
+            var fileName = Path.GetFileName(e.FilePath);
+            var title = Path.GetFileNameWithoutExtension(fileName);
+            var preview = FileSystemService.GenerateContentPreview(content);
+
+            // Create the item model
+            var itemModel = new Models.KanbanItem
+            {
+                Title = title,
+                ContentPreview = preview,
+                FilePath = e.FilePath,
+                FileName = fileName,
+                FullContent = content,
+                LastModified = File.GetLastWriteTime(e.FilePath)
+            };
+
+            // Create the item viewmodel
+            var item = new KanbanItemViewModel(itemModel, _fileSystemService, _boardConfigService, _board, columnViewModel, _fileWatcherService);
+
+            // Add to column
+            columnViewModel.Items.Add(item);
+
+            // Update ItemOrder in config
+            var folderName = Path.GetFileName(columnPath);
+            var columnConfig = _board.Columns.FirstOrDefault(c => c.FolderName == folderName);
+            if (columnConfig != null)
+            {
+                columnConfig.ItemOrder.Add(fileName);
+                await _boardConfigService.SaveAsync(_board);
+            }
+        }
+
+        private async void OnItemDeleted(object? sender, ItemChangedEventArgs e)
+        {
+            if (_board == null) return;
+
+            // Find the column and item
+            var columnPath = Path.GetDirectoryName(e.FilePath);
+            if (columnPath == null) return;
+
+            var columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
+            if (columnViewModel == null) return;
+
+            var fileName = Path.GetFileName(e.FilePath);
+            var item = columnViewModel.Items.FirstOrDefault(i => i.FileName == fileName);
+            if (item != null)
+            {
+                columnViewModel.Items.Remove(item);
+
+                // Update ItemOrder in config
+                var folderName = Path.GetFileName(columnPath);
+                var columnConfig = _board.Columns.FirstOrDefault(c => c.FolderName == folderName);
+                if (columnConfig != null)
+                {
+                    columnConfig.ItemOrder.Remove(fileName);
+                    await _boardConfigService.SaveAsync(_board);
+                }
+            }
+        }
+
+        private async void OnItemRenamed(object? sender, ItemRenamedEventArgs e)
+        {
+            if (_board == null) return;
+
+            var oldFileName = Path.GetFileName(e.OldFilePath);
+            var newFileName = Path.GetFileName(e.NewFilePath);
+            var oldExt = Path.GetExtension(e.OldFilePath);
+            var newExt = Path.GetExtension(e.NewFilePath);
+
+            // Handle edge case: non-.md → .md (treat as create)
+            if (oldExt != ".md" && newExt == ".md")
+            {
+                OnItemCreated(sender, new ItemChangedEventArgs(e.NewFilePath));
+                return;
+            }
+
+            // Handle edge case: .md → non-.md (treat as delete)
+            if (oldExt == ".md" && newExt != ".md")
+            {
+                OnItemDeleted(sender, new ItemChangedEventArgs(e.OldFilePath));
+                return;
+            }
+
+            // Normal rename within .md files
+            var columnPath = Path.GetDirectoryName(e.NewFilePath);
+            if (columnPath == null) return;
+
+            var columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
+            if (columnViewModel == null) return;
+
+            var item = columnViewModel.Items.FirstOrDefault(i => i.FileName == oldFileName);
+            if (item != null)
+            {
+                item.FileName = newFileName;
+                item.Title = Path.GetFileNameWithoutExtension(newFileName);
+                item.FilePath = e.NewFilePath;
+
+                // Update ItemOrder in config
+                var folderName = Path.GetFileName(columnPath);
+                var columnConfig = _board.Columns.FirstOrDefault(c => c.FolderName == folderName);
+                if (columnConfig != null)
+                {
+                    var index = columnConfig.ItemOrder.IndexOf(oldFileName);
+                    if (index >= 0)
+                    {
+                        columnConfig.ItemOrder[index] = newFileName;
+                        await _boardConfigService.SaveAsync(_board);
+                    }
+                }
+            }
+        }
+
+        private async void OnItemContentChanged(object? sender, ItemChangedEventArgs e)
+        {
+            if (_board == null) return;
+
+            // Find the column and item
+            var columnPath = Path.GetDirectoryName(e.FilePath);
+            if (columnPath == null) return;
+
+            var columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
+            if (columnViewModel == null) return;
+
+            var fileName = Path.GetFileName(e.FilePath);
+            var item = columnViewModel.Items.FirstOrDefault(i => i.FileName == fileName);
+            if (item != null)
+            {
+                // Re-read content
+                var content = await _fileSystemService.ReadItemContentAsync(e.FilePath);
+                item.FullContent = content;
+                item.ContentPreview = FileSystemService.GenerateContentPreview(content);
+                item.LastModified = File.GetLastWriteTime(e.FilePath);
+            }
+        }
+
+        private void OnColumnCreated(object? sender, ColumnChangedEventArgs e)
+        {
+            // For now, just log - full implementation would reload board
+            // This is intentionally minimal as user-initiated column creation is already handled
+        }
+
+        private void OnColumnDeleted(object? sender, ColumnChangedEventArgs e)
+        {
+            // Find and remove the column
+            var columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == e.FolderPath);
+            if (columnViewModel != null)
+            {
+                Columns.Remove(columnViewModel);
+            }
         }
     }
 }

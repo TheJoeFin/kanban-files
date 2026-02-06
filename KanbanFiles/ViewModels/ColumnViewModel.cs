@@ -9,6 +9,7 @@ public partial class ColumnViewModel : BaseViewModel
     private readonly FileSystemService _fileSystemService;
     private readonly BoardConfigService _boardConfigService;
     private readonly Board _board;
+    private readonly FileWatcherService? _fileWatcherService;
 
     [ObservableProperty]
     private string _name = string.Empty;
@@ -21,17 +22,18 @@ public partial class ColumnViewModel : BaseViewModel
     public event EventHandler? AddItemRequested;
     public event EventHandler<string>? RenameRequested;
 
-    public ColumnViewModel(Column column, FileSystemService fileSystemService, BoardConfigService boardConfigService, Board board)
+    public ColumnViewModel(Column column, FileSystemService fileSystemService, BoardConfigService boardConfigService, Board board, FileWatcherService? fileWatcherService = null)
     {
         Name = column.Name;
         FolderPath = column.FolderPath;
         _fileSystemService = fileSystemService;
         _boardConfigService = boardConfigService;
         _board = board;
+        _fileWatcherService = fileWatcherService;
 
         foreach (var item in column.Items)
         {
-            var itemViewModel = new KanbanItemViewModel(item, _fileSystemService, _boardConfigService, _board, this);
+            var itemViewModel = new KanbanItemViewModel(item, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService);
             Items.Add(itemViewModel);
         }
     }
@@ -47,6 +49,9 @@ public partial class ColumnViewModel : BaseViewModel
         var filePath = await _fileSystemService.CreateItemAsync(FolderPath, title);
         var fileName = Path.GetFileName(filePath);
 
+        // Suppress the file watcher event
+        _fileWatcherService?.SuppressNextEvent(filePath);
+
         // Update item order in config
         var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == FolderPath);
         if (columnConfig != null)
@@ -60,7 +65,7 @@ public partial class ColumnViewModel : BaseViewModel
         var newItem = items.FirstOrDefault(i => i.FileName == fileName);
         if (newItem != null)
         {
-            var itemViewModel = new KanbanItemViewModel(newItem, _fileSystemService, _boardConfigService, _board, this);
+            var itemViewModel = new KanbanItemViewModel(newItem, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService);
             Items.Add(itemViewModel);
         }
     }
@@ -76,6 +81,10 @@ public partial class ColumnViewModel : BaseViewModel
         var sanitizedName = SanitizeFolderName(newName);
         var oldFolderPath = FolderPath;
         var newFolderPath = Path.Combine(Path.GetDirectoryName(FolderPath)!, sanitizedName);
+
+        // Suppress the folder watcher events
+        _fileWatcherService?.SuppressNextEvent(oldFolderPath);
+        _fileWatcherService?.SuppressNextEvent(newFolderPath);
 
         // Rename folder
         await Task.Run(() => Directory.Move(oldFolderPath, newFolderPath));
@@ -100,6 +109,9 @@ public partial class ColumnViewModel : BaseViewModel
 
     public async Task DeleteColumnAsync()
     {
+        // Suppress the folder watcher event
+        _fileWatcherService?.SuppressNextEvent(FolderPath);
+
         // Delete folder
         await _fileSystemService.DeleteColumnFolderAsync(FolderPath);
 
@@ -131,6 +143,11 @@ public partial class ColumnViewModel : BaseViewModel
     {
         try
         {
+            // Suppress the file watcher events (old and new paths)
+            _fileWatcherService?.SuppressNextEvent(sourceItem.FilePath);
+            var expectedNewPath = Path.Combine(FolderPath, sourceItem.FileName);
+            _fileWatcherService?.SuppressNextEvent(expectedNewPath);
+
             // Move the physical file
             var newFilePath = await _fileSystemService.MoveItemAsync(sourceItem.FilePath, FolderPath);
 

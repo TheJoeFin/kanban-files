@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.UI.Dispatching;
 
 namespace KanbanFiles
 {
@@ -10,6 +11,7 @@ namespace KanbanFiles
         private Window? window;
 
         public static Window? MainWindow { get; private set; }
+        public static DispatcherQueue? MainDispatcher => MainWindow?.DispatcherQueue;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code

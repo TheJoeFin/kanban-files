@@ -1,7 +1,67 @@
 # Phase 4 — Two-Way File System Sync
 
+## Status: ✅ COMPLETE
+
 ## Objective
 Implement real-time synchronization between the file system and the app UI. External changes (files created, deleted, renamed, or modified outside the app) are reflected in the board immediately, and all app-initiated changes are already written to disk (from previous phases).
+
+---
+
+## Implementation Summary
+
+### ✅ 4.1 — FileWatcherService
+**Status**: Complete
+
+Implemented `Services/FileWatcherService.cs` with:
+- Two separate `FileSystemWatcher` instances: one for folders (root), one for files (all subdirectories)
+- Self-initiated change suppression via `SuppressNextEvent()` and `HashSet<string>`
+- DispatcherQueue integration for UI thread marshaling
+- Events: ItemCreated, ItemDeleted, ItemRenamed, ItemContentChanged, ColumnCreated, ColumnDeleted
+- Proper disposal and lifecycle management
+
+**Note**: Simplified architecture uses two watchers instead of per-column watchers (one for root folders, one for all .md files recursively).
+
+### ✅ 4.2 — Sync External File Creates
+**Status**: Complete
+
+- Creates new `KanbanItemViewModel` when .md file is created externally
+- Includes debouncing (300ms) and retry logic (3 attempts, 500ms apart)
+- Updates ItemOrder in `.kanban.json`
+- Properly marshals to UI thread
+
+### ✅ 4.3 — Sync External File Deletes
+**Status**: Complete
+
+- Removes `KanbanItemViewModel` from column when file is deleted
+- Updates ItemOrder in `.kanban.json`
+- Handles suppression for app-initiated deletes
+
+### ✅ 4.4 — Sync External File Renames
+**Status**: Complete
+
+- Updates item title, filename, and file path on external renames
+- Handles edge cases: non-.md → .md (create), .md → non-.md (delete)
+- Updates ItemOrder in `.kanban.json`
+
+### ✅ 4.5 — Sync External Content Changes
+**Status**: Complete
+
+- Re-reads file content on external modifications
+- Updates ContentPreview and FullContent properties
+- Includes debouncing (300ms) to handle multiple change events
+- Retry logic for locked files
+
+### ✅ 4.6 — Debouncing and Thread Marshaling
+**Status**: Complete
+
+- Per-file debounce using `ConcurrentDictionary<string, CancellationTokenSource>`
+- 300ms debounce delay for creates and changes
+- All events marshaled to UI thread via `DispatcherQueue.TryEnqueue()`
+
+### ⚠️ 4.7 — Conflict Handling
+**Status**: Not Implemented (Deferred to Phase 6)
+
+Conflict handling (info bar in detail modal) is deferred to Phase 6 when the rich markdown editor is implemented. Currently, external changes update the card silently, which is safe since there's no in-app editing yet.
 
 ---
 

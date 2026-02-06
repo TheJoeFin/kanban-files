@@ -8,6 +8,7 @@ public partial class KanbanItemViewModel : BaseViewModel
     private readonly BoardConfigService _boardConfigService;
     private readonly Models.Board _board;
     private ColumnViewModel _parentColumn;
+    private readonly FileWatcherService? _fileWatcherService;
 
     [ObservableProperty]
     private string _contentPreview = string.Empty;
@@ -18,24 +19,29 @@ public partial class KanbanItemViewModel : BaseViewModel
     [ObservableProperty]
     private string _fileName = string.Empty;
 
+    [ObservableProperty]
+    private string _fullContent = string.Empty;
+
     public string SourceColumnPath => _parentColumn.FolderPath;
-    public DateTime LastModified { get; }
+    public DateTime LastModified { get; set; }
     public string LastModifiedDisplay => LastModified.ToString("MMM d, yyyy");
 
     public event EventHandler? DeleteRequested;
     public event EventHandler? RenameRequested;
 
-    public KanbanItemViewModel(Models.KanbanItem item, FileSystemService fileSystemService, BoardConfigService boardConfigService, Models.Board board, ColumnViewModel parentColumn)
+    public KanbanItemViewModel(Models.KanbanItem item, FileSystemService fileSystemService, BoardConfigService boardConfigService, Models.Board board, ColumnViewModel parentColumn, FileWatcherService? fileWatcherService = null)
     {
         Title = item.Title;
         ContentPreview = item.ContentPreview;
         FilePath = item.FilePath;
         FileName = item.FileName;
+        FullContent = item.FullContent;
         LastModified = item.LastModified;
         _fileSystemService = fileSystemService;
         _boardConfigService = boardConfigService;
         _board = board;
         _parentColumn = parentColumn;
+        _fileWatcherService = fileWatcherService;
     }
 
     [RelayCommand]
@@ -52,6 +58,9 @@ public partial class KanbanItemViewModel : BaseViewModel
 
     public async Task DeleteAsync()
     {
+        // Suppress the file watcher event
+        _fileWatcherService?.SuppressNextEvent(FilePath);
+
         await _fileSystemService.DeleteItemAsync(FilePath);
 
         // Update item order in config
@@ -96,6 +105,18 @@ public partial class KanbanItemViewModel : BaseViewModel
         {
             lines[0] = $"# {newTitle}";
             content = string.Join(Environment.NewLine, lines);
+        }
+
+        // Suppress the file watcher events
+        _fileWatcherService?.SuppressNextEvent(newFilePath); // Write
+        if (newFilePath != FilePath)
+        {
+            _fileWatcherService?.SuppressNextEvent(FilePath); // Delete old
+            _fileWatcherService?.SuppressNextEvent(newFilePath); // Rename detection
+        }
+        else
+        {
+            _fileWatcherService?.SuppressNextEvent(FilePath); // Content change
         }
 
         // Write to new file

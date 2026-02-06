@@ -24,20 +24,31 @@ namespace KanbanFiles.Views
 
         private async void OnOpenFolderRequested(object? sender, EventArgs e)
         {
-            var folderPicker = new FolderPicker
+            try
             {
-                SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-                ViewMode = PickerViewMode.List
-            };
-            folderPicker.FileTypeFilter.Add("*");
+                var folderPicker = new FolderPicker
+                {
+                    SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+                    ViewMode = PickerViewMode.List
+                };
+                folderPicker.FileTypeFilter.Add("*");
 
-            var hwnd = WindowNative.GetWindowHandle(App.MainWindow);
-            InitializeWithWindow.Initialize(folderPicker, hwnd);
+                var hwnd = WindowNative.GetWindowHandle(App.MainWindow);
+                InitializeWithWindow.Initialize(folderPicker, hwnd);
 
-            var folder = await folderPicker.PickSingleFolderAsync();
-            if (folder != null)
+                var folder = await folderPicker.PickSingleFolderAsync();
+                if (folder != null)
+                {
+                    await ViewModel.LoadBoardAsync(folder.Path);
+                }
+            }
+            catch (Exception ex)
             {
-                await ViewModel.LoadBoardAsync(folder.Path);
+                ViewModel.ShowNotification(
+                    "Error Opening Folder",
+                    $"An unexpected error occurred: {ex.Message}",
+                    InfoBarSeverity.Error);
+                System.Diagnostics.Debug.WriteLine($"Error in OnOpenFolderRequested: {ex}");
             }
         }
 
@@ -211,19 +222,30 @@ namespace KanbanFiles.Views
         private async void Refresh_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
         {
             args.Handled = true;
-            if (!string.IsNullOrEmpty(ViewModel.BoardName) && ViewModel.Columns.Count > 0)
+            try
             {
-                // Get the current folder path from the first column
-                var firstColumn = ViewModel.Columns.FirstOrDefault();
-                if (firstColumn != null)
+                if (!string.IsNullOrEmpty(ViewModel.BoardName) && ViewModel.Columns.Count > 0)
                 {
-                    var boardPath = Path.GetDirectoryName(firstColumn.FolderPath);
-                    if (boardPath != null)
+                    // Get the current folder path from the first column
+                    var firstColumn = ViewModel.Columns.FirstOrDefault();
+                    if (firstColumn != null)
                     {
-                        await ViewModel.LoadBoardAsync(boardPath);
-                        ViewModel.ShowNotification("Refreshed", "Board has been reloaded from disk.", Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
+                        var boardPath = Path.GetDirectoryName(firstColumn.FolderPath);
+                        if (boardPath != null)
+                        {
+                            await ViewModel.LoadBoardAsync(boardPath);
+                            ViewModel.ShowNotification("Refreshed", "Board has been reloaded from disk.", Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                ViewModel.ShowNotification(
+                    "Error Refreshing",
+                    $"Failed to refresh board: {ex.Message}",
+                    Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
+                System.Diagnostics.Debug.WriteLine($"Error in Refresh_Invoked: {ex}");
             }
         }
         
@@ -253,23 +275,45 @@ namespace KanbanFiles.Views
         
         private async void RecentFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.CommandParameter is string folderPath)
+            try
             {
-                if (ViewModel.OpenRecentFolderCommand.CanExecute(folderPath))
+                if (sender is Button button && button.CommandParameter is string folderPath)
                 {
-                    await ViewModel.OpenRecentFolderCommand.ExecuteAsync(folderPath);
+                    if (ViewModel.OpenRecentFolderCommand.CanExecute(folderPath))
+                    {
+                        await ViewModel.OpenRecentFolderCommand.ExecuteAsync(folderPath);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                ViewModel.ShowNotification(
+                    "Error Opening Folder",
+                    $"An unexpected error occurred: {ex.Message}",
+                    InfoBarSeverity.Error);
+                System.Diagnostics.Debug.WriteLine($"Error in RecentFolderButton_Click: {ex}");
             }
         }
         
         private async void RemoveRecentFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.CommandParameter is string folderPath)
+            try
             {
-                if (ViewModel.RemoveRecentFolderCommand.CanExecute(folderPath))
+                if (sender is Button button && button.CommandParameter is string folderPath)
                 {
-                    await ViewModel.RemoveRecentFolderCommand.ExecuteAsync(folderPath);
+                    if (ViewModel.RemoveRecentFolderCommand.CanExecute(folderPath))
+                    {
+                        await ViewModel.RemoveRecentFolderCommand.ExecuteAsync(folderPath);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                ViewModel.ShowNotification(
+                    "Error Removing Folder",
+                    $"An unexpected error occurred: {ex.Message}",
+                    InfoBarSeverity.Error);
+                System.Diagnostics.Debug.WriteLine($"Error in RemoveRecentFolderButton_Click: {ex}");
             }
         }
     }

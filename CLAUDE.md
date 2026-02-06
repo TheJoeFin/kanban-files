@@ -93,6 +93,17 @@
 All 7 phases complete! KanbanFiles is feature-complete with full markdown editing capabilities, comprehensive error handling with proper logging, and zero remaining TODOs.
 
 ## Post-Launch Improvements
+- **Async Void Error Handling** (2/6/2026 10:28 PM): Fixed potential crashes from unhandled exceptions (Issue #12)
+  - Root cause: Four async void event handlers in MainPage.xaml.cs lacked try-catch blocks
+  - Async void methods can crash the app when exceptions are thrown (no caller to catch them)
+  - Solution: Added comprehensive try-catch blocks to all async void handlers
+    - OnOpenFolderRequested: Wraps FolderPicker and LoadBoardAsync
+    - Refresh_Invoked: Wraps board reload operation
+    - RecentFolderButton_Click: Wraps OpenRecentFolderCommand execution
+    - RemoveRecentFolderButton_Click: Wraps RemoveRecentFolderCommand execution
+  - All exceptions now show user-friendly InfoBar notifications and log to Debug output
+  - App handles errors gracefully instead of crashing
+  - Build successful (0 errors, 19 expected AOT warnings)
 - **Subtle Notifications** (2/6/2026 10:19 PM): Removed disruptive "Configuration Updated" notification (Issue #10)
   - Root cause: `.kanban.json` external changes triggered InfoBar notification
   - Solution: Removed ShowNotification() call - automatic board reload provides sufficient feedback

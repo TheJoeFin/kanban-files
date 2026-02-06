@@ -179,3 +179,36 @@ All drag-drop scenarios now work correctly:
 - ✅ Drop into populated groups
 - ✅ No 🚫 cursor appearing during valid drops
 
+
+## Issue 12 4:26 PM 2/6/2026 - RESOLVED 2/6/2026 10:28 PM
+- if I cancel the folder open the app crashes
+
+**Resolution**: Fixed by adding comprehensive try-catch blocks to all async void event handlers that were missing error handling. The issue wasn't specifically about canceling the folder picker (which was already handled with a null check), but rather unhandled exceptions in async void methods that could crash the app.
+
+**Root Causes**:
+1. Four async void event handlers lacked try-catch blocks
+2. Exceptions in async void methods crash the app since there's no caller to catch them
+3. Any error during LoadBoardAsync or Command execution would terminate the app
+
+**Fixed Handlers**:
+- `OnOpenFolderRequested`: Added try-catch around FolderPicker and LoadBoardAsync
+- `Refresh_Invoked`: Added try-catch around refresh operation
+- `RecentFolderButton_Click`: Added try-catch around ExecuteAsync
+- `RemoveRecentFolderButton_Click`: Added try-catch around ExecuteAsync
+
+**Changes**:
+- **MainPage.xaml.cs** (lines 25-51, 222-247, 254-278): Added comprehensive error handling with user-friendly notifications and diagnostic logging
+- All exceptions now show InfoBar notifications with error details
+- All exceptions are logged to Debug output for diagnostics
+- App now gracefully handles errors instead of crashing
+
+Build successful (0 errors, 19 expected AOT warnings)
+
+
+## Issue 13 4:26 PM 2/6/2026
+- The starting size window is too small
+
+
+## Issue 14 4:27 PM 2/6/2026
+- interesting drag behavior, it is working now, but only when the drag happens over another item, if the drag is over the column the 🚫 still appears
+- Also to move a file you have to drag it twice, that is not right, it should be just the once

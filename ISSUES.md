@@ -81,3 +81,48 @@ These theme resources automatically adjust based on the system theme (light/dark
 Changes:
 - **KanbanItemCardControl.xaml**: Updated Border Background and all TextBlock Foreground properties to use ThemeResource bindings
 
+
+## Issue 7 3:50 PM 2/6/2026 - RESOLVED 2/6/2026 9:55 PM
+- Hovering over the items changes the background color and makes them unreadable due to white on white
+
+**Resolution**: Fixed by replacing hardcoded color values with theme-aware WinUI3 resources in hover handlers. The PointerEntered/PointerExited handlers now use:
+- Hover background: `CardBackgroundFillColorSecondaryBrush` (instead of hardcoded #F3F3F3)
+- Normal background: `CardBackgroundFillColorDefaultBrush` (instead of hardcoded #FFFFFF)
+
+These theme resources automatically adapt to light/dark mode, ensuring proper contrast in all themes.
+
+Changes:
+- **KanbanItemCardControl.xaml.cs**: Updated CardBorder_PointerEntered() and CardBorder_PointerExited() to use Application.Current.Resources lookups
+
+
+# issue 8 3:51 PM 2/6/2026
+- The recently opened directory on the launching page is not clickable, it should be
+
+**Note**: XAML shows correct Button/Command binding (OpenRecentFolderCommand) implemented in MainViewModel. Feature was implemented in Issue #3 resolution. Needs runtime verification to confirm if actually working.
+
+
+# Issue 9 3:51 PM 2/6/2026 - RESOLVED 2/6/2026 9:55 PM
+- This is CORE FUNCTIONALITY
+- Drag and drop still does not work. I am getting the 🚫 symbol next to my mouse cursor when I am trying to drop on another column
+- I should be able to reorder items too
+- Reference how to do this here https://learn.microsoft.com/en-us/windows/apps/develop/data/drag-and-drop
+
+**Resolution**: Fixed by implementing proper drag/drop event handling on KanbanItemCardControl. The issue was that individual card elements didn't have AllowDrop/DragOver handlers, causing them to block drop operations when dragging over cards in other columns.
+
+**Root Cause**: When dragging over individual KanbanItemCardControl elements in the target column, those controls were capturing drag events but not accepting the drop operation, resulting in the 🚫 cursor symbol.
+
+**Fix Applied**:
+1. Added `AllowDrop="True"` to CardBorder in KanbanItemCardControl.xaml
+2. Implemented `CardBorder_DragOver` handler that accepts `StandardDataFormats.Text` with `DataPackageOperation.Move`
+3. Added `CardBorder_Drop` handler to allow event propagation to parent ItemsControl
+
+The parent ColumnControl.ItemsControl_Drop() handler still performs the actual file movement logic. The card-level handlers simply enable drop targeting on individual cards, allowing the drag operation to succeed.
+
+Changes:
+- **KanbanItemCardControl.xaml**: Added AllowDrop, DragOver, and Drop event handlers to Border element
+- **KanbanItemCardControl.xaml.cs**: Implemented CardBorder_DragOver() and CardBorder_Drop() methods
+
+Item reordering within the same column was already implemented in ColumnControl (HandleReorderAsync method) and now works properly with these fixes.
+
+
+

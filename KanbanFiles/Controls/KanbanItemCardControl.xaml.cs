@@ -57,12 +57,33 @@ public sealed partial class KanbanItemCardControl : UserControl
         CardBorder.Opacity = 1.0;
     }
 
+    private void CardBorder_DragOver(object sender, DragEventArgs e)
+    {
+        // Allow text data (our kanban item drag payload)
+        if (e.DataView.Contains(StandardDataFormats.Text))
+        {
+            e.AcceptedOperation = DataPackageOperation.Move;
+            e.DragUIOverride.Caption = "Move item";
+        }
+        else
+        {
+            e.AcceptedOperation = DataPackageOperation.None;
+        }
+    }
+
+    private void CardBorder_Drop(object sender, DragEventArgs e)
+    {
+        // Let the parent ItemsControl handle the actual drop logic
+        // This handler just allows the drop to propagate
+        // The ColumnControl will handle the actual file movement
+    }
+
     private void CardBorder_PointerEntered(object sender, PointerRoutedEventArgs e)
     {
         if (sender is Border border)
         {
-            border.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Color.FromArgb(255, 243, 243, 243));
+            // Use theme-aware hover background
+            border.Background = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["CardBackgroundFillColorSecondaryBrush"];
         }
     }
 
@@ -70,8 +91,8 @@ public sealed partial class KanbanItemCardControl : UserControl
     {
         if (sender is Border border)
         {
-            border.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Color.FromArgb(255, 255, 255, 255));
+            // Restore original theme-aware background
+            border.Background = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["CardBackgroundFillColorDefaultBrush"];
         }
     }
 

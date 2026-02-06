@@ -14,7 +14,10 @@
         CornerRadius="8"
         Padding="12"
         CanDrag="True"
+        AllowDrop="True"
         DragStarting="CardBorder_DragStarting"
+        DragOver="CardBorder_DragOver"
+        Drop="CardBorder_Drop"
         DropCompleted="CardBorder_DropCompleted"
         PointerEntered="CardBorder_PointerEntered"
         PointerExited="CardBorder_PointerExited">

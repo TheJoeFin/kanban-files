@@ -150,4 +150,22 @@ All 7 phases complete! KanbanFiles is feature-complete with full markdown editin
   - Text: TextFillColorPrimaryBrush, TextFillColorSecondaryBrush, TextFillColorTertiaryBrush
   - Ensures proper contrast and readability in both light and dark modes
   - Build successful (0 errors, 19 expected AOT warnings)
+- **Hover Background Fix** (2/6/2026 9:55 PM): Fixed white-on-white text during hover (Issue #7)
+  - Root cause: PointerExited handler hardcoded white background (#FFFFFF), causing text to become unreadable
+  - Solution: Use theme-aware resources for both hover and normal states
+  - Hover: CardBackgroundFillColorSecondaryBrush, Normal: CardBackgroundFillColorDefaultBrush
+  - Automatic theme adaptation ensures proper contrast in light/dark modes
+  - Changes: KanbanItemCardControl.xaml.cs (CardBorder_PointerEntered/Exited methods)
+  - Build successful (0 errors, 19 expected AOT warnings)
+- **CRITICAL BUG FIX** (2/6/2026 9:55 PM): Fixed drag/drop showing 🚫 cursor (Issue #9)
+  - Root cause: Individual KanbanItemCardControl elements lacked AllowDrop/DragOver handlers
+  - Cards captured drag events but didn't accept drops, blocking parent ItemsControl handlers
+  - Solution: Added card-level drag/drop event handlers to enable drop targeting
+    - XAML: Added AllowDrop="True", DragOver, and Drop handlers to CardBorder
+    - Code: Implemented CardBorder_DragOver (accepts Move operation) and CardBorder_Drop (propagates to parent)
+  - Parent ColumnControl still handles actual file movement logic
+  - Item reordering within columns now works (was already implemented, just needed proper event handling)
+  - Changes: KanbanItemCardControl.xaml (added handlers), KanbanItemCardControl.xaml.cs (implemented methods)
+  - Build successful (0 errors, 19 expected AOT warnings)
+
 

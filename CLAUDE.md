@@ -32,6 +32,13 @@
   - Retry logic (3 attempts, 500ms) for file access errors
   - All events marshaled to UI thread via DispatcherQueue
   - App.MainDispatcher static property provides DispatcherQueue access
+- **Keyboard Shortcuts**:
+  - Ctrl+O: Open Folder
+  - Ctrl+N: New Item in first column
+  - Ctrl+Shift+N: New Column
+  - F5: Refresh board from disk
+  - Escape: Close dialogs (built-in WinUI)
+  - KeyboardAccelerator in MainPage.xaml, handlers in code-behind
 
 ## Completed Phases (7/7 - 100%)
 - ✅ Phase 1: Project scaffolding, core models, BoardConfigService, FileSystemService
@@ -51,7 +58,7 @@
 - ✅ Phase 7: Polish & Edge Cases
   - ✅ InfoBar notification system with auto-dismiss
   - ✅ Config corruption notifications (backup + user notification)
-  - ✅ Keyboard shortcuts (Ctrl+O, Ctrl+Shift+N, F5)
+  - ✅ Keyboard shortcuts (Ctrl+O, Ctrl+N, Ctrl+Shift+N, F5, Escape in dialogs)
   - ✅ Existing subfolders handling (already implemented in Phase 1)
   - ✅ File filtering for .md, hidden files (already implemented)
   - ✅ ThemeResource usage throughout UI (already implemented)

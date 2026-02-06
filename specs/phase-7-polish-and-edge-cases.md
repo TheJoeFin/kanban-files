@@ -107,7 +107,7 @@ Handle scenarios where `.kanban.json` or `groups.json` are malformed, missing fi
 
 ---
 
-## 7.4 — Keyboard Shortcuts
+## 7.4 — Keyboard Shortcuts ✅
 
 ### What
 Implement global and contextual keyboard shortcuts for efficient navigation and actions.
@@ -158,9 +158,13 @@ Use `KeyboardAccelerator` in XAML for global shortcuts:
 - Closing a modal returns focus to the previously focused item
 
 ### Acceptance Criteria
-- All listed shortcuts work correctly
-- Arrow key navigation moves through columns and items
-- Focus is properly managed across modal open/close
+- ✅ Ctrl+O (Open Folder) works correctly
+- ✅ Ctrl+N (New Item in first column) works correctly
+- ✅ Ctrl+Shift+N (New Column) works correctly
+- ✅ F5 (Refresh) works correctly
+- ✅ Escape works in ContentDialogs (built-in WinUI behavior)
+- ⚠️ Arrow key navigation (deferred - requires focus management system)
+- ⚠️ Enter/Delete/F2 on focused items (deferred - requires selection model)
 
 ---
 

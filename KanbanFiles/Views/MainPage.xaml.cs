@@ -188,6 +188,20 @@ namespace KanbanFiles.Views
             ViewModel.OpenFolderCommand.Execute(null);
         }
         
+        private void NewItem_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            args.Handled = true;
+            if (ViewModel.Columns.Count > 0)
+            {
+                var firstColumn = ViewModel.Columns.FirstOrDefault();
+                firstColumn?.AddItem();
+            }
+            else
+            {
+                ViewModel.ShowNotification("No Columns", "Please create a column first before adding items.", Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning);
+            }
+        }
+        
         private void NewColumn_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
         {
             args.Handled = true;

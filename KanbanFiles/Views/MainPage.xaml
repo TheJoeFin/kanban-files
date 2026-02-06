@@ -16,6 +16,7 @@
     
     <Page.KeyboardAccelerators>
         <KeyboardAccelerator Modifiers="Control" Key="O" Invoked="OpenFolder_Invoked" />
+        <KeyboardAccelerator Modifiers="Control" Key="N" Invoked="NewItem_Invoked" />
         <KeyboardAccelerator Modifiers="Control,Shift" Key="N" Invoked="NewColumn_Invoked" />
         <KeyboardAccelerator Key="F5" Invoked="Refresh_Invoked" />
     </Page.KeyboardAccelerators>

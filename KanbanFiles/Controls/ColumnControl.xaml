@@ -110,11 +110,31 @@
         </ScrollViewer>
 
         <!-- Footer -->
-        <Button Grid.Row="2"
-                Content="+ Add Item"
-                HorizontalAlignment="Stretch"
-                Margin="0,12,0,0"
-                Click="AddItemButton_Click"
-                Style="{StaticResource AccentButtonStyle}"/>
+        <StackPanel Grid.Row="2" Margin="0,12,0,0">
+            <!-- Add Item Button (visible by default) -->
+            <Button x:Name="AddItemButton"
+                    Content="+ Add Item"
+                    HorizontalAlignment="Stretch"
+                    Click="AddItemButton_Click"
+                    Style="{StaticResource AccentButtonStyle}"/>
+            
+            <!-- Inline Add Item Entry (collapsed by default) -->
+            <StackPanel x:Name="AddItemPanel"
+                        Visibility="Collapsed"
+                        Spacing="8">
+                <TextBox x:Name="AddItemTextBox"
+                         PlaceholderText="Enter item title..."
+                         KeyDown="AddItemTextBox_KeyDown"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Add"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="AddItemConfirm_Click"
+                            MinWidth="80"/>
+                    <Button Content="Cancel"
+                            Click="AddItemCancel_Click"
+                            MinWidth="80"/>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </UserControl>

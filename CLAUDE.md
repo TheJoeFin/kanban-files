@@ -112,3 +112,11 @@ All 7 phases complete! KanbanFiles is feature-complete with full markdown editin
   - Solution: Added await columnViewModel.LoadItemsAsync() after creating each column
   - This properly loads groups and distributes items into UngroupedItems/Groups collections for UI display
   - Build successful (0 errors, expected AOT warnings)
+- **Inline Add Item Entry** (2/6/2026 9:25 PM): Replaced dialog popup with inline text entry (Issue #2)
+  - Clicking "+ Add Item" now reveals an inline text input field with Add/Cancel buttons
+  - Enter key creates the item, Escape key cancels
+  - More streamlined UX compared to ContentDialog approach
+  - Keyboard shortcut (Ctrl+N) still works via AddItemRequested event
+  - Changes: ColumnControl.xaml (added collapsible StackPanel), ColumnControl.xaml.cs (UI toggle logic)
+  - Build successful (0 errors, 19 expected AOT warnings)
+

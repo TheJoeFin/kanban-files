@@ -12,15 +12,19 @@ public sealed partial class ColumnControl : UserControl
 {
     private GroupService? _groupService;
 
+    private bool _eventsSubscribed = false;
+
     public ColumnControl()
     {
         this.InitializeComponent();
+        this.Loaded += ColumnControl_Loaded;
+        this.Unloaded += ColumnControl_Unloaded;
     }
 
-    protected override void OnApplyTemplate()
+    private void ColumnControl_Loaded(object sender, RoutedEventArgs e)
     {
-        base.OnApplyTemplate();
-        
+        if (_eventsSubscribed) return;
+
         if (DataContext is ViewModels.ColumnViewModel viewModel)
         {
             // Initialize GroupService if needed
@@ -34,7 +38,30 @@ public sealed partial class ColumnControl : UserControl
             viewModel.DeleteRequested += OnDeleteRequested;
             viewModel.GroupRenameRequested += OnGroupRenameRequested;
             viewModel.GroupDeleteRequested += OnGroupDeleteRequested;
+            
+            _eventsSubscribed = true;
         }
+    }
+
+    private void ColumnControl_Unloaded(object sender, RoutedEventArgs e)
+    {
+        if (!_eventsSubscribed) return;
+
+        if (DataContext is ViewModels.ColumnViewModel viewModel)
+        {
+            viewModel.AddItemRequested -= OnAddItemRequested;
+            viewModel.RenameRequested -= OnRenameRequested;
+            viewModel.DeleteRequested -= OnDeleteRequested;
+            viewModel.GroupRenameRequested -= OnGroupRenameRequested;
+            viewModel.GroupDeleteRequested -= OnGroupDeleteRequested;
+            
+            _eventsSubscribed = false;
+        }
+    }
+
+    protected override void OnApplyTemplate()
+    {
+        base.OnApplyTemplate();
     }
 
     private void NameTextBlock_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
@@ -63,51 +90,68 @@ public sealed partial class ColumnControl : UserControl
 
     private void AddItemButton_Click(object sender, RoutedEventArgs e)
     {
-        if (DataContext is ViewModels.ColumnViewModel viewModel)
+        // Show inline entry, hide button
+        AddItemButton.Visibility = Visibility.Collapsed;
+        AddItemPanel.Visibility = Visibility.Visible;
+        AddItemTextBox.Text = string.Empty;
+        AddItemTextBox.Focus(FocusState.Programmatic);
+    }
+
+    private void AddItemTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.Enter)
         {
-            viewModel.AddItem();
+            e.Handled = true;
+            AddItemConfirm_Click(sender, e);
+        }
+        else if (e.Key == Windows.System.VirtualKey.Escape)
+        {
+            e.Handled = true;
+            AddItemCancel_Click(sender, e);
         }
     }
 
-    private async void OnAddItemRequested(object? sender, EventArgs e)
+    private async void AddItemConfirm_Click(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not ViewModels.ColumnViewModel viewModel) return;
-
-        var textBox = new TextBox
+        var title = AddItemTextBox.Text?.Trim() ?? string.Empty;
+        
+        if (string.IsNullOrWhiteSpace(title))
         {
-            PlaceholderText = "Enter item title...",
-            MinWidth = 300
-        };
+            await ShowErrorAsync("Item title cannot be empty.");
+            return;
+        }
 
-        var dialog = new ContentDialog
+        if (DataContext is ViewModels.ColumnViewModel viewModel)
         {
-            Title = "New Item",
-            Content = textBox,
-            PrimaryButtonText = "Create",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Primary,
-            XamlRoot = this.XamlRoot
-        };
-
-        var result = await dialog.ShowAsync();
-        if (result == ContentDialogResult.Primary)
-        {
-            var title = textBox.Text?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                await ShowErrorAsync("Item title cannot be empty.");
-                return;
-            }
-
             try
             {
                 await viewModel.CreateItemAsync(title);
+                
+                // Hide inline entry, show button
+                AddItemPanel.Visibility = Visibility.Collapsed;
+                AddItemButton.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
             {
                 await ShowErrorAsync($"Failed to create item: {ex.Message}");
             }
         }
+    }
+
+    private void AddItemCancel_Click(object sender, RoutedEventArgs e)
+    {
+        // Hide inline entry, show button
+        AddItemPanel.Visibility = Visibility.Collapsed;
+        AddItemButton.Visibility = Visibility.Visible;
+    }
+
+    private void OnAddItemRequested(object? sender, EventArgs e)
+    {
+        // Activate inline entry UI (same as button click)
+        AddItemButton.Visibility = Visibility.Collapsed;
+        AddItemPanel.Visibility = Visibility.Visible;
+        AddItemTextBox.Text = string.Empty;
+        AddItemTextBox.Focus(FocusState.Programmatic);
     }
 
     private async void OnRenameRequested(object? sender, string currentName)

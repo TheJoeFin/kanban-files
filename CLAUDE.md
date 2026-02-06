@@ -93,6 +93,12 @@
 All 7 phases complete! KanbanFiles is feature-complete with full markdown editing capabilities, comprehensive error handling with proper logging, and zero remaining TODOs.
 
 ## Post-Launch Improvements
+- **Subtle Notifications** (2/6/2026 10:19 PM): Removed disruptive "Configuration Updated" notification (Issue #10)
+  - Root cause: `.kanban.json` external changes triggered InfoBar notification
+  - Solution: Removed ShowNotification() call - automatic board reload provides sufficient feedback
+  - UI updates naturally without explicit notification, creating smoother UX
+  - Manual refresh (F5) notification intentionally kept for user-initiated actions
+  - Build successful (0 errors, 19 expected AOT warnings)
 - **Error Handling Enhancement** (2/6/2026 9:02 PM): Added missing try-catch blocks to ColumnViewModel.RenameColumnAsync()
   - Follows same pattern as CreateItemAsync() and DeleteColumnAsync()
   - Catches UnauthorizedAccessException and IOException

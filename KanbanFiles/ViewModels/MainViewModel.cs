@@ -391,10 +391,8 @@ namespace KanbanFiles.ViewModels
             if (fileName == ".kanban.json")
             {
                 // Reload the entire board configuration from disk
+                // No notification needed - the UI update provides sufficient feedback
                 await LoadBoardAsync(_board.RootPath);
-                ShowNotification("Configuration Updated", 
-                    "Board configuration has been reloaded from .kanban.json", 
-                    InfoBarSeverity.Informational);
                 return;
             }
 

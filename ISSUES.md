@@ -135,8 +135,19 @@ Changes:
 Item reordering within the same column was already implemented in ColumnControl (HandleReorderAsync method) and now works properly with these fixes.
 
 
-# issue 10 4:06 PM 2/6/2026
+# Issue 10 4:06 PM 2/6/2026 - RESOLVED 2/6/2026 10:19 PM
 - the updating files info notification is too disruptive, it should be subtle, smooth, and natural
+
+**Resolution**: Removed the "Configuration Updated" notification that appeared when `.kanban.json` changed externally. The automatic board reload provides sufficient visual feedback without needing an explicit notification.
+
+**Root Cause**: The `MainViewModel.OnItemContentChanged()` method showed an InfoBar notification every time `.kanban.json` was modified by external processes or file watchers. This was redundant since the UI already updates automatically when the board configuration reloads.
+
+**Fix**: Removed the `ShowNotification()` call (lines 395-397 in MainViewModel.cs) after loading board configuration. The board still reloads automatically, but without the disruptive notification. Users see the changes reflected naturally in the UI.
+
+**Note**: The F5 manual refresh notification ("Refreshed") was intentionally kept, as it provides feedback for user-initiated actions (different use case).
+
+Changes:
+- **MainViewModel.cs** (lines 390-398): Removed ShowNotification() call for .kanban.json changes
 
 
 # Issue 11 4:13 PM 2/6/2026 - RESOLVED 2/6/2026 10:15 PM

@@ -424,3 +424,32 @@ DOCUMENTATION FIX: Phase 4.7 Conflict Handling Status Correction
 All 7 phases remain complete. Build succeeds with 0 errors.
 
 ===================
+
+2/6/2026 8:50 PM
+
+TODO FIX: .kanban.json Auto-Reload on External Changes
+
+**Issue**: Found TODO comment in MainViewModel.cs line 357: "// TODO: Handle board config changes"
+When .kanban.json was edited externally, the FileWatcherService detected the change but the UI did not automatically refresh to reflect changes (e.g., modified column order, display names).
+
+**Resolution**: Implemented auto-reload functionality:
+- When .kanban.json changes externally, MainViewModel.OnItemContentChanged() now calls LoadBoardAsync()
+- User receives "Configuration Updated" notification when config reloads
+- Board automatically refreshes with new configuration from disk
+- Leverages existing LoadBoardAsync() method used by F5 keyboard shortcut
+- Events already marshaled to UI thread by FileWatcherService
+
+**Implementation**:
+- File: KanbanFiles/ViewModels/MainViewModel.cs (lines 354-363)
+- Replaced TODO with: LoadBoardAsync(_board.RootPath) + ShowNotification()
+- Consistent with existing pattern for groups.json auto-reload (lines 340-352)
+
+**Testing**:
+- Build succeeds (0 errors, 19 expected AOT warnings)
+- No TODO comments remain in application code (only SDK headers)
+
+**Commit**: fdbd349 "Implement .kanban.json auto-reload on external changes"
+
+All 7 phases complete. Zero TODOs remaining. Project fully complete.
+
+===================

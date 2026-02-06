@@ -34,51 +34,51 @@ The goal of this application is to emulate the usefulness of organizing via a Ka
 - [x] **1.3** Implement `BoardConfigService` — read/write `.kanban.json`, auto-create defaults, handle corruption
 - [x] **1.4** Implement `FileSystemService` — enumerate folders/files, CRUD operations, content preview generation
 
-### Phase 2 — Basic Board UI
-- [ ] **2.1** Create `MainWindow` with command bar + horizontal scrollable board
-- [ ] **2.2** Create `ColumnControl` — header, vertical item list, add item footer
-- [ ] **2.3** Create `KanbanItemControl` — card with title, preview, hover state, context menu
-- [ ] **2.4** Implement "Open Folder" command via `FolderPicker`
-- [ ] **2.5** Implement "New Item" — create `.md` file, add card
-- [ ] **2.6** Implement "New Column" — create subfolder, update config
+### Phase 2 — Basic Board UI ✅
+- [x] **2.1** Create `MainWindow` with command bar + horizontal scrollable board
+- [x] **2.2** Create `ColumnControl` — header, vertical item list, add item footer
+- [x] **2.3** Create `KanbanItemControl` — card with title, preview, hover state, context menu
+- [x] **2.4** Implement "Open Folder" command via `FolderPicker`
+- [x] **2.5** Implement "New Item" — create `.md` file, add card
+- [x] **2.6** Implement "New Column" — create subfolder, update config
 
-### Phase 3 — Drag & Drop
-- [ ] **3.1** Drag-and-drop items between columns (moves `.md` file on disk)
-- [ ] **3.2** Reorder items within a column (persists to `.kanban.json`)
-- [ ] **3.3** Reorder columns via drag-and-drop on header (persists to `.kanban.json`)
+### Phase 3 — Drag & Drop ✅
+- [x] **3.1** Drag-and-drop items between columns (moves `.md` file on disk)
+- [x] **3.2** Reorder items within a column (persists to `.kanban.json`)
+- [x] **3.3** Reorder columns via drag-and-drop on header (persists to `.kanban.json`)
 
-### Phase 4 — 2-Way File System Sync
-- [ ] **4.1** Implement `FileWatcherService` — root watcher + per-column watchers, self-change suppression
-- [ ] **4.2** Sync external file creates → new card appears
-- [ ] **4.3** Sync external file deletes → card removed
-- [ ] **4.4** Sync external file renames → card title updated
-- [ ] **4.5** Sync external content changes → preview and open editor updated
-- [ ] **4.6** Debounce rapid events, marshal to UI thread via `DispatcherQueue`
-- [ ] **4.7** Conflict handling — auto-reload or prompt when file edited in app and externally
+### Phase 4 — 2-Way File System Sync ✅
+- [x] **4.1** Implement `FileWatcherService` — root watcher + per-column watchers, self-change suppression
+- [x] **4.2** Sync external file creates → new card appears
+- [x] **4.3** Sync external file deletes → card removed
+- [x] **4.4** Sync external file renames → card title updated
+- [x] **4.5** Sync external content changes → preview and open editor updated
+- [x] **4.6** Debounce rapid events, marshal to UI thread via `DispatcherQueue`
+- [x] **4.7** Conflict handling — auto-reload or prompt when file edited in app and externally
 
-### Phase 5 — Grouping
-- [ ] **5.1** Define `groups.json` schema (name, item list, collapsed state per group)
-- [ ] **5.2** Implement `GroupService` — CRUD for groups, item assignments
-- [ ] **5.3** Update `ColumnControl` with collapsible group sections (ungrouped items at top)
-- [ ] **5.4** Drag-and-drop groups to reorder within column
-- [ ] **5.5** Drag-and-drop items into/out of groups
-- [ ] **5.6** UI for create/rename/delete groups
+### Phase 5 — Grouping ✅
+- [x] **5.1** Define `groups.json` schema (name, item list, collapsed state per group)
+- [x] **5.2** Implement `GroupService` — CRUD for groups, item assignments
+- [x] **5.3** Update `ColumnControl` with collapsible group sections (ungrouped items at top)
+- [x] **5.4** Drag-and-drop groups to reorder within column
+- [x] **5.5** Drag-and-drop items into/out of groups
+- [x] **5.6** UI for create/rename/delete groups
 
-### Phase 6 — Rich Markdown Editing (Full-Page Modal)
-- [ ] **6.1** Create `ItemDetailDialog` — full-window overlay with title bar, split pane, status bar
-- [ ] **6.2** Markdown editor — monospace `TextBox`, keyboard shortcuts (bold, italic, link, save)
-- [ ] **6.3** Markdig + WebView2 preview — live render with theme-aware CSS
-- [ ] **6.4** Save to disk — explicit save, suppress watcher, update card preview
-- [ ] **6.5** External change detection while modal open — auto-reload or prompt
+### Phase 6 — Rich Markdown Editing (Full-Page Modal) ✅
+- [x] **6.1** Create `ItemDetailDialog` — full-window overlay with title bar, split pane, status bar
+- [x] **6.2** Markdown editor — monospace `TextBox`, keyboard shortcuts (bold, italic, link, save)
+- [x] **6.3** Markdig + WebView2 preview — live render with theme-aware CSS
+- [x] **6.4** Save to disk — explicit save, suppress watcher, update card preview
+- [x] **6.5** External change detection while modal open — auto-reload or prompt
 
-### Phase 7 — Polish & Edge Cases
-- [ ] **7.1** Handle opening folders with existing subfolders
-- [ ] **7.2** Handle non-`.md` files gracefully (ignore)
-- [ ] **7.3** Handle config file corruption (backup + regenerate + notify)
-- [ ] **7.4** Keyboard shortcuts (global nav, board nav, modal editing)
-- [ ] **7.5** Theming — light/dark via WinUI3 system theme + WebView2 sync
-- [ ] **7.6** Persist window size/position + last opened folder
-- [ ] **7.7** Error handling & `InfoBar` notifications with severity levels
+### Phase 7 — Polish & Edge Cases ✅
+- [x] **7.1** Handle opening folders with existing subfolders
+- [x] **7.2** Handle non-`.md` files gracefully (ignore)
+- [x] **7.3** Handle config file corruption (backup + regenerate + notify)
+- [x] **7.4** Keyboard shortcuts (global nav, board nav, modal editing)
+- [x] **7.5** Theming — light/dark via WinUI3 system theme + WebView2 sync
+- [x] **7.6** Persist window size/position + last opened folder
+- [x] **7.7** Error handling & `InfoBar` notifications with severity levels
 
 ---
 

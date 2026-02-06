@@ -44,7 +44,7 @@
 - ✅ Phase 1: Project scaffolding, core models, BoardConfigService, FileSystemService
 - ✅ Phase 2: Basic Board UI with full CRUD operations (create/read/update/delete columns and items)
 - ✅ Phase 3: Drag & Drop (items between/within columns, column reordering)
-- ✅ Phase 4: Two-Way File System Sync (FileWatcherService, external file monitoring)
+- ✅ Phase 4: Two-Way File System Sync (FileWatcherService, external file monitoring, conflict handling)
 - ✅ Phase 5: Grouping (GroupService, GroupViewModel, group CRUD, drag & drop for groups and items, collapse state persistence)
 - ✅ Phase 6: Rich Markdown Editing
   - Implementation: Inline ContentDialog approach (no separate XAML file)

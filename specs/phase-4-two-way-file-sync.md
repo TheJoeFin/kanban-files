@@ -1,6 +1,6 @@
 # Phase 4 — Two-Way File System Sync
 
-## Status: ✅ COMPLETE
+## Status: ✅ COMPLETE (Including Conflict Handling from Phase 6)
 
 ## Objective
 Implement real-time synchronization between the file system and the app UI. External changes (files created, deleted, renamed, or modified outside the app) are reflected in the board immediately, and all app-initiated changes are already written to disk (from previous phases).
@@ -307,7 +307,9 @@ _dispatcherQueue.TryEnqueue(DispatcherQueuePriority.Normal, () =>
 
 ---
 
-## 4.7 — Conflict Handling
+## ✅ 4.7 — Conflict Handling
+
+**Status**: Complete (Implemented in Phase 6)
 
 ### What
 Handle the scenario where a file is being edited both in the app and externally simultaneously.
@@ -315,17 +317,20 @@ Handle the scenario where a file is being edited both in the app and externally 
 ### Strategy: Last-Write-Wins with Notification
 
 1. When the app detects an external change to a file that is currently open in the detail modal:
-   - Show an **info bar** at the top of the modal: "This file was changed externally. [Reload] [Keep Mine]"
+   - Show a ContentDialog: "External File Change Detected. This file was modified externally. Do you want to reload it?"
    - **Reload**: Discard app changes, load external content
-   - **Keep Mine**: Dismiss the notification, continue editing. Next save overwrites the external changes.
+   - **Keep My Changes**: Dismiss the notification, continue editing. Next save overwrites the external changes.
 2. If the file is NOT open in the modal (just a card in the board):
    - Silently update the preview and content — no conflict possible since user isn't editing.
+
+**Implementation**: See `KanbanFiles/Controls/KanbanItemCardControl.xaml.cs` (lines 360-415) for the complete external change detection and conflict resolution logic.
 
 ### Future Enhancement (Out of Scope)
 - Three-way merge
 - Diff view showing both versions
 
 ### Acceptance Criteria
-- Editing a file in the app while it's changed externally shows a notification
-- User can choose to reload or keep their changes
-- No data loss in either scenario
+- ✅ Editing a file in the app while it's changed externally shows a notification (ContentDialog)
+- ✅ User can choose to reload or keep their changes
+- ✅ No data loss in either scenario
+- ✅ Files not being edited are updated silently (no prompt needed)

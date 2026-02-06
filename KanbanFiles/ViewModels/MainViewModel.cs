@@ -354,7 +354,11 @@ namespace KanbanFiles.ViewModels
             // Handle .kanban.json changes
             if (fileName == ".kanban.json")
             {
-                // TODO: Handle board config changes
+                // Reload the entire board configuration from disk
+                await LoadBoardAsync(_board.RootPath);
+                ShowNotification("Configuration Updated", 
+                    "Board configuration has been reloaded from .kanban.json", 
+                    InfoBarSeverity.Informational);
                 return;
             }
 

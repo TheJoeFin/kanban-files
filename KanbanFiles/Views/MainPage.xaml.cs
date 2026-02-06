@@ -1,6 +1,7 @@
 using KanbanFiles.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Input;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 using Windows.ApplicationModel.DataTransfer;
@@ -179,6 +180,37 @@ namespace KanbanFiles.Views
                 return ViewModel.Columns.Count;
 
             return index;
+        }
+        
+        private void OpenFolder_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            args.Handled = true;
+            ViewModel.OpenFolderCommand.Execute(null);
+        }
+        
+        private void NewColumn_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            args.Handled = true;
+            ViewModel.AddColumnCommand.Execute(null);
+        }
+        
+        private async void Refresh_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            args.Handled = true;
+            if (!string.IsNullOrEmpty(ViewModel.BoardName) && ViewModel.Columns.Count > 0)
+            {
+                // Get the current folder path from the first column
+                var firstColumn = ViewModel.Columns.FirstOrDefault();
+                if (firstColumn != null)
+                {
+                    var boardPath = Path.GetDirectoryName(firstColumn.FolderPath);
+                    if (boardPath != null)
+                    {
+                        await ViewModel.LoadBoardAsync(boardPath);
+                        ViewModel.ShowNotification("Refreshed", "Board has been reloaded from disk.", Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
+                    }
+                }
+            }
         }
     }
 }

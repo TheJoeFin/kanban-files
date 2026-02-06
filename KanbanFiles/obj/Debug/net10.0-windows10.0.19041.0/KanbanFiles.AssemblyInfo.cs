@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("KanbanFiles")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5380ad303b328fa344b9c1107b51b332198123d4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bd595dc509165dcacb3de9dc35e1c65668cf7a0a")]
 [assembly: System.Reflection.AssemblyProductAttribute("KanbanFiles")]
 [assembly: System.Reflection.AssemblyTitleAttribute("KanbanFiles")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

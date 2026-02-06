@@ -27,6 +27,18 @@ namespace KanbanFiles.ViewModels
 
         [ObservableProperty]
         private bool _isLoaded = false;
+        
+        [ObservableProperty]
+        private bool _isNotificationVisible = false;
+        
+        [ObservableProperty]
+        private string _notificationTitle = string.Empty;
+        
+        [ObservableProperty]
+        private string _notificationMessage = string.Empty;
+        
+        [ObservableProperty]
+        private Microsoft.UI.Xaml.Controls.InfoBarSeverity _notificationSeverity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational;
 
         public event EventHandler? OpenFolderRequested;
         public event EventHandler<string>? AddColumnRequested;
@@ -43,6 +55,16 @@ namespace KanbanFiles.ViewModels
             _fileWatcherService?.Dispose();
             
             _board = await _boardConfigService.LoadOrInitializeAsync(folderPath);
+            
+            // Check if config was corrupted and recovered
+            if (_boardConfigService.WasConfigCorrupted)
+            {
+                ShowNotification(
+                    "Configuration Recovered",
+                    "Board configuration was corrupted and has been reset. A backup was saved.",
+                    Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning);
+                _boardConfigService.ResetCorruptionFlag();
+            }
 
             // Start file watcher first
             var dispatcher = App.MainDispatcher;
@@ -353,6 +375,27 @@ namespace KanbanFiles.ViewModels
             if (columnViewModel != null)
             {
                 Columns.Remove(columnViewModel);
+            }
+        }
+        
+        public void ShowNotification(string title, string message, Microsoft.UI.Xaml.Controls.InfoBarSeverity severity)
+        {
+            NotificationTitle = title;
+            NotificationMessage = message;
+            NotificationSeverity = severity;
+            IsNotificationVisible = true;
+            
+            // Auto-dismiss for informational and success notifications after 5 seconds
+            if (severity == Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational || 
+                severity == Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success)
+            {
+                Task.Delay(5000).ContinueWith(_ =>
+                {
+                    if (App.MainDispatcher != null)
+                    {
+                        App.MainDispatcher.TryEnqueue(() => IsNotificationVisible = false);
+                    }
+                });
             }
         }
     }

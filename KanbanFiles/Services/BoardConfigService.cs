@@ -14,6 +14,10 @@ public class BoardConfigService
     };
 
     private const string ConfigFileName = ".kanban.json";
+    
+    public bool WasConfigCorrupted { get; private set; }
+    
+    public void ResetCorruptionFlag() => WasConfigCorrupted = false;
 
     public async Task<Board> LoadOrInitializeAsync(string rootPath)
     {
@@ -35,6 +39,7 @@ public class BoardConfigService
             {
                 // Corrupt config - backup and regenerate
                 await BackupCorruptConfigAsync(configPath);
+                WasConfigCorrupted = true;
                 Console.WriteLine($"Warning: Corrupt .kanban.json detected. Backed up and regenerating. Error: {ex.Message}");
             }
         }

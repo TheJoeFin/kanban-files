@@ -39,6 +39,14 @@
 - ✅ Phase 3: Drag & Drop (items between/within columns, column reordering)
 - ✅ Phase 4: Two-Way File System Sync (FileWatcherService, external file monitoring)
 - ✅ Phase 5: Grouping (GroupService, GroupViewModel, group CRUD, drag & drop for groups and items, collapse state persistence)
+- 🚧 Phase 7 (Partial): Polish & Edge Cases
+  - ✅ InfoBar notification system with auto-dismiss
+  - ✅ Config corruption notifications (backup + user notification)
+  - ✅ Keyboard shortcuts (Ctrl+O, Ctrl+Shift+N, F5)
+  - ✅ Existing subfolders handling (already implemented in Phase 1)
+  - ✅ File filtering for .md, hidden files (already implemented)
+  - ✅ ThemeResource usage throughout UI (already implemented)
+  - ⏸️ Window state persistence (deferred)
 
 ## In Progress
 - 🚧 Phase 6: Rich Markdown Editing

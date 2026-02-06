@@ -13,22 +13,29 @@
     <Page.DataContext>
         <viewmodels:MainViewModel x:ConnectionId='2' x:Name="ViewModel" />
     </Page.DataContext>
+    
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator x:ConnectionId='3' Modifiers="Control" Key="O"                              />
+        <KeyboardAccelerator x:ConnectionId='4' Modifiers="Control,Shift" Key="N"                             />
+        <KeyboardAccelerator x:ConnectionId='5' Key="F5"                           />
+    </Page.KeyboardAccelerators>
 
     <Grid>
         <!-- Main Board View -->
-        <Grid x:ConnectionId='3'                                                      >
+        <Grid x:ConnectionId='6'                                                      >
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <!-- Top CommandBar -->
             <CommandBar Grid.Row="0" DefaultLabelPosition="Right">
-                <AppBarButton x:ConnectionId='11' 
+                <AppBarButton x:ConnectionId='15' 
                     Icon="Folder" 
                     Label="Open Folder"
                                                                    />
-                <AppBarButton x:ConnectionId='12' 
+                <AppBarButton x:ConnectionId='16' 
                     Label="+ New Column"
                                                                  >
                     <AppBarButton.Icon>
@@ -37,7 +44,7 @@
                 </AppBarButton>
                 
                 <CommandBar.Content>
-                    <TextBlock x:ConnectionId='13' 
+                    <TextBlock x:ConnectionId='17' 
                                                                         
                         FontSize="20"
                         FontWeight="SemiBold"
@@ -45,16 +52,26 @@
                         Margin="20,0,0,0" />
                 </CommandBar.Content>
             </CommandBar>
+            
+            <!-- Notification InfoBar -->
+            <InfoBar x:ConnectionId='11' Grid.Row="1"
+                     x:Name="NotificationBar"
+                                                                                   
+                                                                              
+                                                                                  
+                                                                                    
+                     IsClosable="True"
+                     Margin="16,8" />
 
             <!-- Horizontal ScrollViewer for Columns -->
             <ScrollViewer 
-                Grid.Row="1"
+                Grid.Row="2"
                 HorizontalScrollBarVisibility="Auto"
                 VerticalScrollBarVisibility="Disabled"
                 HorizontalScrollMode="Enabled"
                 VerticalScrollMode="Disabled">
                 
-                <ItemsControl x:ConnectionId='8' 
+                <ItemsControl x:ConnectionId='12' 
                     x:Name="ColumnsItemsControl"
                                                                          
                     AllowDrop="True"
@@ -79,7 +96,7 @@
         </Grid>
 
         <!-- Empty State -->
-        <StackPanel x:ConnectionId='4' 
+        <StackPanel x:ConnectionId='7' 
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Spacing="24"
@@ -103,7 +120,7 @@
                 HorizontalAlignment="Center"
                 Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}" />
             
-            <Button x:ConnectionId='5'
+            <Button x:ConnectionId='8'
                 Content="Open Folder"
                                                               
                 HorizontalAlignment="Center"

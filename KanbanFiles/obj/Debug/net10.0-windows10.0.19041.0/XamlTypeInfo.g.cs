@@ -226,7 +226,7 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
         
         private void InitTypeTables()
         {
-            _typeNameTable = new string[36];
+            _typeNameTable = new string[46];
             _typeNameTable[0] = "Microsoft.UI.Xaml.Controls.XamlControlsResources";
             _typeNameTable[1] = "Microsoft.UI.Xaml.ResourceDictionary";
             _typeNameTable[2] = "Object";
@@ -257,14 +257,24 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
             _typeNameTable[27] = "System.Collections.ObjectModel.Collection`1<KanbanFiles.ViewModels.GroupViewModel>";
             _typeNameTable[28] = "KanbanFiles.ViewModels.GroupViewModel";
             _typeNameTable[29] = "Int32";
-            _typeNameTable[30] = "Microsoft.UI.Xaml.Controls.Button";
-            _typeNameTable[31] = "KanbanFiles.Views.MainPage";
-            _typeNameTable[32] = "Microsoft.UI.Xaml.Controls.Page";
-            _typeNameTable[33] = "Microsoft.UI.Xaml.Controls.TreeViewNode";
-            _typeNameTable[34] = "Microsoft.UI.Xaml.DependencyObject";
-            _typeNameTable[35] = "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>";
+            _typeNameTable[30] = "Microsoft.UI.Xaml.Controls.InfoBarSeverity";
+            _typeNameTable[31] = "System.Enum";
+            _typeNameTable[32] = "Microsoft.UI.Xaml.Controls.Button";
+            _typeNameTable[33] = "Microsoft.UI.Xaml.Controls.InfoBar";
+            _typeNameTable[34] = "Microsoft.UI.Xaml.Controls.Control";
+            _typeNameTable[35] = "Microsoft.UI.Xaml.Controls.Primitives.ButtonBase";
+            _typeNameTable[36] = "System.Windows.Input.ICommand";
+            _typeNameTable[37] = "Microsoft.UI.Xaml.Style";
+            _typeNameTable[38] = "Microsoft.UI.Xaml.DataTemplate";
+            _typeNameTable[39] = "Microsoft.UI.Xaml.Controls.IconSource";
+            _typeNameTable[40] = "Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings";
+            _typeNameTable[41] = "Microsoft.UI.Xaml.DependencyObject";
+            _typeNameTable[42] = "KanbanFiles.Views.MainPage";
+            _typeNameTable[43] = "Microsoft.UI.Xaml.Controls.Page";
+            _typeNameTable[44] = "Microsoft.UI.Xaml.Controls.TreeViewNode";
+            _typeNameTable[45] = "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>";
 
-            _typeTable = new global::System.Type[36];
+            _typeTable = new global::System.Type[46];
             _typeTable[0] = typeof(global::Microsoft.UI.Xaml.Controls.XamlControlsResources);
             _typeTable[1] = typeof(global::Microsoft.UI.Xaml.ResourceDictionary);
             _typeTable[2] = typeof(global::System.Object);
@@ -295,12 +305,22 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
             _typeTable[27] = typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.GroupViewModel>);
             _typeTable[28] = typeof(global::KanbanFiles.ViewModels.GroupViewModel);
             _typeTable[29] = typeof(global::System.Int32);
-            _typeTable[30] = typeof(global::Microsoft.UI.Xaml.Controls.Button);
-            _typeTable[31] = typeof(global::KanbanFiles.Views.MainPage);
-            _typeTable[32] = typeof(global::Microsoft.UI.Xaml.Controls.Page);
-            _typeTable[33] = typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode);
-            _typeTable[34] = typeof(global::Microsoft.UI.Xaml.DependencyObject);
-            _typeTable[35] = typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>);
+            _typeTable[30] = typeof(global::Microsoft.UI.Xaml.Controls.InfoBarSeverity);
+            _typeTable[31] = typeof(global::System.Enum);
+            _typeTable[32] = typeof(global::Microsoft.UI.Xaml.Controls.Button);
+            _typeTable[33] = typeof(global::Microsoft.UI.Xaml.Controls.InfoBar);
+            _typeTable[34] = typeof(global::Microsoft.UI.Xaml.Controls.Control);
+            _typeTable[35] = typeof(global::Microsoft.UI.Xaml.Controls.Primitives.ButtonBase);
+            _typeTable[36] = typeof(global::System.Windows.Input.ICommand);
+            _typeTable[37] = typeof(global::Microsoft.UI.Xaml.Style);
+            _typeTable[38] = typeof(global::Microsoft.UI.Xaml.DataTemplate);
+            _typeTable[39] = typeof(global::Microsoft.UI.Xaml.Controls.IconSource);
+            _typeTable[40] = typeof(global::Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings);
+            _typeTable[41] = typeof(global::Microsoft.UI.Xaml.DependencyObject);
+            _typeTable[42] = typeof(global::KanbanFiles.Views.MainPage);
+            _typeTable[43] = typeof(global::Microsoft.UI.Xaml.Controls.Page);
+            _typeTable[44] = typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode);
+            _typeTable[45] = typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -350,8 +370,10 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
         private object Activate_22_Collection() { return new global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.KanbanItemViewModel>(); }
         private object Activate_26_ObservableCollection() { return new global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.GroupViewModel>(); }
         private object Activate_27_Collection() { return new global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.GroupViewModel>(); }
-        private object Activate_31_MainPage() { return new global::KanbanFiles.Views.MainPage(); }
-        private object Activate_33_TreeViewNode() { return new global::Microsoft.UI.Xaml.Controls.TreeViewNode(); }
+        private object Activate_33_InfoBar() { return new global::Microsoft.UI.Xaml.Controls.InfoBar(); }
+        private object Activate_40_InfoBarTemplateSettings() { return new global::Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings(); }
+        private object Activate_42_MainPage() { return new global::KanbanFiles.Views.MainPage(); }
+        private object Activate_44_TreeViewNode() { return new global::Microsoft.UI.Xaml.Controls.TreeViewNode(); }
         private void StaticInitializer_0_XamlControlsResources() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.XamlControlsResources).TypeHandle);
         private void StaticInitializer_4_InverseBoolToVisibilityConverter() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.Converters.InverseBoolToVisibilityConverter).TypeHandle);
         private void StaticInitializer_5_Color() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Windows.UI.Color).TypeHandle);
@@ -376,9 +398,14 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
         private void StaticInitializer_26_ObservableCollection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.ObservableCollection<global::KanbanFiles.ViewModels.GroupViewModel>).TypeHandle);
         private void StaticInitializer_27_Collection() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.ObjectModel.Collection<global::KanbanFiles.ViewModels.GroupViewModel>).TypeHandle);
         private void StaticInitializer_28_GroupViewModel() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.ViewModels.GroupViewModel).TypeHandle);
-        private void StaticInitializer_31_MainPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.Views.MainPage).TypeHandle);
-        private void StaticInitializer_33_TreeViewNode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode).TypeHandle);
-        private void StaticInitializer_35_IList() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>).TypeHandle);
+        private void StaticInitializer_30_InfoBarSeverity() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.InfoBarSeverity).TypeHandle);
+        private void StaticInitializer_31_Enum() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Enum).TypeHandle);
+        private void StaticInitializer_33_InfoBar() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.InfoBar).TypeHandle);
+        private void StaticInitializer_36_ICommand() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Windows.Input.ICommand).TypeHandle);
+        private void StaticInitializer_40_InfoBarTemplateSettings() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings).TypeHandle);
+        private void StaticInitializer_42_MainPage() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::KanbanFiles.Views.MainPage).TypeHandle);
+        private void StaticInitializer_44_TreeViewNode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode).TypeHandle);
+        private void StaticInitializer_45_IList() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>).TypeHandle);
         private void MapAdd_0_XamlControlsResources(object instance, object key, object item)
         {
             var collection = (global::System.Collections.Generic.IDictionary<global::System.Object, global::System.Object>)instance;
@@ -422,7 +449,7 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
             var newItem = (global::KanbanFiles.ViewModels.GroupViewModel)item;
             collection.Add(newItem);
         }
-        private void VectorAdd_35_IList(object instance, object item)
+        private void VectorAdd_45_IList(object instance, object item)
         {
             var collection = (global::System.Collections.Generic.ICollection<global::Microsoft.UI.Xaml.Controls.TreeViewNode>)instance;
             var newItem = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)item;
@@ -575,6 +602,10 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
                 userType.AddMemberName("Columns");
                 userType.AddMemberName("BoardName");
                 userType.AddMemberName("IsLoaded");
+                userType.AddMemberName("IsNotificationVisible");
+                userType.AddMemberName("NotificationTitle");
+                userType.AddMemberName("NotificationMessage");
+                userType.AddMemberName("NotificationSeverity");
                 userType.AddMemberName("OpenFolderCommand");
                 userType.AddMemberName("AddColumnCommand");
                 userType.SetIsLocalType();
@@ -680,26 +711,102 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
                 xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 30:   //  Microsoft.UI.Xaml.Controls.Button
+            case 30:   //  Microsoft.UI.Xaml.Controls.InfoBarSeverity
+                userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.Enum"));
+                userType.StaticInitializer = StaticInitializer_30_InfoBarSeverity;
+                userType.AddEnumValue("Informational", global::Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational);
+                userType.AddEnumValue("Success", global::Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
+                userType.AddEnumValue("Warning", global::Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning);
+                userType.AddEnumValue("Error", global::Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
+                xamlType = userType;
+                break;
+
+            case 31:   //  System.Enum
+                userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("System.ValueType"));
+                userType.StaticInitializer = StaticInitializer_31_Enum;
+                xamlType = userType;
+                break;
+
+            case 32:   //  Microsoft.UI.Xaml.Controls.Button
                 xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 31:   //  KanbanFiles.Views.MainPage
+            case 33:   //  Microsoft.UI.Xaml.Controls.InfoBar
+                userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Control"));
+                userType.Activator = Activate_33_InfoBar;
+                userType.StaticInitializer = StaticInitializer_33_InfoBar;
+                userType.SetContentPropertyName("Microsoft.UI.Xaml.Controls.InfoBar.Content");
+                userType.AddMemberName("Content");
+                userType.AddMemberName("IsOpen");
+                userType.AddMemberName("Title");
+                userType.AddMemberName("Message");
+                userType.AddMemberName("Severity");
+                userType.AddMemberName("IsClosable");
+                userType.AddMemberName("ActionButton");
+                userType.AddMemberName("CloseButtonCommand");
+                userType.AddMemberName("CloseButtonCommandParameter");
+                userType.AddMemberName("CloseButtonStyle");
+                userType.AddMemberName("ContentTemplate");
+                userType.AddMemberName("IconSource");
+                userType.AddMemberName("IsIconVisible");
+                userType.AddMemberName("TemplateSettings");
+                xamlType = userType;
+                break;
+
+            case 34:   //  Microsoft.UI.Xaml.Controls.Control
+                xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 35:   //  Microsoft.UI.Xaml.Controls.Primitives.ButtonBase
+                xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 36:   //  System.Windows.Input.ICommand
+                userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, null);
+                userType.StaticInitializer = StaticInitializer_36_ICommand;
+                userType.SetIsReturnTypeStub();
+                xamlType = userType;
+                break;
+
+            case 37:   //  Microsoft.UI.Xaml.Style
+                xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 38:   //  Microsoft.UI.Xaml.DataTemplate
+                xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 39:   //  Microsoft.UI.Xaml.Controls.IconSource
+                xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 40:   //  Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings
+                userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.DependencyObject"));
+                userType.StaticInitializer = StaticInitializer_40_InfoBarTemplateSettings;
+                userType.SetIsReturnTypeStub();
+                xamlType = userType;
+                break;
+
+            case 41:   //  Microsoft.UI.Xaml.DependencyObject
+                xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 42:   //  KanbanFiles.Views.MainPage
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_31_MainPage;
-                userType.StaticInitializer = StaticInitializer_31_MainPage;
+                userType.Activator = Activate_42_MainPage;
+                userType.StaticInitializer = StaticInitializer_42_MainPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 32:   //  Microsoft.UI.Xaml.Controls.Page
+            case 43:   //  Microsoft.UI.Xaml.Controls.Page
                 xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 33:   //  Microsoft.UI.Xaml.Controls.TreeViewNode
+            case 44:   //  Microsoft.UI.Xaml.Controls.TreeViewNode
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.DependencyObject"));
-                userType.Activator = Activate_33_TreeViewNode;
-                userType.StaticInitializer = StaticInitializer_33_TreeViewNode;
+                userType.Activator = Activate_44_TreeViewNode;
+                userType.StaticInitializer = StaticInitializer_44_TreeViewNode;
                 userType.AddMemberName("Children");
                 userType.AddMemberName("Content");
                 userType.AddMemberName("Depth");
@@ -711,14 +818,10 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 34:   //  Microsoft.UI.Xaml.DependencyObject
-                xamlType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlSystemBaseType(typeName, type);
-                break;
-
-            case 35:   //  System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>
+            case 45:   //  System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>
                 userType = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType(this, typeName, type, null);
-                userType.StaticInitializer = StaticInitializer_35_IList;
-                userType.CollectionAdd = VectorAdd_35_IList;
+                userType.StaticInitializer = StaticInitializer_45_IList;
+                userType.CollectionAdd = VectorAdd_45_IList;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
@@ -1036,62 +1139,237 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
             var that = (global::KanbanFiles.ViewModels.MainViewModel)instance;
             that.IsLoaded = (global::System.Boolean)Value;
         }
-        private object get_35_MainViewModel_OpenFolderCommand(object instance)
+        private object get_35_MainViewModel_IsNotificationVisible(object instance)
+        {
+            var that = (global::KanbanFiles.ViewModels.MainViewModel)instance;
+            return that.IsNotificationVisible;
+        }
+        private void set_35_MainViewModel_IsNotificationVisible(object instance, object Value)
+        {
+            var that = (global::KanbanFiles.ViewModels.MainViewModel)instance;
+            that.IsNotificationVisible = (global::System.Boolean)Value;
+        }
+        private object get_36_MainViewModel_NotificationTitle(object instance)
+        {
+            var that = (global::KanbanFiles.ViewModels.MainViewModel)instance;
+            return that.NotificationTitle;
+        }
+        private void set_36_MainViewModel_NotificationTitle(object instance, object Value)
+        {
+            var that = (global::KanbanFiles.ViewModels.MainViewModel)instance;
+            that.NotificationTitle = (global::System.String)Value;
+        }
+        private object get_37_MainViewModel_NotificationMessage(object instance)
+        {
+            var that = (global::KanbanFiles.ViewModels.MainViewModel)instance;
+            return that.NotificationMessage;
+        }
+        private void set_37_MainViewModel_NotificationMessage(object instance, object Value)
+        {
+            var that = (global::KanbanFiles.ViewModels.MainViewModel)instance;
+            that.NotificationMessage = (global::System.String)Value;
+        }
+        private object get_38_MainViewModel_NotificationSeverity(object instance)
+        {
+            var that = (global::KanbanFiles.ViewModels.MainViewModel)instance;
+            return that.NotificationSeverity;
+        }
+        private void set_38_MainViewModel_NotificationSeverity(object instance, object Value)
+        {
+            var that = (global::KanbanFiles.ViewModels.MainViewModel)instance;
+            that.NotificationSeverity = (global::Microsoft.UI.Xaml.Controls.InfoBarSeverity)Value;
+        }
+        private object get_39_MainViewModel_OpenFolderCommand(object instance)
         {
             var that = (global::KanbanFiles.ViewModels.MainViewModel)instance;
             return that.OpenFolderCommand;
         }
-        private object get_36_MainViewModel_AddColumnCommand(object instance)
+        private object get_40_MainViewModel_AddColumnCommand(object instance)
         {
             var that = (global::KanbanFiles.ViewModels.MainViewModel)instance;
             return that.AddColumnCommand;
         }
-        private object get_37_TreeViewNode_Children(object instance)
+        private object get_41_InfoBar_Content(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.Content;
+        }
+        private void set_41_InfoBar_Content(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            that.Content = (global::System.Object)Value;
+        }
+        private object get_42_InfoBar_IsOpen(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.IsOpen;
+        }
+        private void set_42_InfoBar_IsOpen(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            that.IsOpen = (global::System.Boolean)Value;
+        }
+        private object get_43_InfoBar_Title(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.Title;
+        }
+        private void set_43_InfoBar_Title(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            that.Title = (global::System.String)Value;
+        }
+        private object get_44_InfoBar_Message(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.Message;
+        }
+        private void set_44_InfoBar_Message(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            that.Message = (global::System.String)Value;
+        }
+        private object get_45_InfoBar_Severity(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.Severity;
+        }
+        private void set_45_InfoBar_Severity(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            that.Severity = (global::Microsoft.UI.Xaml.Controls.InfoBarSeverity)Value;
+        }
+        private object get_46_InfoBar_IsClosable(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.IsClosable;
+        }
+        private void set_46_InfoBar_IsClosable(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            that.IsClosable = (global::System.Boolean)Value;
+        }
+        private object get_47_InfoBar_ActionButton(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.ActionButton;
+        }
+        private void set_47_InfoBar_ActionButton(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            that.ActionButton = (global::Microsoft.UI.Xaml.Controls.Primitives.ButtonBase)Value;
+        }
+        private object get_48_InfoBar_CloseButtonCommand(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.CloseButtonCommand;
+        }
+        private void set_48_InfoBar_CloseButtonCommand(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            that.CloseButtonCommand = (global::System.Windows.Input.ICommand)Value;
+        }
+        private object get_49_InfoBar_CloseButtonCommandParameter(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.CloseButtonCommandParameter;
+        }
+        private void set_49_InfoBar_CloseButtonCommandParameter(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            that.CloseButtonCommandParameter = (global::System.Object)Value;
+        }
+        private object get_50_InfoBar_CloseButtonStyle(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.CloseButtonStyle;
+        }
+        private void set_50_InfoBar_CloseButtonStyle(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            that.CloseButtonStyle = (global::Microsoft.UI.Xaml.Style)Value;
+        }
+        private object get_51_InfoBar_ContentTemplate(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.ContentTemplate;
+        }
+        private void set_51_InfoBar_ContentTemplate(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            that.ContentTemplate = (global::Microsoft.UI.Xaml.DataTemplate)Value;
+        }
+        private object get_52_InfoBar_IconSource(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.IconSource;
+        }
+        private void set_52_InfoBar_IconSource(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            that.IconSource = (global::Microsoft.UI.Xaml.Controls.IconSource)Value;
+        }
+        private object get_53_InfoBar_IsIconVisible(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.IsIconVisible;
+        }
+        private void set_53_InfoBar_IsIconVisible(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            that.IsIconVisible = (global::System.Boolean)Value;
+        }
+        private object get_54_InfoBar_TemplateSettings(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.InfoBar)instance;
+            return that.TemplateSettings;
+        }
+        private object get_55_TreeViewNode_Children(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Children;
         }
-        private object get_38_TreeViewNode_Content(object instance)
+        private object get_56_TreeViewNode_Content(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Content;
         }
-        private void set_38_TreeViewNode_Content(object instance, object Value)
+        private void set_56_TreeViewNode_Content(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             that.Content = (global::System.Object)Value;
         }
-        private object get_39_TreeViewNode_Depth(object instance)
+        private object get_57_TreeViewNode_Depth(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Depth;
         }
-        private object get_40_TreeViewNode_HasChildren(object instance)
+        private object get_58_TreeViewNode_HasChildren(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.HasChildren;
         }
-        private object get_41_TreeViewNode_HasUnrealizedChildren(object instance)
+        private object get_59_TreeViewNode_HasUnrealizedChildren(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.HasUnrealizedChildren;
         }
-        private void set_41_TreeViewNode_HasUnrealizedChildren(object instance, object Value)
+        private void set_59_TreeViewNode_HasUnrealizedChildren(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             that.HasUnrealizedChildren = (global::System.Boolean)Value;
         }
-        private object get_42_TreeViewNode_IsExpanded(object instance)
+        private object get_60_TreeViewNode_IsExpanded(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.IsExpanded;
         }
-        private void set_42_TreeViewNode_IsExpanded(object instance, object Value)
+        private void set_60_TreeViewNode_IsExpanded(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             that.IsExpanded = (global::System.Boolean)Value;
         }
-        private object get_43_TreeViewNode_Parent(object instance)
+        private object get_61_TreeViewNode_Parent(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Parent;
@@ -1315,62 +1593,184 @@ namespace KanbanFiles.KanbanFiles_XamlTypeInfo
                 xamlMember.Getter = get_34_MainViewModel_IsLoaded;
                 xamlMember.Setter = set_34_MainViewModel_IsLoaded;
                 break;
+            case "KanbanFiles.ViewModels.MainViewModel.IsNotificationVisible":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("KanbanFiles.ViewModels.MainViewModel");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "IsNotificationVisible", "Boolean");
+                xamlMember.Getter = get_35_MainViewModel_IsNotificationVisible;
+                xamlMember.Setter = set_35_MainViewModel_IsNotificationVisible;
+                break;
+            case "KanbanFiles.ViewModels.MainViewModel.NotificationTitle":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("KanbanFiles.ViewModels.MainViewModel");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "NotificationTitle", "String");
+                xamlMember.Getter = get_36_MainViewModel_NotificationTitle;
+                xamlMember.Setter = set_36_MainViewModel_NotificationTitle;
+                break;
+            case "KanbanFiles.ViewModels.MainViewModel.NotificationMessage":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("KanbanFiles.ViewModels.MainViewModel");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "NotificationMessage", "String");
+                xamlMember.Getter = get_37_MainViewModel_NotificationMessage;
+                xamlMember.Setter = set_37_MainViewModel_NotificationMessage;
+                break;
+            case "KanbanFiles.ViewModels.MainViewModel.NotificationSeverity":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("KanbanFiles.ViewModels.MainViewModel");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "NotificationSeverity", "Microsoft.UI.Xaml.Controls.InfoBarSeverity");
+                xamlMember.Getter = get_38_MainViewModel_NotificationSeverity;
+                xamlMember.Setter = set_38_MainViewModel_NotificationSeverity;
+                break;
             case "KanbanFiles.ViewModels.MainViewModel.OpenFolderCommand":
                 userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("KanbanFiles.ViewModels.MainViewModel");
                 xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "OpenFolderCommand", "CommunityToolkit.Mvvm.Input.IRelayCommand");
-                xamlMember.Getter = get_35_MainViewModel_OpenFolderCommand;
+                xamlMember.Getter = get_39_MainViewModel_OpenFolderCommand;
                 xamlMember.SetIsReadOnly();
                 break;
             case "KanbanFiles.ViewModels.MainViewModel.AddColumnCommand":
                 userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("KanbanFiles.ViewModels.MainViewModel");
                 xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "AddColumnCommand", "CommunityToolkit.Mvvm.Input.IRelayCommand");
-                xamlMember.Getter = get_36_MainViewModel_AddColumnCommand;
+                xamlMember.Getter = get_40_MainViewModel_AddColumnCommand;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.Content":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "Content", "Object");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_41_InfoBar_Content;
+                xamlMember.Setter = set_41_InfoBar_Content;
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.IsOpen":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "IsOpen", "Boolean");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_42_InfoBar_IsOpen;
+                xamlMember.Setter = set_42_InfoBar_IsOpen;
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.Title":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "Title", "String");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_43_InfoBar_Title;
+                xamlMember.Setter = set_43_InfoBar_Title;
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.Message":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "Message", "String");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_44_InfoBar_Message;
+                xamlMember.Setter = set_44_InfoBar_Message;
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.Severity":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "Severity", "Microsoft.UI.Xaml.Controls.InfoBarSeverity");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_45_InfoBar_Severity;
+                xamlMember.Setter = set_45_InfoBar_Severity;
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.IsClosable":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "IsClosable", "Boolean");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_46_InfoBar_IsClosable;
+                xamlMember.Setter = set_46_InfoBar_IsClosable;
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.ActionButton":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "ActionButton", "Microsoft.UI.Xaml.Controls.Primitives.ButtonBase");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_47_InfoBar_ActionButton;
+                xamlMember.Setter = set_47_InfoBar_ActionButton;
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.CloseButtonCommand":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "CloseButtonCommand", "System.Windows.Input.ICommand");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_48_InfoBar_CloseButtonCommand;
+                xamlMember.Setter = set_48_InfoBar_CloseButtonCommand;
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.CloseButtonCommandParameter":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "CloseButtonCommandParameter", "Object");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_49_InfoBar_CloseButtonCommandParameter;
+                xamlMember.Setter = set_49_InfoBar_CloseButtonCommandParameter;
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.CloseButtonStyle":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "CloseButtonStyle", "Microsoft.UI.Xaml.Style");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_50_InfoBar_CloseButtonStyle;
+                xamlMember.Setter = set_50_InfoBar_CloseButtonStyle;
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.ContentTemplate":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "ContentTemplate", "Microsoft.UI.Xaml.DataTemplate");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_51_InfoBar_ContentTemplate;
+                xamlMember.Setter = set_51_InfoBar_ContentTemplate;
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.IconSource":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "IconSource", "Microsoft.UI.Xaml.Controls.IconSource");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_52_InfoBar_IconSource;
+                xamlMember.Setter = set_52_InfoBar_IconSource;
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.IsIconVisible":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "IsIconVisible", "Boolean");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_53_InfoBar_IsIconVisible;
+                xamlMember.Setter = set_53_InfoBar_IsIconVisible;
+                break;
+            case "Microsoft.UI.Xaml.Controls.InfoBar.TemplateSettings":
+                userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.InfoBar");
+                xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "TemplateSettings", "Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_54_InfoBar_TemplateSettings;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Children":
                 userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "Children", "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>");
-                xamlMember.Getter = get_37_TreeViewNode_Children;
+                xamlMember.Getter = get_55_TreeViewNode_Children;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Content":
                 userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "Content", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_38_TreeViewNode_Content;
-                xamlMember.Setter = set_38_TreeViewNode_Content;
+                xamlMember.Getter = get_56_TreeViewNode_Content;
+                xamlMember.Setter = set_56_TreeViewNode_Content;
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Depth":
                 userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "Depth", "Int32");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_39_TreeViewNode_Depth;
+                xamlMember.Getter = get_57_TreeViewNode_Depth;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.HasChildren":
                 userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "HasChildren", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_40_TreeViewNode_HasChildren;
+                xamlMember.Getter = get_58_TreeViewNode_HasChildren;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.HasUnrealizedChildren":
                 userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "HasUnrealizedChildren", "Boolean");
-                xamlMember.Getter = get_41_TreeViewNode_HasUnrealizedChildren;
-                xamlMember.Setter = set_41_TreeViewNode_HasUnrealizedChildren;
+                xamlMember.Getter = get_59_TreeViewNode_HasUnrealizedChildren;
+                xamlMember.Setter = set_59_TreeViewNode_HasUnrealizedChildren;
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.IsExpanded":
                 userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "IsExpanded", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_42_TreeViewNode_IsExpanded;
-                xamlMember.Setter = set_42_TreeViewNode_IsExpanded;
+                xamlMember.Getter = get_60_TreeViewNode_IsExpanded;
+                xamlMember.Setter = set_60_TreeViewNode_IsExpanded;
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Parent":
                 userType = (global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::KanbanFiles.KanbanFiles_XamlTypeInfo.XamlMember(this, "Parent", "Microsoft.UI.Xaml.Controls.TreeViewNode");
-                xamlMember.Getter = get_43_TreeViewNode_Parent;
+                xamlMember.Getter = get_61_TreeViewNode_Parent;
                 xamlMember.SetIsReadOnly();
                 break;
             }

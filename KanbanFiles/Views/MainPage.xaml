@@ -13,11 +13,18 @@
     <Page.DataContext>
         <viewmodels:MainViewModel x:Name="ViewModel" />
     </Page.DataContext>
+    
+    <Page.KeyboardAccelerators>
+        <KeyboardAccelerator Modifiers="Control" Key="O" Invoked="OpenFolder_Invoked" />
+        <KeyboardAccelerator Modifiers="Control,Shift" Key="N" Invoked="NewColumn_Invoked" />
+        <KeyboardAccelerator Key="F5" Invoked="Refresh_Invoked" />
+    </Page.KeyboardAccelerators>
 
     <Grid>
         <!-- Main Board View -->
         <Grid Visibility="{x:Bind ViewModel.IsLoaded, Mode=OneWay}">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
@@ -45,10 +52,20 @@
                         Margin="20,0,0,0" />
                 </CommandBar.Content>
             </CommandBar>
+            
+            <!-- Notification InfoBar -->
+            <InfoBar Grid.Row="1"
+                     x:Name="NotificationBar"
+                     IsOpen="{x:Bind ViewModel.IsNotificationVisible, Mode=TwoWay}"
+                     Title="{x:Bind ViewModel.NotificationTitle, Mode=OneWay}"
+                     Message="{x:Bind ViewModel.NotificationMessage, Mode=OneWay}"
+                     Severity="{x:Bind ViewModel.NotificationSeverity, Mode=OneWay}"
+                     IsClosable="True"
+                     Margin="16,8" />
 
             <!-- Horizontal ScrollViewer for Columns -->
             <ScrollViewer 
-                Grid.Row="1"
+                Grid.Row="2"
                 HorizontalScrollBarVisibility="Auto"
                 VerticalScrollBarVisibility="Disabled"
                 HorizontalScrollMode="Enabled"

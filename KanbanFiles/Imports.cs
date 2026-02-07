@@ -2,6 +2,7 @@ global using CommunityToolkit.Mvvm.ComponentModel;
 global using CommunityToolkit.Mvvm.Input;
 global using CommunityToolkit.Mvvm.Messaging;
 
+global using KanbanFiles.Messages;
 global using KanbanFiles.Models;
 global using KanbanFiles.Services;
 global using KanbanFiles.ViewModels;

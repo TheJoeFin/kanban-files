@@ -7,7 +7,7 @@ public partial class KanbanItemViewModel : BaseViewModel
 {
     private readonly FileSystemService _fileSystemService;
     private readonly BoardConfigService _boardConfigService;
-    private readonly Models.Board _board;
+    private readonly Board _board;
     private ColumnViewModel _parentColumn;
     private readonly FileWatcherService? _fileWatcherService;
     private readonly INotificationService? _notificationService;
@@ -30,9 +30,8 @@ public partial class KanbanItemViewModel : BaseViewModel
 
     public event EventHandler? DeleteRequested;
     public event EventHandler? RenameRequested;
-    public event EventHandler? OpenDetailRequested;
 
-    public KanbanItemViewModel(Models.KanbanItem item, FileSystemService fileSystemService, BoardConfigService boardConfigService, Models.Board board, ColumnViewModel parentColumn, FileWatcherService? fileWatcherService = null, INotificationService? notificationService = null)
+    public KanbanItemViewModel(KanbanItem item, FileSystemService fileSystemService, BoardConfigService boardConfigService, Board board, ColumnViewModel parentColumn, FileWatcherService? fileWatcherService = null, INotificationService? notificationService = null)
     {
         Title = item.Title;
         ContentPreview = item.ContentPreview;
@@ -51,7 +50,7 @@ public partial class KanbanItemViewModel : BaseViewModel
     [RelayCommand]
     private void OpenDetail()
     {
-        OpenDetailRequested?.Invoke(this, EventArgs.Empty);
+        WeakReferenceMessenger.Default.Send(new Messages.OpenItemDetailMessage(this));
     }
 
     [RelayCommand]
@@ -70,7 +69,7 @@ public partial class KanbanItemViewModel : BaseViewModel
             await _fileSystemService.DeleteItemAsync(FilePath);
 
             // Update item order in config
-            var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(Path.GetDirectoryName(FilePath)));
+            ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(Path.GetDirectoryName(FilePath)));
             if (columnConfig != null)
             {
                 columnConfig.ItemOrder.Remove(FileName);
@@ -105,13 +104,13 @@ public partial class KanbanItemViewModel : BaseViewModel
     {
         try
         {
-            var folderPath = Path.GetDirectoryName(FilePath)!;
-            var sanitizedTitle = SanitizeFileName(newTitle);
-            var newFileName = sanitizedTitle + ".md";
-            var newFilePath = Path.Combine(folderPath, newFileName);
+            string folderPath = Path.GetDirectoryName(FilePath)!;
+            string sanitizedTitle = SanitizeFileName(newTitle);
+            string newFileName = sanitizedTitle + ".md";
+            string newFilePath = Path.Combine(folderPath, newFileName);
 
             // Ensure unique filename
-            var counter = 1;
+            int counter = 1;
             while (File.Exists(newFilePath) && newFilePath != FilePath)
             {
                 newFileName = $"{sanitizedTitle}-{counter}.md";
@@ -120,10 +119,10 @@ public partial class KanbanItemViewModel : BaseViewModel
             }
 
             // Read content
-            var content = await _fileSystemService.ReadItemContentAsync(FilePath);
+            string content = await _fileSystemService.ReadItemContentAsync(FilePath);
 
             // Update first line if it's a heading
-            var lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.None);
+            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.None);
             if (lines.Length > 0 && lines[0].StartsWith("# "))
             {
                 lines[0] = $"# {newTitle}";
@@ -152,10 +151,10 @@ public partial class KanbanItemViewModel : BaseViewModel
             }
 
             // Update config
-            var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(folderPath));
+            ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(folderPath));
             if (columnConfig != null)
             {
-                var index = columnConfig.ItemOrder.IndexOf(FileName);
+                int index = columnConfig.ItemOrder.IndexOf(FileName);
                 if (index >= 0)
                 {
                     columnConfig.ItemOrder[index] = newFileName;
@@ -195,8 +194,8 @@ public partial class KanbanItemViewModel : BaseViewModel
 
     private string SanitizeFileName(string fileName)
     {
-        var invalid = Path.GetInvalidFileNameChars();
-        var sanitized = string.Join("", fileName.Split(invalid, StringSplitOptions.RemoveEmptyEntries));
+        char[] invalid = Path.GetInvalidFileNameChars();
+        string sanitized = string.Join("", fileName.Split(invalid, StringSplitOptions.RemoveEmptyEntries));
         return string.IsNullOrWhiteSpace(sanitized) ? "untitled" : sanitized;
     }
 }

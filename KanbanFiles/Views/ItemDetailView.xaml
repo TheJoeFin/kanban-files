@@ -2,16 +2,155 @@
     x:Class="KanbanFiles.Views.ItemDetailView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:KanbanFiles.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:converters="using:KanbanFiles.Converters"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </UserControl.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <TextBlock Text="Item Detail View" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--  Toolbar  -->
+        <Grid
+            Grid.Row="0"
+            Padding="12,8"
+            Background="{ThemeResource LayerFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="0,0,0,1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!--  Back button and title  -->
+            <StackPanel
+                Grid.Column="0"
+                Orientation="Horizontal"
+                Spacing="12">
+                <Button
+                    x:Name="BackButton"
+                    Width="36"
+                    Height="36"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Click="BackButton_Click"
+                    ToolTipService.ToolTip="Back to board (Esc)">
+                    <FontIcon FontSize="16" Glyph="&#xE72B;" />
+                </Button>
+                <TextBlock
+                    x:Name="TitleText"
+                    VerticalAlignment="Center"
+                    FontSize="18"
+                    FontWeight="SemiBold"
+                    Text="{Binding Title, Mode=OneWay}"
+                    TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+
+            <!--  Formatting toolbar  -->
+            <StackPanel
+                Grid.Column="1"
+                Margin="24,0,0,0"
+                HorizontalAlignment="Left"
+                Orientation="Horizontal"
+                Spacing="4">
+                <Button
+                    Width="32"
+                    Height="32"
+                    Padding="0"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Click="BoldButton_Click"
+                    ToolTipService.ToolTip="Bold (Ctrl+B)">
+                    <FontIcon FontSize="14" Glyph="&#xE8DD;" />
+                </Button>
+                <Button
+                    Width="32"
+                    Height="32"
+                    Padding="0"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Click="ItalicButton_Click"
+                    ToolTipService.ToolTip="Italic (Ctrl+I)">
+                    <FontIcon FontSize="14" Glyph="&#xE8DB;" />
+                </Button>
+                <Button
+                    Width="32"
+                    Height="32"
+                    Padding="0"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Click="LinkButton_Click"
+                    ToolTipService.ToolTip="Insert Link (Ctrl+K)">
+                    <FontIcon FontSize="14" Glyph="&#xE71B;" />
+                </Button>
+            </StackPanel>
+
+            <!--  Save status  -->
+            <StackPanel
+                Grid.Column="2"
+                Orientation="Horizontal"
+                Spacing="8">
+                <TextBlock
+                    x:Name="SaveStatusText"
+                    VerticalAlignment="Center"
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Button
+                    x:Name="SaveButton"
+                    Height="32"
+                    VerticalAlignment="Center"
+                    Click="SaveButton_Click"
+                    Content="Save"
+                    Style="{StaticResource AccentButtonStyle}"
+                    ToolTipService.ToolTip="Save (Ctrl+S)"
+                    Visibility="Collapsed" />
+            </StackPanel>
+        </Grid>
+
+        <!--  Split Editor / Preview  -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!--  Markdown Editor  -->
+            <Grid Grid.Column="0" Padding="0">
+                <TextBox
+                    x:Name="EditorTextBox"
+                    Padding="16"
+                    AcceptsReturn="True"
+                    BorderThickness="0"
+                    CornerRadius="0"
+                    FontFamily="Cascadia Code, Consolas, Courier New"
+                    FontSize="14"
+                    KeyDown="EditorTextBox_KeyDown"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    TextChanged="EditorTextBox_TextChanged"
+                    TextWrapping="Wrap" />
+            </Grid>
+
+            <!--  Separator  -->
+            <Border
+                Grid.Column="0"
+                Width="1"
+                HorizontalAlignment="Right"
+                Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+
+            <!--  Markdown Preview  -->
+            <Grid Grid.Column="1" Padding="0">
+                <WebView2 x:Name="PreviewWebView" Loaded="PreviewWebView_Loaded" />
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

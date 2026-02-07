@@ -1,6 +1,5 @@
-﻿using System.Collections.ObjectModel;
-using KanbanFiles.Services;
-using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Dispatching;
+using System.Collections.ObjectModel;
 
 namespace KanbanFiles.ViewModels
 {
@@ -25,15 +24,15 @@ namespace KanbanFiles.ViewModels
             ((NotificationService)_notificationService).SetMainViewModel(this);
             _focusManagerService = new FocusManagerService();
             _recentFoldersService = new RecentFoldersService();
-            Columns = new ObservableCollection<ColumnViewModel>();
-            RecentFolders = new ObservableCollection<string>();
+            Columns = [];
+            RecentFolders = [];
             _ = LoadRecentFoldersAsync();
         }
 
         public ObservableCollection<ColumnViewModel> Columns { get; }
-        
+
         public ObservableCollection<string> RecentFolders { get; }
-        
+
         public bool HasRecentFolders => RecentFolders.Count > 0;
 
         [ObservableProperty]
@@ -41,18 +40,26 @@ namespace KanbanFiles.ViewModels
 
         [ObservableProperty]
         private bool _isLoaded = false;
-        
+
         [ObservableProperty]
         private bool _isNotificationVisible = false;
-        
+
         [ObservableProperty]
         private string _notificationTitle = string.Empty;
-        
+
         [ObservableProperty]
         private string _notificationMessage = string.Empty;
-        
+
         [ObservableProperty]
         private InfoBarSeverity _notificationSeverity = InfoBarSeverity.Informational;
+
+        [ObservableProperty]
+        private bool _isItemDetailOpen = false;
+
+        [ObservableProperty]
+        private ItemDetailViewModel? _currentItemDetail;
+
+        private KanbanItemViewModel? _currentKanbanItem;
 
         public event EventHandler? OpenFolderRequested;
         public event EventHandler<string>? AddColumnRequested;
@@ -67,9 +74,9 @@ namespace KanbanFiles.ViewModels
         {
             // Stop any existing file watcher
             _fileWatcherService?.Dispose();
-            
+
             _board = await _boardConfigService.LoadOrInitializeAsync(folderPath);
-            
+
             // Check if config was corrupted and recovered
             if (_boardConfigService.WasConfigCorrupted)
             {
@@ -81,7 +88,7 @@ namespace KanbanFiles.ViewModels
             }
 
             // Start file watcher first
-            var dispatcher = App.MainDispatcher;
+            DispatcherQueue? dispatcher = App.MainDispatcher;
             if (dispatcher != null)
             {
                 _fileWatcherService = new FileWatcherService(_board.RootPath, dispatcher);
@@ -94,23 +101,23 @@ namespace KanbanFiles.ViewModels
                 _fileWatcherService.Start();
             }
 
-            var columns = await _fileSystemService.EnumerateColumnsAsync(_board);
-            
+            List<Column> columns = await _fileSystemService.EnumerateColumnsAsync(_board);
+
             Columns.Clear();
-            foreach (var column in columns)
+            foreach (Column column in columns)
             {
-                var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService, _notificationService);
+                ColumnViewModel columnViewModel = new(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService, _notificationService);
                 columnViewModel.DeleteRequested += OnColumnDeleteRequested;
-                
+
                 // Load groups and populate UngroupedItems/Groups collections
                 await columnViewModel.LoadItemsAsync();
-                
+
                 Columns.Add(columnViewModel);
             }
-            
+
             BoardName = _board.Name;
             IsLoaded = true;
-            
+
             // Add to recent folders after successful load
             try
             {
@@ -135,53 +142,53 @@ namespace KanbanFiles.ViewModels
 
             try
             {
-                var sanitizedName = SanitizeFolderName(columnName);
-                var newFolderPath = Path.Combine(_board.RootPath, sanitizedName);
+                string sanitizedName = SanitizeFolderName(columnName);
+                string newFolderPath = Path.Combine(_board.RootPath, sanitizedName);
 
                 // Suppress the folder watcher event
                 _fileWatcherService?.SuppressNextEvent(newFolderPath);
 
                 await _fileSystemService.CreateColumnFolderAsync(_board.RootPath, sanitizedName);
 
-                var newColumnConfig = new Models.ColumnConfig
+                ColumnConfig newColumnConfig = new()
                 {
                     FolderName = sanitizedName,
                     DisplayName = columnName,
                     SortOrder = _board.Columns.Count,
-                    ItemOrder = new List<string>()
+                    ItemOrder = []
                 };
 
                 _board.Columns.Add(newColumnConfig);
                 await _boardConfigService.SaveAsync(_board);
 
-                var column = new Models.Column
+                Column column = new()
                 {
                     Name = columnName,
                     FolderPath = newFolderPath,
                     SortOrder = newColumnConfig.SortOrder
                 };
 
-                var columnViewModel = new ColumnViewModel(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService, _notificationService);
+                ColumnViewModel columnViewModel = new(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService, _notificationService);
                 columnViewModel.DeleteRequested += OnColumnDeleteRequested;
                 Columns.Add(columnViewModel);
             }
             catch (UnauthorizedAccessException)
             {
-                ShowNotification("Permission Denied", 
-                    $"Cannot create column '{columnName}'. Check file permissions.", 
+                ShowNotification("Permission Denied",
+                    $"Cannot create column '{columnName}'. Check file permissions.",
                     InfoBarSeverity.Error);
             }
             catch (IOException ex)
             {
-                ShowNotification("Error Creating Column", 
-                    ex.Message, 
+                ShowNotification("Error Creating Column",
+                    ex.Message,
                     InfoBarSeverity.Error);
             }
         }
 
         private void OnColumnDeleteRequested(object? sender, string folderPath)
         {
-            var columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == folderPath);
+            ColumnViewModel? columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == folderPath);
             if (columnViewModel != null)
             {
                 Columns.Remove(columnViewModel);
@@ -193,7 +200,7 @@ namespace KanbanFiles.ViewModels
             if (_board == null) return;
 
             // Get current index
-            var currentIndex = Columns.IndexOf(sourceColumn);
+            int currentIndex = Columns.IndexOf(sourceColumn);
             if (currentIndex == -1) return;
 
             // Adjust target index if moving down
@@ -212,23 +219,20 @@ namespace KanbanFiles.ViewModels
             // Update SortOrder for all columns
             for (int i = 0; i < Columns.Count; i++)
             {
-                var columnViewModel = Columns[i];
-                var folderName = Path.GetFileName(columnViewModel.FolderPath);
-                var columnConfig = _board.Columns.FirstOrDefault(c => c.FolderName == folderName);
-                if (columnConfig != null)
-                {
-                    columnConfig.SortOrder = i;
-                }
+                ColumnViewModel columnViewModel = Columns[i];
+                string folderName = Path.GetFileName(columnViewModel.FolderPath);
+                ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => c.FolderName == folderName);
+                columnConfig?.SortOrder = i;
             }
 
             // Save to config
             await _boardConfigService.SaveAsync(_board);
         }
 
-        private string SanitizeFolderName(string name)
+        private static string SanitizeFolderName(string name)
         {
-            var invalid = Path.GetInvalidFileNameChars();
-            var sanitized = string.Join("", name.Split(invalid, StringSplitOptions.RemoveEmptyEntries));
+            char[] invalid = Path.GetInvalidFileNameChars();
+            string sanitized = string.Join("", name.Split(invalid, StringSplitOptions.RemoveEmptyEntries));
             return string.IsNullOrWhiteSpace(sanitized) ? "New Column" : sanitized;
         }
 
@@ -237,20 +241,20 @@ namespace KanbanFiles.ViewModels
             if (_board == null) return;
 
             // Find the column for this item
-            var columnPath = Path.GetDirectoryName(e.FilePath);
+            string? columnPath = Path.GetDirectoryName(e.FilePath);
             if (columnPath == null) return;
 
-            var columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
+            ColumnViewModel? columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
             if (columnViewModel == null) return;
 
             // Read the item content
-            var content = await _fileSystemService.ReadItemContentAsync(e.FilePath);
-            var fileName = Path.GetFileName(e.FilePath);
-            var title = Path.GetFileNameWithoutExtension(fileName);
-            var preview = FileSystemService.GenerateContentPreview(content);
+            string content = await _fileSystemService.ReadItemContentAsync(e.FilePath);
+            string fileName = Path.GetFileName(e.FilePath);
+            string title = Path.GetFileNameWithoutExtension(fileName);
+            string preview = FileSystemService.GenerateContentPreview(content);
 
             // Create the item model
-            var itemModel = new Models.KanbanItem
+            KanbanItem itemModel = new()
             {
                 Title = title,
                 ContentPreview = preview,
@@ -261,15 +265,15 @@ namespace KanbanFiles.ViewModels
             };
 
             // Create the item viewmodel
-            var item = new KanbanItemViewModel(itemModel, _fileSystemService, _boardConfigService, _board, columnViewModel, _fileWatcherService, _notificationService);
+            KanbanItemViewModel item = new(itemModel, _fileSystemService, _boardConfigService, _board, columnViewModel, _fileWatcherService, _notificationService);
 
             // Add to column
             columnViewModel.Items.Add(item);
-            
+
             // Add to UI-bound collection based on group membership
             if (!string.IsNullOrEmpty(itemModel.GroupName))
             {
-                var group = columnViewModel.Groups.FirstOrDefault(g => g.Name == itemModel.GroupName);
+                GroupViewModel? group = columnViewModel.Groups.FirstOrDefault(g => g.Name == itemModel.GroupName);
                 group?.Items.Add(item);
             }
             else
@@ -278,8 +282,8 @@ namespace KanbanFiles.ViewModels
             }
 
             // Update ItemOrder in config
-            var folderName = Path.GetFileName(columnPath);
-            var columnConfig = _board.Columns.FirstOrDefault(c => c.FolderName == folderName);
+            string folderName = Path.GetFileName(columnPath);
+            ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => c.FolderName == folderName);
             if (columnConfig != null)
             {
                 columnConfig.ItemOrder.Add(fileName);
@@ -292,21 +296,21 @@ namespace KanbanFiles.ViewModels
             if (_board == null) return;
 
             // Find the column and item
-            var columnPath = Path.GetDirectoryName(e.FilePath);
+            string? columnPath = Path.GetDirectoryName(e.FilePath);
             if (columnPath == null) return;
 
-            var columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
+            ColumnViewModel? columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
             if (columnViewModel == null) return;
 
-            var fileName = Path.GetFileName(e.FilePath);
-            var item = columnViewModel.Items.FirstOrDefault(i => i.FileName == fileName);
+            string fileName = Path.GetFileName(e.FilePath);
+            KanbanItemViewModel? item = columnViewModel.Items.FirstOrDefault(i => i.FileName == fileName);
             if (item != null)
             {
                 columnViewModel.Items.Remove(item);
 
                 // Update ItemOrder in config
-                var folderName = Path.GetFileName(columnPath);
-                var columnConfig = _board.Columns.FirstOrDefault(c => c.FolderName == folderName);
+                string folderName = Path.GetFileName(columnPath);
+                ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => c.FolderName == folderName);
                 if (columnConfig != null)
                 {
                     columnConfig.ItemOrder.Remove(fileName);
@@ -319,10 +323,10 @@ namespace KanbanFiles.ViewModels
         {
             if (_board == null) return;
 
-            var oldFileName = Path.GetFileName(e.OldFilePath);
-            var newFileName = Path.GetFileName(e.NewFilePath);
-            var oldExt = Path.GetExtension(e.OldFilePath);
-            var newExt = Path.GetExtension(e.NewFilePath);
+            string oldFileName = Path.GetFileName(e.OldFilePath);
+            string newFileName = Path.GetFileName(e.NewFilePath);
+            string oldExt = Path.GetExtension(e.OldFilePath);
+            string newExt = Path.GetExtension(e.NewFilePath);
 
             // Handle edge case: non-.md → .md (treat as create)
             if (oldExt != ".md" && newExt == ".md")
@@ -339,13 +343,13 @@ namespace KanbanFiles.ViewModels
             }
 
             // Normal rename within .md files
-            var columnPath = Path.GetDirectoryName(e.NewFilePath);
+            string? columnPath = Path.GetDirectoryName(e.NewFilePath);
             if (columnPath == null) return;
 
-            var columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
+            ColumnViewModel? columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
             if (columnViewModel == null) return;
 
-            var item = columnViewModel.Items.FirstOrDefault(i => i.FileName == oldFileName);
+            KanbanItemViewModel? item = columnViewModel.Items.FirstOrDefault(i => i.FileName == oldFileName);
             if (item != null)
             {
                 item.FileName = newFileName;
@@ -353,11 +357,11 @@ namespace KanbanFiles.ViewModels
                 item.FilePath = e.NewFilePath;
 
                 // Update ItemOrder in config
-                var folderName = Path.GetFileName(columnPath);
-                var columnConfig = _board.Columns.FirstOrDefault(c => c.FolderName == folderName);
+                string folderName = Path.GetFileName(columnPath);
+                ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => c.FolderName == folderName);
                 if (columnConfig != null)
                 {
-                    var index = columnConfig.ItemOrder.IndexOf(oldFileName);
+                    int index = columnConfig.ItemOrder.IndexOf(oldFileName);
                     if (index >= 0)
                     {
                         columnConfig.ItemOrder[index] = newFileName;
@@ -371,15 +375,15 @@ namespace KanbanFiles.ViewModels
         {
             if (_board == null) return;
 
-            var fileName = Path.GetFileName(e.FilePath);
+            string fileName = Path.GetFileName(e.FilePath);
 
             // Handle groups.json changes
             if (fileName == "groups.json")
             {
-                var columnPath = Path.GetDirectoryName(e.FilePath);
+                string? columnPath = Path.GetDirectoryName(e.FilePath);
                 if (columnPath == null) return;
 
-                var columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
+                ColumnViewModel? columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
                 if (columnViewModel != null)
                 {
                     await columnViewModel.LoadGroupsAsync();
@@ -401,18 +405,18 @@ namespace KanbanFiles.ViewModels
                 return;
 
             // Find the column and item
-            var itemColumnPath = Path.GetDirectoryName(e.FilePath);
+            string? itemColumnPath = Path.GetDirectoryName(e.FilePath);
             if (itemColumnPath == null) return;
 
-            var itemColumnViewModel = Columns.FirstOrDefault(c => c.FolderPath == itemColumnPath);
+            ColumnViewModel? itemColumnViewModel = Columns.FirstOrDefault(c => c.FolderPath == itemColumnPath);
             if (itemColumnViewModel == null) return;
 
-            var itemFileName = Path.GetFileName(e.FilePath);
-            var item = itemColumnViewModel.Items.FirstOrDefault(i => i.FileName == itemFileName);
+            string itemFileName = Path.GetFileName(e.FilePath);
+            KanbanItemViewModel? item = itemColumnViewModel.Items.FirstOrDefault(i => i.FileName == itemFileName);
             if (item != null)
             {
                 // Re-read content
-                var content = await _fileSystemService.ReadItemContentAsync(e.FilePath);
+                string content = await _fileSystemService.ReadItemContentAsync(e.FilePath);
                 item.FullContent = content;
                 item.ContentPreview = FileSystemService.GenerateContentPreview(content);
                 item.LastModified = File.GetLastWriteTime(e.FilePath);
@@ -428,38 +432,62 @@ namespace KanbanFiles.ViewModels
         private void OnColumnDeleted(object? sender, ColumnChangedEventArgs e)
         {
             // Find and remove the column
-            var columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == e.FolderPath);
+            ColumnViewModel? columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == e.FolderPath);
             if (columnViewModel != null)
             {
                 Columns.Remove(columnViewModel);
             }
         }
-        
+
+        public (KanbanItemViewModel kanbanItem, ItemDetailViewModel detailVm, FileWatcherService? fileWatcher) OpenItemDetail(KanbanItemViewModel kanbanItemViewModel)
+        {
+            KanbanItem itemModel = new()
+            {
+                Title = kanbanItemViewModel.Title,
+                FilePath = kanbanItemViewModel.FilePath,
+                FileName = kanbanItemViewModel.FileName,
+                ContentPreview = kanbanItemViewModel.ContentPreview,
+                FullContent = kanbanItemViewModel.FullContent,
+                LastModified = kanbanItemViewModel.LastModified
+            };
+
+            ItemDetailViewModel detailViewModel = new(itemModel, _fileSystemService, _fileWatcherService);
+            CurrentItemDetail = detailViewModel;
+            _currentKanbanItem = kanbanItemViewModel;
+            IsItemDetailOpen = true;
+
+            return (kanbanItemViewModel, detailViewModel, _fileWatcherService);
+        }
+
+        public void CloseItemDetail()
+        {
+            IsItemDetailOpen = false;
+            CurrentItemDetail = null;
+            _currentKanbanItem = null;
+        }
+
         public void ShowNotification(string title, string message, InfoBarSeverity severity)
         {
             NotificationTitle = title;
             NotificationMessage = message;
             NotificationSeverity = severity;
             IsNotificationVisible = true;
-            
+
             // Auto-dismiss for informational and success notifications after 5 seconds
-            if (severity == InfoBarSeverity.Informational || 
+            if (severity == InfoBarSeverity.Informational ||
                 severity == InfoBarSeverity.Success)
             {
                 Task.Delay(5000).ContinueWith(_ =>
                 {
-                    if (App.MainDispatcher != null)
-                    {
-                        App.MainDispatcher.TryEnqueue(() => IsNotificationVisible = false);
-                    }
+                    App.MainDispatcher?.TryEnqueue(() => IsNotificationVisible = false);
                 });
             }
         }
-        
+
         public void NavigateLeft()
         {
             if (!IsLoaded || Columns.Count == 0) return;
-            
+
             if (_focusManagerService.FocusedColumnIndex < 0)
             {
                 _focusManagerService.SetFocus(0, 0);
@@ -469,11 +497,11 @@ namespace KanbanFiles.ViewModels
                 _focusManagerService.MoveLeft(Columns.Count);
             }
         }
-        
+
         public void NavigateRight()
         {
             if (!IsLoaded || Columns.Count == 0) return;
-            
+
             if (_focusManagerService.FocusedColumnIndex < 0)
             {
                 _focusManagerService.SetFocus(0, 0);
@@ -483,49 +511,49 @@ namespace KanbanFiles.ViewModels
                 _focusManagerService.MoveRight(Columns.Count);
             }
         }
-        
+
         public void NavigateUp()
         {
             if (!IsLoaded || Columns.Count == 0) return;
-            
-            var colIndex = _focusManagerService.FocusedColumnIndex;
+
+            int colIndex = _focusManagerService.FocusedColumnIndex;
             if (colIndex < 0 || colIndex >= Columns.Count)
             {
                 _focusManagerService.SetFocus(0, 0);
                 return;
             }
-            
-            var column = Columns[colIndex];
+
+            ColumnViewModel column = Columns[colIndex];
             _focusManagerService.MoveUp(column.Items.Count);
         }
-        
+
         public void NavigateDown()
         {
             if (!IsLoaded || Columns.Count == 0) return;
-            
-            var colIndex = _focusManagerService.FocusedColumnIndex;
+
+            int colIndex = _focusManagerService.FocusedColumnIndex;
             if (colIndex < 0 || colIndex >= Columns.Count)
             {
                 _focusManagerService.SetFocus(0, 0);
                 return;
             }
-            
-            var column = Columns[colIndex];
+
+            ColumnViewModel column = Columns[colIndex];
             _focusManagerService.MoveDown(column.Items.Count);
         }
-        
+
         public (int columnIndex, int itemIndex) GetCurrentFocus()
         {
             return (_focusManagerService.FocusedColumnIndex, _focusManagerService.FocusedItemIndex);
         }
-        
+
         private async Task LoadRecentFoldersAsync()
         {
             try
             {
-                var recentFolders = await _recentFoldersService.GetRecentFoldersAsync();
+                List<string> recentFolders = await _recentFoldersService.GetRecentFoldersAsync();
                 RecentFolders.Clear();
-                foreach (var folder in recentFolders)
+                foreach (string folder in recentFolders)
                 {
                     RecentFolders.Add(folder);
                 }
@@ -536,54 +564,54 @@ namespace KanbanFiles.ViewModels
                 System.Diagnostics.Debug.WriteLine($"Failed to load recent folders: {ex.Message}");
             }
         }
-        
+
         [RelayCommand]
         private async Task OpenRecentFolderAsync(string folderPath)
         {
             if (string.IsNullOrEmpty(folderPath))
                 return;
-                
+
             try
             {
                 if (!Directory.Exists(folderPath))
                 {
-                    ShowNotification("Folder Not Found", 
-                        $"The folder '{folderPath}' no longer exists.", 
+                    ShowNotification("Folder Not Found",
+                        $"The folder '{folderPath}' no longer exists.",
                         InfoBarSeverity.Error);
-                    
+
                     await _recentFoldersService.RemoveRecentFolderAsync(folderPath);
                     await LoadRecentFoldersAsync();
                     return;
                 }
-                
+
                 await LoadBoardAsync(folderPath);
             }
             catch (UnauthorizedAccessException)
             {
-                ShowNotification("Permission Denied", 
-                    $"Cannot access folder '{folderPath}'. Check file permissions.", 
+                ShowNotification("Permission Denied",
+                    $"Cannot access folder '{folderPath}'. Check file permissions.",
                     InfoBarSeverity.Error);
             }
             catch (IOException ex)
             {
-                ShowNotification("Error Opening Folder", 
-                    ex.Message, 
+                ShowNotification("Error Opening Folder",
+                    ex.Message,
                     InfoBarSeverity.Error);
             }
             catch (Exception ex)
             {
-                ShowNotification("Error Opening Folder", 
-                    $"An unexpected error occurred: {ex.Message}", 
+                ShowNotification("Error Opening Folder",
+                    $"An unexpected error occurred: {ex.Message}",
                     InfoBarSeverity.Error);
             }
         }
-        
+
         [RelayCommand]
         private async Task RemoveRecentFolderAsync(string folderPath)
         {
             if (string.IsNullOrEmpty(folderPath))
                 return;
-                
+
             try
             {
                 await _recentFoldersService.RemoveRecentFolderAsync(folderPath);
@@ -592,8 +620,8 @@ namespace KanbanFiles.ViewModels
             }
             catch (Exception ex)
             {
-                ShowNotification("Error Removing Folder", 
-                    $"Failed to remove folder from recent list: {ex.Message}", 
+                ShowNotification("Error Removing Folder",
+                    $"Failed to remove folder from recent list: {ex.Message}",
                     InfoBarSeverity.Error);
             }
         }

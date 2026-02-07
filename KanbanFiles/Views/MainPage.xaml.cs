@@ -5,6 +5,8 @@ using Microsoft.UI.Xaml.Input;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
+using Windows.Foundation;
 
 namespace KanbanFiles.Views
 {
@@ -20,6 +22,13 @@ namespace KanbanFiles.Views
             this.InitializeComponent();
             ViewModel.OpenFolderRequested += OnOpenFolderRequested;
             ViewModel.AddColumnRequested += OnAddColumnRequested;
+            ItemDetailViewControl.CloseRequested += OnItemDetailCloseRequested;
+
+            WeakReferenceMessenger.Default.Register<Messages.OpenItemDetailMessage>(this, (r, m) =>
+            {
+                var page = (MainPage)r;
+                page.HandleOpenItemDetail(m.KanbanItemViewModel);
+            });
         }
 
         private async void OnOpenFolderRequested(object? sender, EventArgs e)
@@ -36,7 +45,7 @@ namespace KanbanFiles.Views
                 var hwnd = WindowNative.GetWindowHandle(App.MainWindow);
                 InitializeWithWindow.Initialize(folderPicker, hwnd);
 
-                var folder = await folderPicker.PickSingleFolderAsync();
+                StorageFolder folder = await folderPicker.PickSingleFolderAsync();
                 if (folder != null)
                 {
                     await ViewModel.LoadBoardAsync(folder.Path);
@@ -64,7 +73,7 @@ namespace KanbanFiles.Views
                 XamlRoot = this.XamlRoot
             };
 
-            var result = await dialog.ShowAsync();
+            ContentDialogResult result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
             {
                 var textBox = dialog.Content as TextBox;
@@ -122,6 +131,9 @@ namespace KanbanFiles.Views
 
         private void ColumnsItemsControl_DragOver(object sender, DragEventArgs e)
         {
+            e.AcceptedOperation = DataPackageOperation.Move;
+            return;
+
             // Check if this is a column drag operation
             if (e.DataView.Properties.ContainsKey(ColumnDragDataFormat))
             {
@@ -147,13 +159,13 @@ namespace KanbanFiles.Views
                 return;
 
             // Find the source column
-            var sourceColumn = ViewModel.Columns.FirstOrDefault(c => 
+            ColumnViewModel? sourceColumn = ViewModel.Columns.FirstOrDefault(c => 
                 Path.GetFileName(c.FolderPath) == folderName);
             if (sourceColumn == null)
                 return;
 
             // Calculate drop position
-            var dropPosition = e.GetPosition(ColumnsItemsControl);
+            Point dropPosition = e.GetPosition(ColumnsItemsControl);
             var targetIndex = CalculateDropIndex(dropPosition);
 
             // Don't reorder if dropping in the same position
@@ -204,7 +216,7 @@ namespace KanbanFiles.Views
             args.Handled = true;
             if (ViewModel.Columns.Count > 0)
             {
-                var firstColumn = ViewModel.Columns.FirstOrDefault();
+                ColumnViewModel? firstColumn = ViewModel.Columns.FirstOrDefault();
                 firstColumn?.AddItem();
             }
             else
@@ -227,7 +239,7 @@ namespace KanbanFiles.Views
                 if (!string.IsNullOrEmpty(ViewModel.BoardName) && ViewModel.Columns.Count > 0)
                 {
                     // Get the current folder path from the first column
-                    var firstColumn = ViewModel.Columns.FirstOrDefault();
+                    ColumnViewModel? firstColumn = ViewModel.Columns.FirstOrDefault();
                     if (firstColumn != null)
                     {
                         var boardPath = Path.GetDirectoryName(firstColumn.FolderPath);
@@ -271,6 +283,29 @@ namespace KanbanFiles.Views
         {
             args.Handled = true;
             ViewModel.NavigateDown();
+        }
+
+        private void Escape_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            if (ViewModel.IsItemDetailOpen)
+            {
+                args.Handled = true;
+                ItemDetailViewControl.RequestClose();
+            }
+        }
+
+        private async void HandleOpenItemDetail(KanbanItemViewModel kanbanItemViewModel)
+        {
+            var args = ViewModel.OpenItemDetail(kanbanItemViewModel);
+            ItemDetailOverlay.Visibility = Visibility.Visible;
+            await ItemDetailViewControl.LoadAsync(args.kanbanItem, args.detailVm, args.fileWatcher);
+        }
+
+        private void OnItemDetailCloseRequested(object? sender, EventArgs e)
+        {
+            ItemDetailViewControl.Unload();
+            ItemDetailOverlay.Visibility = Visibility.Collapsed;
+            ViewModel.CloseItemDetail();
         }
         
         private async void RecentFolderButton_Click(object sender, RoutedEventArgs e)

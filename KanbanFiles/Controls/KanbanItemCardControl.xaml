@@ -5,41 +5,42 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:KanbanFiles.ViewModels"
-    mc:Ignorable="d"
-    d:DataContext="{d:DesignInstance Type=viewmodels:KanbanItemViewModel}">
+    d:DataContext="{d:DesignInstance Type=viewmodels:KanbanItemViewModel}"
+    mc:Ignorable="d">
 
     <Border
         x:Name="CardBorder"
-        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-        CornerRadius="8"
         Padding="12"
-        CanDrag="True"
         AllowDrop="True"
-        DragStarting="CardBorder_DragStarting"
+        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+        CanDrag="True"
+        CornerRadius="8"
+        DoubleTapped="CardBorder_DoubleTapped"
         DragOver="CardBorder_DragOver"
+        DragStarting="CardBorder_DragStarting"
         Drop="CardBorder_Drop"
         DropCompleted="CardBorder_DropCompleted"
         PointerEntered="CardBorder_PointerEntered"
         PointerExited="CardBorder_PointerExited">
-        
+
         <Border.Shadow>
             <ThemeShadow />
         </Border.Shadow>
-        
+
         <Border.ContextFlyout>
             <MenuFlyout>
-                <MenuFlyoutItem Text="Open" Click="OpenItem_Click">
+                <MenuFlyoutItem Command="{x:Bind ViewModel.OpenDetailCommand}" Text="Open">
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="&#xE8E5;" />
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Rename" Click="RenameItem_Click">
+                <MenuFlyoutItem Click="RenameItem_Click" Text="Rename">
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="&#xE8AC;" />
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem Text="Delete" Click="DeleteItem_Click">
+                <MenuFlyoutItem Click="DeleteItem_Click" Text="Delete">
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="&#xE74D;" />
                     </MenuFlyoutItem.Icon>
@@ -49,27 +50,27 @@
 
         <StackPanel Spacing="8">
             <TextBlock
-                Text="{x:Bind ViewModel.Title, Mode=OneWay}"
                 FontSize="14"
                 FontWeight="Bold"
                 Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                TextWrapping="WrapWholeWords"
-                TextTrimming="CharacterEllipsis" />
+                Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="WrapWholeWords" />
 
             <TextBlock
-                Text="{x:Bind ViewModel.ContentPreview, Mode=OneWay}"
                 FontSize="12"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                LineHeight="18"
                 MaxLines="2"
-                TextWrapping="Wrap"
+                Text="{x:Bind ViewModel.ContentPreview, Mode=OneWay}"
                 TextTrimming="CharacterEllipsis"
-                LineHeight="18" />
+                TextWrapping="Wrap" />
 
             <TextBlock
-                Text="{x:Bind ViewModel.LastModifiedDisplay, Mode=OneWay}"
+                HorizontalAlignment="Right"
                 FontSize="10"
                 Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                HorizontalAlignment="Right" />
+                Text="{x:Bind ViewModel.LastModifiedDisplay, Mode=OneWay}" />
         </StackPanel>
     </Border>
 </UserControl>

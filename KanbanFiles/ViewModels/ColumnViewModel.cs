@@ -40,7 +40,7 @@ public partial class ColumnViewModel : BaseViewModel
         _fileWatcherService = fileWatcherService;
         _notificationService = notificationService;
 
-        foreach (var item in column.Items)
+        foreach (KanbanItem item in column.Items)
         {
             var itemViewModel = new KanbanItemViewModel(item, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService);
             Items.Add(itemViewModel);
@@ -64,7 +64,7 @@ public partial class ColumnViewModel : BaseViewModel
             _fileWatcherService?.SuppressNextEvent(filePath);
 
             // Update item order in config
-            var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == FolderPath);
+            ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == FolderPath);
             if (columnConfig != null)
             {
                 columnConfig.ItemOrder.Add(fileName);
@@ -72,8 +72,8 @@ public partial class ColumnViewModel : BaseViewModel
             }
 
             // Read the newly created item
-            var items = await _fileSystemService.EnumerateItemsAsync(FolderPath);
-            var newItem = items.FirstOrDefault(i => i.FileName == fileName);
+            List<KanbanItem> items = await _fileSystemService.EnumerateItemsAsync(FolderPath);
+            KanbanItem? newItem = items.FirstOrDefault(i => i.FileName == fileName);
             if (newItem != null)
             {
                 var itemViewModel = new KanbanItemViewModel(newItem, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService);
@@ -82,7 +82,7 @@ public partial class ColumnViewModel : BaseViewModel
                 // Add to UI-bound collection based on group membership
                 if (!string.IsNullOrEmpty(newItem.GroupName))
                 {
-                    var group = Groups.FirstOrDefault(g => g.Name == newItem.GroupName);
+                    GroupViewModel? group = Groups.FirstOrDefault(g => g.Name == newItem.GroupName);
                     group?.Items.Add(itemViewModel);
                 }
                 else
@@ -127,7 +127,7 @@ public partial class ColumnViewModel : BaseViewModel
             await Task.Run(() => Directory.Move(oldFolderPath, newFolderPath));
 
             // Update config
-            var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(oldFolderPath));
+            ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(oldFolderPath));
             if (columnConfig != null)
             {
                 columnConfig.FolderName = sanitizedName;
@@ -170,7 +170,7 @@ public partial class ColumnViewModel : BaseViewModel
             await _fileSystemService.DeleteColumnFolderAsync(FolderPath);
 
             // Update config
-            var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(FolderPath));
+            ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(FolderPath));
             if (columnConfig != null)
             {
                 _board.Columns.Remove(columnConfig);
@@ -196,11 +196,16 @@ public partial class ColumnViewModel : BaseViewModel
     public void RemoveItem(KanbanItemViewModel item)
     {
         Items.Remove(item);
+        UngroupedItems.Remove(item);
+        foreach (GroupViewModel group in Groups)
+        {
+            group.Items.Remove(item);
+        }
     }
 
     public async Task UpdateItemOrderAsync()
     {
-        var columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(FolderPath));
+        ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(FolderPath));
         if (columnConfig != null)
         {
             columnConfig.ItemOrder = Items.Select(i => i.FileName).ToList();
@@ -220,8 +225,8 @@ public partial class ColumnViewModel : BaseViewModel
             // Move the physical file
             var newFilePath = await _fileSystemService.MoveItemAsync(sourceItem.FilePath, FolderPath);
 
-            // Remove from source column
-            sourceColumnViewModel.Items.Remove(sourceItem);
+            // Remove from source column (both flat and UI-bound collections)
+            sourceColumnViewModel.RemoveItem(sourceItem);
 
             // Update the item's parent column and file path
             sourceItem.UpdateParentColumn(this);
@@ -233,6 +238,7 @@ public partial class ColumnViewModel : BaseViewModel
                 targetIndex = Items.Count;
             }
             Items.Insert(targetIndex, sourceItem);
+            UngroupedItems.Add(sourceItem);
 
             // Update item order in both columns
             await sourceColumnViewModel.UpdateItemOrderAsync();
@@ -273,26 +279,26 @@ public partial class ColumnViewModel : BaseViewModel
     public async Task LoadItemsAsync()
     {
         await LoadGroupsAsync();
-        
+
         // Enumerate items from file system
-        var items = await _fileSystemService.EnumerateItemsAsync(FolderPath);
+        List<KanbanItem> items = await _fileSystemService.EnumerateItemsAsync(FolderPath);
         
         // Clear existing items
         Items.Clear();
         UngroupedItems.Clear();
-        foreach (var group in Groups)
+        foreach (GroupViewModel group in Groups)
         {
             group.Items.Clear();
         }
         
         // Create ViewModels and organize into groups
-        foreach (var item in items)
+        foreach (KanbanItem item in items)
         {
             var itemViewModel = new KanbanItemViewModel(item, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService);
             Items.Add(itemViewModel);
-            
+
             // Organize into groups based on group membership
-            var group = Groups.FirstOrDefault(g => g.Name == item.GroupName);
+            GroupViewModel? group = Groups.FirstOrDefault(g => g.Name == item.GroupName);
             if (group != null)
             {
                 group.Items.Add(itemViewModel);
@@ -306,11 +312,11 @@ public partial class ColumnViewModel : BaseViewModel
 
     public async Task LoadGroupsAsync()
     {
-        var groupsConfig = await _groupService.LoadGroupsAsync(FolderPath);
+        GroupsConfig groupsConfig = await _groupService.LoadGroupsAsync(FolderPath);
         
         Groups.Clear();
         
-        foreach (var group in groupsConfig.Groups)
+        foreach (Group group in groupsConfig.Groups)
         {
             var groupViewModel = new GroupViewModel(group.Name)
             {
@@ -334,9 +340,9 @@ public partial class ColumnViewModel : BaseViewModel
     public async Task RenameGroupAsync(string oldName, string newName)
     {
         await _groupService.RenameGroupAsync(FolderPath, oldName, newName);
-        
+
         // Update the group view model
-        var group = Groups.FirstOrDefault(g => g.Name == oldName);
+        GroupViewModel? group = Groups.FirstOrDefault(g => g.Name == oldName);
         if (group != null)
         {
             group.Name = newName;
@@ -345,12 +351,12 @@ public partial class ColumnViewModel : BaseViewModel
 
     public async Task DeleteGroupAsync(string groupName)
     {
-        var group = Groups.FirstOrDefault(g => g.Name == groupName);
+        GroupViewModel? group = Groups.FirstOrDefault(g => g.Name == groupName);
         if (group == null) return;
         
         // Move all items from group to ungrouped
         var itemsToMove = group.Items.ToList();
-        foreach (var item in itemsToMove)
+        foreach (KanbanItemViewModel? item in itemsToMove)
         {
             await MoveItemToGroupAsync(item.FileName, null);
         }
@@ -371,14 +377,14 @@ public partial class ColumnViewModel : BaseViewModel
             // Move to specified group
             await _groupService.AddItemToGroupAsync(FolderPath, groupName, itemFileName);
         }
-        
+
         // Update UI organization
-        var item = Items.FirstOrDefault(i => i.FileName == itemFileName);
+        KanbanItemViewModel? item = Items.FirstOrDefault(i => i.FileName == itemFileName);
         if (item != null)
         {
             // Remove from current location
             UngroupedItems.Remove(item);
-            foreach (var group in Groups)
+            foreach (GroupViewModel group in Groups)
             {
                 group.Items.Remove(item);
             }
@@ -390,7 +396,7 @@ public partial class ColumnViewModel : BaseViewModel
             }
             else
             {
-                var targetGroup = Groups.FirstOrDefault(g => g.Name == groupName);
+                GroupViewModel? targetGroup = Groups.FirstOrDefault(g => g.Name == groupName);
                 targetGroup?.Items.Add(item);
             }
         }

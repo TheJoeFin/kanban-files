@@ -9,4 +9,5 @@ public class KanbanItem
     public string FullContent { get; set; } = string.Empty;
     public string? GroupName { get; set; }
     public DateTime LastModified { get; set; }
+    public bool IsTextFile { get; set; } = true;
 }

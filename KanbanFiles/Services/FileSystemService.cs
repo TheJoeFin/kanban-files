@@ -6,6 +6,27 @@ namespace KanbanFiles.Services;
 public class FileSystemService
 {
     private static readonly string[] ExcludedFiles = { ".kanban.json" };
+    private static readonly HashSet<string> ExcludedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".json" };
+
+    private static readonly HashSet<string> TextFileExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".md", ".markdown", ".txt", ".text", ".log", ".csv", ".tsv",
+        ".xml", ".yaml", ".yml", ".toml", ".ini", ".cfg", ".conf", ".properties",
+        ".html", ".htm", ".css", ".scss", ".less", ".sass",
+        ".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs",
+        ".cs", ".vb", ".fs", ".fsx",
+        ".py", ".rb", ".lua", ".pl", ".pm", ".r",
+        ".java", ".kt", ".kts", ".groovy", ".scala",
+        ".c", ".cpp", ".h", ".hpp", ".cc", ".cxx",
+        ".go", ".rs", ".swift", ".dart",
+        ".sh", ".bash", ".zsh", ".bat", ".cmd", ".ps1", ".psm1",
+        ".sql", ".graphql",
+        ".env", ".gitignore", ".gitattributes", ".editorconfig",
+        ".vue", ".svelte", ".astro",
+        ".rst", ".adoc", ".tex",
+        ".tf", ".hcl", ".cmake", ".makefile",
+        ".sln", ".csproj", ".vbproj", ".fsproj", ".props", ".targets",
+    };
 
     public async Task<List<Column>> EnumerateColumnsAsync(Board board)
     {
@@ -27,7 +48,7 @@ public class FileSystemService
                 SortOrder = columnConfig.SortOrder
             };
 
-            List<KanbanItem> items = await EnumerateItemsAsync(folderPath);
+            List<KanbanItem> items = await EnumerateItemsAsync(folderPath, board.FileFilter);
 
             // Apply item order from config
             var orderedItems = new List<KanbanItem>();
@@ -60,7 +81,7 @@ public class FileSystemService
         return columns;
     }
 
-    public async Task<List<KanbanItem>> EnumerateItemsAsync(string folderPath)
+    public async Task<List<KanbanItem>> EnumerateItemsAsync(string folderPath, FileFilterConfig? filter = null)
     {
         var items = new List<KanbanItem>();
 
@@ -69,18 +90,33 @@ public class FileSystemService
             return items;
         }
 
-        IEnumerable<string> mdFiles = Directory.GetFiles(folderPath, "*.md", SearchOption.TopDirectoryOnly)
+        IEnumerable<string> allFiles = Directory.GetFiles(folderPath, "*", SearchOption.TopDirectoryOnly)
             .Where(path => !IsExcludedFile(Path.GetFileName(path)))
-            .Where(path => !IsHiddenOrSystem(path));
+            .Where(path => !IsExcludedExtension(Path.GetExtension(path)))
+            .Where(path => !IsHiddenOrSystem(path))
+            .Where(path => PassesFilter(path, filter));
 
-        foreach (var filePath in mdFiles)
+        foreach (var filePath in allFiles)
         {
             try
             {
                 var fileName = Path.GetFileName(filePath);
                 var title = Path.GetFileNameWithoutExtension(fileName);
-                var content = await File.ReadAllTextAsync(filePath);
-                var preview = GenerateContentPreview(content);
+                bool isText = IsTextFile(filePath);
+
+                string content = string.Empty;
+                string preview;
+
+                if (isText)
+                {
+                    content = await File.ReadAllTextAsync(filePath);
+                    preview = GenerateContentPreview(content);
+                }
+                else
+                {
+                    preview = GenerateFileTypePreview(filePath);
+                }
+
                 DateTime lastModified = File.GetLastWriteTime(filePath);
 
                 items.Add(new KanbanItem
@@ -90,7 +126,8 @@ public class FileSystemService
                     FilePath = filePath,
                     ContentPreview = preview,
                     FullContent = content,
-                    LastModified = lastModified
+                    LastModified = lastModified,
+                    IsTextFile = isText
                 });
             }
             catch (Exception ex)
@@ -300,13 +337,74 @@ public class FileSystemService
         return string.Join(" ", previewLines);
     }
 
-    private bool IsExcludedFile(string fileName)
+    private static bool IsExcludedFile(string fileName)
     {
         return ExcludedFiles.Contains(fileName, StringComparer.OrdinalIgnoreCase) ||
                fileName.StartsWith(".");
     }
 
-    private bool IsHiddenOrSystem(string filePath)
+    private static bool IsExcludedExtension(string extension)
+    {
+        return ExcludedExtensions.Contains(extension);
+    }
+
+    public static bool IsTextFile(string filePath)
+    {
+        string ext = Path.GetExtension(filePath);
+        return TextFileExtensions.Contains(ext);
+    }
+
+    public static bool PassesFilter(string filePath, FileFilterConfig? filter)
+    {
+        if (filter == null) return true;
+
+        string ext = Path.GetExtension(filePath);
+
+        if (filter.IncludeExtensions.Count > 0)
+        {
+            return filter.IncludeExtensions.Any(e =>
+                string.Equals(ext, NormalizeExtension(e), StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (filter.ExcludeExtensions.Count > 0)
+        {
+            return !filter.ExcludeExtensions.Any(e =>
+                string.Equals(ext, NormalizeExtension(e), StringComparison.OrdinalIgnoreCase));
+        }
+
+        return true;
+    }
+
+    public static string GenerateFileTypePreview(string filePath)
+    {
+        string ext = Path.GetExtension(filePath).TrimStart('.');
+        if (string.IsNullOrEmpty(ext)) ext = "Unknown";
+
+        try
+        {
+            long size = new FileInfo(filePath).Length;
+            string sizeText = size < 1024 ? $"{size} B" :
+                              size < 1048576 ? $"{size / 1024.0:F1} KB" :
+                              $"{size / 1048576.0:F1} MB";
+            return $"{ext.ToUpperInvariant()} file \u00b7 {sizeText}";
+        }
+        catch
+        {
+            return $"{ext.ToUpperInvariant()} file";
+        }
+    }
+
+    private static string NormalizeExtension(string ext)
+    {
+        return ext.StartsWith('.') ? ext : "." + ext;
+    }
+
+    public static bool IsExcludedItemFile(string fileName)
+    {
+        return IsExcludedFile(fileName) || IsExcludedExtension(Path.GetExtension(fileName));
+    }
+
+    private static bool IsHiddenOrSystem(string filePath)
     {
         try
         {

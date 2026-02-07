@@ -129,19 +129,9 @@ public class FileWatcherService : IDisposable
             return;
 
         string ext = Path.GetExtension(e.FullPath);
+        string fileName = Path.GetFileName(e.FullPath);
 
-        if (ext.Equals(".md", StringComparison.OrdinalIgnoreCase))
-        {
-            DebounceEvent(e.FullPath, async () =>
-            {
-                await WaitForFileAvailableAsync(e.FullPath);
-                _dispatcherQueue.TryEnqueue(() =>
-                {
-                    ItemCreated?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
-                });
-            });
-        }
-        else if (ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        if (ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
         {
             DebounceEvent(e.FullPath, async () =>
             {
@@ -151,7 +141,20 @@ public class FileWatcherService : IDisposable
                     ItemContentChanged?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
                 });
             });
+            return;
         }
+
+        // Skip internal/hidden files
+        if (fileName.StartsWith('.')) return;
+
+        DebounceEvent(e.FullPath, async () =>
+        {
+            await WaitForFileAvailableAsync(e.FullPath);
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                ItemCreated?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
+            });
+        });
     }
 
     private void OnFileDeleted(object sender, FileSystemEventArgs e)
@@ -160,21 +163,24 @@ public class FileWatcherService : IDisposable
             return;
 
         string ext = Path.GetExtension(e.FullPath);
+        string fileName = Path.GetFileName(e.FullPath);
 
-        if (ext.Equals(".md", StringComparison.OrdinalIgnoreCase))
-        {
-            _dispatcherQueue.TryEnqueue(() =>
-            {
-                ItemDeleted?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
-            });
-        }
-        else if (ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        if (ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
         {
             _dispatcherQueue.TryEnqueue(() =>
             {
                 ItemContentChanged?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
             });
+            return;
         }
+
+        // Skip internal/hidden files
+        if (fileName.StartsWith('.')) return;
+
+        _dispatcherQueue.TryEnqueue(() =>
+        {
+            ItemDeleted?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
+        });
     }
 
     private void OnFileRenamed(object sender, RenamedEventArgs e)
@@ -185,20 +191,25 @@ public class FileWatcherService : IDisposable
         var oldExt = Path.GetExtension(e.OldFullPath);
         var newExt = Path.GetExtension(e.FullPath);
 
-        if (oldExt.Equals(".md", StringComparison.OrdinalIgnoreCase) || newExt.Equals(".md", StringComparison.OrdinalIgnoreCase))
-        {
-            _dispatcherQueue.TryEnqueue(() =>
-            {
-                ItemRenamed?.Invoke(this, new ItemRenamedEventArgs(e.OldFullPath, e.FullPath));
-            });
-        }
-        else if (oldExt.Equals(".json", StringComparison.OrdinalIgnoreCase) || newExt.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        // JSON file changes → content change (group config)
+        if (oldExt.Equals(".json", StringComparison.OrdinalIgnoreCase) || newExt.Equals(".json", StringComparison.OrdinalIgnoreCase))
         {
             _dispatcherQueue.TryEnqueue(() =>
             {
                 ItemContentChanged?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
             });
+            return;
         }
+
+        // Skip internal/hidden files
+        string oldFileName = Path.GetFileName(e.OldFullPath);
+        string newFileName = Path.GetFileName(e.FullPath);
+        if (oldFileName.StartsWith('.') && newFileName.StartsWith('.')) return;
+
+        _dispatcherQueue.TryEnqueue(() =>
+        {
+            ItemRenamed?.Invoke(this, new ItemRenamedEventArgs(e.OldFullPath, e.FullPath));
+        });
     }
 
     private void OnFileChanged(object sender, FileSystemEventArgs e)

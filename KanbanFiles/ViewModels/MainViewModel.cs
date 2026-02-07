@@ -136,6 +136,34 @@ namespace KanbanFiles.ViewModels
             AddColumnRequested?.Invoke(this, string.Empty);
         }
 
+        [RelayCommand]
+        private void EditFileFilter()
+        {
+            EditFileFilterRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        public FileFilterConfig GetFileFilter()
+        {
+            return _board?.FileFilter ?? new FileFilterConfig();
+        }
+
+        public async Task UpdateFileFilterAsync(FileFilterConfig filter)
+        {
+            if (_board == null) return;
+
+            // Normalize: store null when both lists are empty
+            _board.FileFilter = (filter.IncludeExtensions.Count == 0 && filter.ExcludeExtensions.Count == 0)
+                ? null
+                : filter;
+
+            await _boardConfigService.SaveAsync(_board);
+            await LoadBoardAsync(_board.RootPath);
+
+            ShowNotification("File Filter Updated",
+                "The board has been reloaded with the new file filter.",
+                InfoBarSeverity.Success);
+        }
+
         public async Task CreateColumnAsync(string columnName)
         {
             if (_board == null) return;
@@ -244,14 +272,22 @@ namespace KanbanFiles.ViewModels
             string? columnPath = Path.GetDirectoryName(e.FilePath);
             if (columnPath == null) return;
 
+            string fileName = Path.GetFileName(e.FilePath);
+
+            // Skip excluded files
+            if (FileSystemService.IsExcludedItemFile(fileName)) return;
+
+            // Check file filter
+            if (!FileSystemService.PassesFilter(e.FilePath, _board.FileFilter)) return;
+
             ColumnViewModel? columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
             if (columnViewModel == null) return;
 
             // Read the item content
-            string content = await _fileSystemService.ReadItemContentAsync(e.FilePath);
-            string fileName = Path.GetFileName(e.FilePath);
+            bool isText = FileSystemService.IsTextFile(e.FilePath);
+            string content = isText ? await _fileSystemService.ReadItemContentAsync(e.FilePath) : string.Empty;
             string title = Path.GetFileNameWithoutExtension(fileName);
-            string preview = FileSystemService.GenerateContentPreview(content);
+            string preview = isText ? FileSystemService.GenerateContentPreview(content) : FileSystemService.GenerateFileTypePreview(e.FilePath);
 
             // Create the item model
             KanbanItem itemModel = new()
@@ -261,7 +297,8 @@ namespace KanbanFiles.ViewModels
                 FilePath = e.FilePath,
                 FileName = fileName,
                 FullContent = content,
-                LastModified = File.GetLastWriteTime(e.FilePath)
+                LastModified = File.GetLastWriteTime(e.FilePath),
+                IsTextFile = isText
             };
 
             // Create the item viewmodel
@@ -317,24 +354,22 @@ namespace KanbanFiles.ViewModels
 
             string oldFileName = Path.GetFileName(e.OldFilePath);
             string newFileName = Path.GetFileName(e.NewFilePath);
-            string oldExt = Path.GetExtension(e.OldFilePath);
-            string newExt = Path.GetExtension(e.NewFilePath);
 
-            // Handle edge case: non-.md → .md (treat as create)
-            if (oldExt != ".md" && newExt == ".md")
+            // Hidden → visible: treat as create
+            if (oldFileName.StartsWith('.') && !newFileName.StartsWith('.'))
             {
                 OnItemCreated(sender, new ItemChangedEventArgs(e.NewFilePath));
                 return;
             }
 
-            // Handle edge case: .md → non-.md (treat as delete)
-            if (oldExt == ".md" && newExt != ".md")
+            // Visible → hidden: treat as delete
+            if (!oldFileName.StartsWith('.') && newFileName.StartsWith('.'))
             {
                 OnItemDeleted(sender, new ItemChangedEventArgs(e.OldFilePath));
                 return;
             }
 
-            // Normal rename within .md files
+            // Normal rename
             string? columnPath = Path.GetDirectoryName(e.NewFilePath);
             if (columnPath == null) return;
 
@@ -347,6 +382,7 @@ namespace KanbanFiles.ViewModels
                 item.FileName = newFileName;
                 item.Title = Path.GetFileNameWithoutExtension(newFileName);
                 item.FilePath = e.NewFilePath;
+                item.IsTextFile = FileSystemService.IsTextFile(e.NewFilePath);
 
                 // Update ItemOrder in config
                 string folderName = Path.GetFileName(columnPath);
@@ -360,6 +396,11 @@ namespace KanbanFiles.ViewModels
                         await _boardConfigService.SaveAsync(_board);
                     }
                 }
+            }
+            else
+            {
+                // Item not found by old name - might be a newly visible file
+                OnItemCreated(sender, new ItemChangedEventArgs(e.NewFilePath));
             }
         }
 
@@ -393,11 +434,7 @@ namespace KanbanFiles.ViewModels
                 return;
             }
 
-            // Handle .md file content changes
-            if (Path.GetExtension(e.FilePath) != ".md")
-                return;
-
-            // Find the column and item
+            // Handle item file content changes (all file types)
             string? itemColumnPath = Path.GetDirectoryName(e.FilePath);
             if (itemColumnPath == null) return;
 
@@ -408,10 +445,17 @@ namespace KanbanFiles.ViewModels
             KanbanItemViewModel? item = itemColumnViewModel.Items.FirstOrDefault(i => i.FileName == itemFileName);
             if (item != null)
             {
-                // Re-read content
-                string content = await _fileSystemService.ReadItemContentAsync(e.FilePath);
-                item.FullContent = content;
-                item.ContentPreview = FileSystemService.GenerateContentPreview(content);
+                if (item.IsTextFile)
+                {
+                    // Re-read content
+                    string content = await _fileSystemService.ReadItemContentAsync(e.FilePath);
+                    item.FullContent = content;
+                    item.ContentPreview = FileSystemService.GenerateContentPreview(content);
+                }
+                else
+                {
+                    item.ContentPreview = FileSystemService.GenerateFileTypePreview(e.FilePath);
+                }
                 item.LastModified = File.GetLastWriteTime(e.FilePath);
             }
         }

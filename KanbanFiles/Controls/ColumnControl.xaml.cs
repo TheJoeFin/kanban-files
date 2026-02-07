@@ -352,14 +352,7 @@ public sealed partial class ColumnControl : UserControl
 
         try
         {
-            // Handle group reorder
-            if (e.DataView.Contains("KanbanGroupReorder"))
-            {
-                await HandleGroupReorderDropAsync(e);
-                return;
-            }
-
-            // Handle item drop
+            // Handle item/group drop
             if (!e.DataView.Contains(StandardDataFormats.Text))
             {
                 return;
@@ -382,38 +375,93 @@ public sealed partial class ColumnControl : UserControl
                 return;
             }
 
-            if (dragPayload == null || string.IsNullOrEmpty(dragPayload.FilePath))
+            if (dragPayload == null)
             {
                 return;
             }
 
-            // Detect drop zone (ungrouped or specific group)
-            string? targetGroupName = GetDropTargetGroup(e);
-
-            // Check if this is a move between columns or reorder within same column
-            bool isSameColumn = dragPayload.SourceColumnPath.Equals(targetColumnViewModel.FolderPath, StringComparison.OrdinalIgnoreCase);
-
-            if (isSameColumn)
+            // Determine if this is a group drag or an item drag
+            if (!string.IsNullOrEmpty(dragPayload.GroupName))
             {
-                // Reorder within the same column or move between groups
-                await HandleItemReorderOrGroupMoveAsync(targetColumnViewModel, dragPayload, targetGroupName);
+                await HandleGroupDropAsync(targetColumnViewModel, dragPayload);
             }
-            else
+            else if (!string.IsNullOrEmpty(dragPayload.FilePath))
             {
-                // Move between different columns
-                await HandleMoveAsync(targetColumnViewModel, dragPayload, GetDropIndex(e));
-
-                // If dropping into a group, also assign group membership
-                if (targetGroupName != null)
-                {
-                    string fileName = Path.GetFileName(dragPayload.FilePath);
-                    await targetColumnViewModel.MoveItemToGroupAsync(fileName, targetGroupName);
-                }
+                await HandleItemDropAsync(targetColumnViewModel, dragPayload, e);
             }
         }
         catch (Exception ex)
         {
             await ShowErrorAsync($"Failed to drop item: {ex.Message}");
+        }
+    }
+
+    private async Task HandleGroupDropAsync(ColumnViewModel targetColumnViewModel, DragPayload dragPayload)
+    {
+        bool isSameColumn = dragPayload.SourceColumnPath.Equals(targetColumnViewModel.FolderPath, StringComparison.OrdinalIgnoreCase);
+
+        if (isSameColumn)
+        {
+            // Reorder within the same column
+            GroupViewModel? sourceGroup = targetColumnViewModel.Groups.FirstOrDefault(g => g.Name == dragPayload.GroupName);
+            if (sourceGroup == null) return;
+
+            // For same-column reorder, move to end as a simple default
+            int currentIndex = targetColumnViewModel.Groups.IndexOf(sourceGroup);
+            int dropIndex = targetColumnViewModel.Groups.Count - 1;
+            if (currentIndex != dropIndex)
+            {
+                targetColumnViewModel.Groups.Move(currentIndex, dropIndex);
+                await UpdateGroupOrderAsync(targetColumnViewModel);
+            }
+        }
+        else
+        {
+            // Move group to a different column
+            MainViewModel? mainViewModel = GetMainViewModel();
+            if (mainViewModel == null)
+            {
+                await ShowErrorAsync("Unable to access main board view.");
+                return;
+            }
+
+            ColumnViewModel? sourceColumn = mainViewModel.Columns.FirstOrDefault(c =>
+                c.FolderPath.Equals(dragPayload.SourceColumnPath, StringComparison.OrdinalIgnoreCase));
+
+            if (sourceColumn == null)
+            {
+                await ShowErrorAsync("Source column not found.");
+                return;
+            }
+
+            await targetColumnViewModel.MoveGroupFromColumnAsync(dragPayload.GroupName!, sourceColumn);
+        }
+    }
+
+    private async Task HandleItemDropAsync(ColumnViewModel targetColumnViewModel, DragPayload dragPayload, DragEventArgs e)
+    {
+        // Detect drop zone (ungrouped or specific group)
+        string? targetGroupName = GetDropTargetGroup(e);
+
+        // Check if this is a move between columns or reorder within same column
+        bool isSameColumn = dragPayload.SourceColumnPath.Equals(targetColumnViewModel.FolderPath, StringComparison.OrdinalIgnoreCase);
+
+        if (isSameColumn)
+        {
+            // Reorder within the same column or move between groups
+            await HandleItemReorderOrGroupMoveAsync(targetColumnViewModel, dragPayload, targetGroupName);
+        }
+        else
+        {
+            // Move between different columns
+            await HandleMoveAsync(targetColumnViewModel, dragPayload, GetDropIndex(e));
+
+            // If dropping into a group, also assign group membership
+            if (targetGroupName != null)
+            {
+                string fileName = Path.GetFileName(dragPayload.FilePath);
+                await targetColumnViewModel.MoveItemToGroupAsync(fileName, targetGroupName);
+            }
         }
     }
 
@@ -424,47 +472,6 @@ public sealed partial class ColumnControl : UserControl
         {
             itemsControl.DragOver += ItemsControl_DragOver;
             itemsControl.Drop += ItemsControl_Drop;
-        }
-    }
-
-    private async Task HandleGroupReorderDropAsync(DragEventArgs e)
-    {
-        if (DataContext is not ViewModels.ColumnViewModel viewModel) return;
-
-        try
-        {
-            string groupName = await e.DataView.GetTextAsync("KanbanGroupReorder");
-            if (string.IsNullOrWhiteSpace(groupName)) return;
-
-            // Find the source group
-            GroupViewModel? sourceGroup = viewModel.Groups.FirstOrDefault(g => g.Name == groupName);
-            if (sourceGroup == null) return;
-
-            // Calculate drop index based on Y position
-            int dropIndex = GetGroupDropIndex(e);
-            int currentIndex = viewModel.Groups.IndexOf(sourceGroup);
-
-            // Adjust drop index if moving within same list
-            if (dropIndex > currentIndex)
-            {
-                dropIndex--;
-            }
-
-            // Don't move if dropping at same position
-            if (currentIndex == dropIndex)
-            {
-                return;
-            }
-
-            // Move the group in the collection
-            viewModel.Groups.Move(currentIndex, dropIndex);
-
-            // Update the config
-            await UpdateGroupOrderAsync(viewModel);
-        }
-        catch (Exception ex)
-        {
-            await ShowErrorAsync($"Failed to reorder group: {ex.Message}");
         }
     }
 

@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Windows.ApplicationModel.DataTransfer;
 using KanbanFiles.ViewModels;
+using System.Text.Json;
 
 namespace KanbanFiles.Controls;
 
@@ -130,7 +131,26 @@ public sealed partial class GroupHeaderControl : UserControl
             return;
         }
 
-        args.Data.Properties.Add("KanbanGroupReorder", ViewModel.Name);
+        // Find the parent ColumnViewModel to get the source column path
+        string sourceColumnPath = string.Empty;
+        DependencyObject? current = this;
+        while (current != null)
+        {
+            if (current is FrameworkElement fe && fe.DataContext is ColumnViewModel columnVm)
+            {
+                sourceColumnPath = columnVm.FolderPath;
+                break;
+            }
+            current = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(current);
+        }
+
+        var payload = new DragPayload
+        {
+            GroupName = ViewModel.Name,
+            SourceColumnPath = sourceColumnPath
+        };
+
+        args.Data.SetText(JsonSerializer.Serialize(payload));
         args.Data.RequestedOperation = DataPackageOperation.Move;
         HeaderBorder.Opacity = 0.5;
     }

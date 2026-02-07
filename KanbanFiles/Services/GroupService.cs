@@ -27,7 +27,7 @@ public class GroupService
         try
         {
             var json = await File.ReadAllTextAsync(groupsPath);
-            var groupsConfig = JsonSerializer.Deserialize<GroupsConfig>(json, _jsonOptions);
+            GroupsConfig? groupsConfig = JsonSerializer.Deserialize<GroupsConfig>(json, _jsonOptions);
             if (groupsConfig != null)
             {
                 return groupsConfig;
@@ -51,7 +51,7 @@ public class GroupService
 
     public async Task CreateGroupAsync(string columnFolderPath, string groupName)
     {
-        var groupsConfig = await LoadGroupsAsync(columnFolderPath);
+        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
 
         // Ensure unique name
         var uniqueName = GetUniqueGroupName(groupsConfig, groupName);
@@ -68,8 +68,8 @@ public class GroupService
 
     public async Task DeleteGroupAsync(string columnFolderPath, string groupName)
     {
-        var groupsConfig = await LoadGroupsAsync(columnFolderPath);
-        var group = groupsConfig.Groups.FirstOrDefault(g => g.Name == groupName);
+        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
+        Group? group = groupsConfig.Groups.FirstOrDefault(g => g.Name == groupName);
         
         if (group != null)
         {
@@ -80,8 +80,8 @@ public class GroupService
 
     public async Task RenameGroupAsync(string columnFolderPath, string oldName, string newName)
     {
-        var groupsConfig = await LoadGroupsAsync(columnFolderPath);
-        var group = groupsConfig.Groups.FirstOrDefault(g => g.Name == oldName);
+        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
+        Group? group = groupsConfig.Groups.FirstOrDefault(g => g.Name == oldName);
         
         if (group != null)
         {
@@ -94,16 +94,16 @@ public class GroupService
 
     public async Task AddItemToGroupAsync(string columnFolderPath, string groupName, string fileName)
     {
-        var groupsConfig = await LoadGroupsAsync(columnFolderPath);
+        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
 
         // Remove from any existing group first
-        foreach (var group in groupsConfig.Groups)
+        foreach (Group group in groupsConfig.Groups)
         {
             group.ItemFileNames.Remove(fileName);
         }
 
         // Add to target group
-        var targetGroup = groupsConfig.Groups.FirstOrDefault(g => g.Name == groupName);
+        Group? targetGroup = groupsConfig.Groups.FirstOrDefault(g => g.Name == groupName);
         if (targetGroup != null && !targetGroup.ItemFileNames.Contains(fileName))
         {
             targetGroup.ItemFileNames.Add(fileName);
@@ -114,9 +114,9 @@ public class GroupService
 
     public async Task RemoveItemFromGroupAsync(string columnFolderPath, string fileName)
     {
-        var groupsConfig = await LoadGroupsAsync(columnFolderPath);
+        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
         
-        foreach (var group in groupsConfig.Groups)
+        foreach (Group group in groupsConfig.Groups)
         {
             group.ItemFileNames.Remove(fileName);
         }
@@ -131,14 +131,14 @@ public class GroupService
 
     public async Task ReorderGroupsAsync(string columnFolderPath, List<string> orderedGroupNames)
     {
-        var groupsConfig = await LoadGroupsAsync(columnFolderPath);
+        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
         
         var reorderedGroups = new List<Group>();
         
         // Add groups in the specified order
         foreach (var groupName in orderedGroupNames)
         {
-            var group = groupsConfig.Groups.FirstOrDefault(g => g.Name == groupName);
+            Group? group = groupsConfig.Groups.FirstOrDefault(g => g.Name == groupName);
             if (group != null)
             {
                 reorderedGroups.Add(group);
@@ -146,7 +146,7 @@ public class GroupService
         }
 
         // Add any groups not in the ordered list (shouldn't happen, but defensive)
-        foreach (var group in groupsConfig.Groups)
+        foreach (Group group in groupsConfig.Groups)
         {
             if (!reorderedGroups.Contains(group))
             {
@@ -160,12 +160,12 @@ public class GroupService
 
     public async Task CleanupStaleReferencesAsync(string columnFolderPath, IEnumerable<string> currentFileNames)
     {
-        var groupsConfig = await LoadGroupsAsync(columnFolderPath);
+        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
         var currentFileNameSet = new HashSet<string>(currentFileNames);
         
         bool hasChanges = false;
 
-        foreach (var group in groupsConfig.Groups)
+        foreach (Group group in groupsConfig.Groups)
         {
             var staleFiles = group.ItemFileNames.Where(f => !currentFileNameSet.Contains(f)).ToList();
             if (staleFiles.Count > 0)

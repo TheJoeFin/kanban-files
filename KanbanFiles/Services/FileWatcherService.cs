@@ -72,7 +72,7 @@ public class FileWatcherService : IDisposable
         }
 
         // Cancel all pending debounces
-        foreach (var cts in _debouncers.Values)
+        foreach (CancellationTokenSource cts in _debouncers.Values)
         {
             cts.Cancel();
             cts.Dispose();
@@ -192,7 +192,7 @@ public class FileWatcherService : IDisposable
     private void DebounceEvent(string path, Func<Task> action)
     {
         // Cancel any existing debounce for this file
-        if (_debouncers.TryGetValue(path, out var existingCts))
+        if (_debouncers.TryGetValue(path, out CancellationTokenSource? existingCts))
         {
             existingCts.Cancel();
             existingCts.Dispose();
@@ -226,7 +226,7 @@ public class FileWatcherService : IDisposable
         {
             try
             {
-                using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 return;
             }
             catch (IOException)

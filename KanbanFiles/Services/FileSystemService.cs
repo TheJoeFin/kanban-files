@@ -11,7 +11,7 @@ public class FileSystemService
     {
         var columns = new List<Column>();
 
-        foreach (var columnConfig in board.Columns.OrderBy(c => c.SortOrder))
+        foreach (ColumnConfig? columnConfig in board.Columns.OrderBy(c => c.SortOrder))
         {
             var folderPath = Path.Combine(board.RootPath, columnConfig.FolderName);
 
@@ -27,13 +27,13 @@ public class FileSystemService
                 SortOrder = columnConfig.SortOrder
             };
 
-            var items = await EnumerateItemsAsync(folderPath);
+            List<KanbanItem> items = await EnumerateItemsAsync(folderPath);
 
             // Apply item order from config
             var orderedItems = new List<KanbanItem>();
             foreach (var fileName in columnConfig.ItemOrder)
             {
-                var item = items.FirstOrDefault(i => i.FileName == fileName);
+                KanbanItem? item = items.FirstOrDefault(i => i.FileName == fileName);
                 if (item != null)
                 {
                     orderedItems.Add(item);
@@ -41,7 +41,7 @@ public class FileSystemService
             }
 
             // Add items not in order list (new files)
-            foreach (var item in items)
+            foreach (KanbanItem item in items)
             {
                 if (!orderedItems.Contains(item))
                 {
@@ -49,7 +49,7 @@ public class FileSystemService
                 }
             }
 
-            foreach (var item in orderedItems)
+            foreach (KanbanItem item in orderedItems)
             {
                 column.Items.Add(item);
             }
@@ -69,7 +69,7 @@ public class FileSystemService
             return items;
         }
 
-        var mdFiles = Directory.GetFiles(folderPath, "*.md", SearchOption.TopDirectoryOnly)
+        IEnumerable<string> mdFiles = Directory.GetFiles(folderPath, "*.md", SearchOption.TopDirectoryOnly)
             .Where(path => !IsExcludedFile(Path.GetFileName(path)))
             .Where(path => !IsHiddenOrSystem(path));
 
@@ -81,7 +81,7 @@ public class FileSystemService
                 var title = Path.GetFileNameWithoutExtension(fileName);
                 var content = await File.ReadAllTextAsync(filePath);
                 var preview = GenerateContentPreview(content);
-                var lastModified = File.GetLastWriteTime(filePath);
+                DateTime lastModified = File.GetLastWriteTime(filePath);
 
                 items.Add(new KanbanItem
                 {
@@ -310,7 +310,7 @@ public class FileSystemService
     {
         try
         {
-            var attributes = File.GetAttributes(filePath);
+            FileAttributes attributes = File.GetAttributes(filePath);
             return (attributes & FileAttributes.Hidden) == FileAttributes.Hidden ||
                    (attributes & FileAttributes.System) == FileAttributes.System;
         }

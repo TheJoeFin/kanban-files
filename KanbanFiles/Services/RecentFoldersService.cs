@@ -33,7 +33,7 @@ public class RecentFoldersService : IRecentFoldersService
             }
 
             var json = await File.ReadAllTextAsync(_recentFoldersPath);
-            var folders = JsonSerializer.Deserialize<List<string>>(json, _jsonOptions) ?? new List<string>();
+            List<string> folders = JsonSerializer.Deserialize<List<string>>(json, _jsonOptions) ?? new List<string>();
 
             // Validate folders exist and remove invalid ones
             var validFolders = folders.Where(Directory.Exists).ToList();
@@ -77,7 +77,7 @@ public class RecentFoldersService : IRecentFoldersService
         await _fileLock.WaitAsync();
         try
         {
-            var folders = await GetRecentFoldersInternalAsync();
+            List<string> folders = await GetRecentFoldersInternalAsync();
 
             // Normalize path for comparison (case-insensitive on Windows)
             var normalizedPath = Path.GetFullPath(folderPath);
@@ -123,7 +123,7 @@ public class RecentFoldersService : IRecentFoldersService
         await _fileLock.WaitAsync();
         try
         {
-            var folders = await GetRecentFoldersInternalAsync();
+            List<string> folders = await GetRecentFoldersInternalAsync();
 
             // Normalize path for comparison (case-insensitive on Windows)
             var normalizedPath = Path.GetFullPath(folderPath);

@@ -28,7 +28,7 @@ public class BoardConfigService
             try
             {
                 var json = await File.ReadAllTextAsync(configPath);
-                var board = JsonSerializer.Deserialize<Board>(json, _jsonOptions);
+                Board? board = JsonSerializer.Deserialize<Board>(json, _jsonOptions);
                 if (board != null)
                 {
                     board.RootPath = rootPath;
@@ -84,14 +84,14 @@ public class BoardConfigService
         else
         {
             // Create default columns
-            var defaultColumns = new[]
+            (string, int)[] defaultColumns = new[]
             {
                 ("To Do", 0),
                 ("In Progress", 1),
                 ("Done", 2)
             };
 
-            foreach (var (name, order) in defaultColumns)
+            foreach ((string? name, int order) in defaultColumns)
             {
                 var folderPath = Path.Combine(rootPath, name);
                 Directory.CreateDirectory(folderPath);

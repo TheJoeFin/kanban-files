@@ -11,10 +11,9 @@
     <Border
         x:Name="HeaderBorder"
         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-        CornerRadius="8"
+        CornerRadius="6"
         Padding="12,8"
-        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-        BorderThickness="1"
+        BorderThickness="0"
         CanDrag="True"
         DragStarting="HeaderBorder_DragStarting"
         DropCompleted="HeaderBorder_DropCompleted"

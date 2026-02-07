@@ -10,6 +10,7 @@
     xmlns:viewmodels="using:KanbanFiles.ViewModels"
     xmlns:views="using:KanbanFiles.Views"
     x:Name="RootPage"
+    Background="Transparent"
     mc:Ignorable="d">
 
     <Page.DataContext>

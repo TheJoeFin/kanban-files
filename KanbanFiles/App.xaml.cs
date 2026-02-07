@@ -44,18 +44,17 @@ public partial class App : Application
     /// <param name="e">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs e)
     {
-        window ??= new Window();
-        MainWindow = window;
-
-        if (window.Content is not Frame rootFrame)
+        if (window == null)
         {
-            rootFrame = new Frame();
-            rootFrame.NavigationFailed += OnNavigationFailed;
-            window.Content = rootFrame;
+            var mainWindow = new MainWindow();
+            window = mainWindow;
+            MainWindow = window;
+
+            mainWindow.NavigationFrame.NavigationFailed += OnNavigationFailed;
+            InitializeWindowState();
+            _ = mainWindow.NavigationFrame.Navigate(typeof(MainPage), e.Arguments);
         }
 
-        InitializeWindowState();
-        _ = rootFrame.Navigate(typeof(MainPage), e.Arguments);
         window.Activate();
     }
 

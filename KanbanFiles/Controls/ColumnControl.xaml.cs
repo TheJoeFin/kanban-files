@@ -1,10 +1,7 @@
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using Windows.ApplicationModel.DataTransfer;
 using System.Text.Json;
-using KanbanFiles.Models;
-using KanbanFiles.Services;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Foundation;
 
 namespace KanbanFiles.Controls;
 
@@ -38,7 +35,7 @@ public sealed partial class ColumnControl : UserControl
             viewModel.DeleteRequested += OnDeleteRequested;
             viewModel.GroupRenameRequested += OnGroupRenameRequested;
             viewModel.GroupDeleteRequested += OnGroupDeleteRequested;
-            
+
             _eventsSubscribed = true;
         }
     }
@@ -54,7 +51,7 @@ public sealed partial class ColumnControl : UserControl
             viewModel.DeleteRequested -= OnDeleteRequested;
             viewModel.GroupRenameRequested -= OnGroupRenameRequested;
             viewModel.GroupDeleteRequested -= OnGroupDeleteRequested;
-            
+
             _eventsSubscribed = false;
         }
     }
@@ -113,8 +110,8 @@ public sealed partial class ColumnControl : UserControl
 
     private async void AddItemConfirm_Click(object sender, RoutedEventArgs e)
     {
-        var title = AddItemTextBox.Text?.Trim() ?? string.Empty;
-        
+        string title = AddItemTextBox.Text?.Trim() ?? string.Empty;
+
         if (string.IsNullOrWhiteSpace(title))
         {
             await ShowErrorAsync("Item title cannot be empty.");
@@ -126,7 +123,7 @@ public sealed partial class ColumnControl : UserControl
             try
             {
                 await viewModel.CreateItemAsync(title);
-                
+
                 // Hide inline entry, show button
                 AddItemPanel.Visibility = Visibility.Collapsed;
                 AddItemButton.Visibility = Visibility.Visible;
@@ -158,14 +155,14 @@ public sealed partial class ColumnControl : UserControl
     {
         if (DataContext is not ViewModels.ColumnViewModel viewModel) return;
 
-        var textBox = new TextBox
+        TextBox textBox = new()
         {
             Text = currentName,
             MinWidth = 300
         };
         textBox.SelectAll();
 
-        var dialog = new ContentDialog
+        ContentDialog dialog = new()
         {
             Title = "Rename Column",
             Content = textBox,
@@ -175,10 +172,10 @@ public sealed partial class ColumnControl : UserControl
             XamlRoot = this.XamlRoot
         };
 
-        var result = await dialog.ShowAsync();
+        ContentDialogResult result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
-            var newName = textBox.Text?.Trim() ?? string.Empty;
+            string newName = textBox.Text?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(newName))
             {
                 await ShowErrorAsync("Column name cannot be empty.");
@@ -200,7 +197,7 @@ public sealed partial class ColumnControl : UserControl
     {
         if (DataContext is not ViewModels.ColumnViewModel viewModel) return;
 
-        var dialog = new ContentDialog
+        ContentDialog dialog = new()
         {
             Title = "Delete Column",
             Content = $"Are you sure you want to delete \"{viewModel.Name}\" and all its items?",
@@ -210,7 +207,7 @@ public sealed partial class ColumnControl : UserControl
             XamlRoot = this.XamlRoot
         };
 
-        var result = await dialog.ShowAsync();
+        ContentDialogResult result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
             try
@@ -226,7 +223,7 @@ public sealed partial class ColumnControl : UserControl
 
     private async Task ShowErrorAsync(string message)
     {
-        var dialog = new ContentDialog
+        ContentDialog dialog = new()
         {
             Title = "Error",
             Content = message,
@@ -240,14 +237,14 @@ public sealed partial class ColumnControl : UserControl
     {
         if (DataContext is not ViewModels.ColumnViewModel columnViewModel) return;
 
-        var textBox = new TextBox
+        TextBox textBox = new()
         {
             Text = groupViewModel.Name,
             MinWidth = 300
         };
         textBox.SelectAll();
 
-        var dialog = new ContentDialog
+        ContentDialog dialog = new()
         {
             Title = "Rename Group",
             Content = textBox,
@@ -257,10 +254,10 @@ public sealed partial class ColumnControl : UserControl
             XamlRoot = this.XamlRoot
         };
 
-        var result = await dialog.ShowAsync();
+        ContentDialogResult result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
-            var newName = textBox.Text?.Trim() ?? string.Empty;
+            string newName = textBox.Text?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(newName))
             {
                 await ShowErrorAsync("Group name cannot be empty.");
@@ -282,7 +279,7 @@ public sealed partial class ColumnControl : UserControl
     {
         if (DataContext is not ViewModels.ColumnViewModel columnViewModel) return;
 
-        var dialog = new ContentDialog
+        ContentDialog dialog = new()
         {
             Title = "Delete Group",
             Content = $"Are you sure you want to delete \"{groupViewModel.Name}\"? Items will be moved to ungrouped.",
@@ -292,7 +289,7 @@ public sealed partial class ColumnControl : UserControl
             XamlRoot = this.XamlRoot
         };
 
-        var result = await dialog.ShowAsync();
+        ContentDialogResult result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
             try
@@ -310,13 +307,13 @@ public sealed partial class ColumnControl : UserControl
     {
         if (DataContext is not ViewModels.ColumnViewModel viewModel) return;
 
-        var textBox = new TextBox
+        TextBox textBox = new()
         {
             PlaceholderText = "Enter group name...",
             MinWidth = 300
         };
 
-        var dialog = new ContentDialog
+        ContentDialog dialog = new()
         {
             Title = "Create Group",
             Content = textBox,
@@ -326,10 +323,10 @@ public sealed partial class ColumnControl : UserControl
             XamlRoot = this.XamlRoot
         };
 
-        var result = await dialog.ShowAsync();
+        ContentDialogResult result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
-            var groupName = textBox.Text?.Trim() ?? string.Empty;
+            string groupName = textBox.Text?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(groupName))
             {
                 await ShowErrorAsync("Group name cannot be empty.");
@@ -349,32 +346,17 @@ public sealed partial class ColumnControl : UserControl
 
     private void ItemsControl_DragOver(object sender, DragEventArgs e)
     {
-        if (e.DataView.Contains(StandardDataFormats.Text))
-        {
-            e.AcceptedOperation = DataPackageOperation.Move;
-            e.DragUIOverride.Caption = "Move item";
-            e.DragUIOverride.IsCaptionVisible = true;
-            e.DragUIOverride.IsGlyphVisible = true;
-        }
-        else if (e.DataView.Contains("KanbanGroupReorder"))
-        {
-            e.AcceptedOperation = DataPackageOperation.Move;
-            e.DragUIOverride.Caption = "Reorder group";
-            e.DragUIOverride.IsCaptionVisible = true;
-            e.DragUIOverride.IsGlyphVisible = true;
-        }
-        else
-        {
-            e.AcceptedOperation = DataPackageOperation.None;
-        }
+        e.AcceptedOperation = DataPackageOperation.Move;
     }
 
     private async void ItemsControl_Drop(object sender, DragEventArgs e)
     {
-        if (DataContext is not ViewModels.ColumnViewModel targetColumnViewModel)
+        if (DataContext is not ColumnViewModel targetColumnViewModel)
         {
             return;
         }
+
+        e.Handled = true;
 
         try
         {
@@ -391,7 +373,7 @@ public sealed partial class ColumnControl : UserControl
                 return;
             }
 
-            var jsonText = await e.DataView.GetTextAsync();
+            string jsonText = await e.DataView.GetTextAsync();
             if (string.IsNullOrWhiteSpace(jsonText))
             {
                 return;
@@ -428,11 +410,11 @@ public sealed partial class ColumnControl : UserControl
             {
                 // Move between different columns
                 await HandleMoveAsync(targetColumnViewModel, dragPayload, GetDropIndex(e));
-                
+
                 // If dropping into a group, also assign group membership
                 if (targetGroupName != null)
                 {
-                    var fileName = Path.GetFileName(dragPayload.FilePath);
+                    string fileName = Path.GetFileName(dragPayload.FilePath);
                     await targetColumnViewModel.MoveItemToGroupAsync(fileName, targetGroupName);
                 }
             }
@@ -459,11 +441,11 @@ public sealed partial class ColumnControl : UserControl
 
         try
         {
-            var groupName = await e.DataView.GetTextAsync("KanbanGroupReorder");
+            string groupName = await e.DataView.GetTextAsync("KanbanGroupReorder");
             if (string.IsNullOrWhiteSpace(groupName)) return;
 
             // Find the source group
-            var sourceGroup = viewModel.Groups.FirstOrDefault(g => g.Name == groupName);
+            GroupViewModel? sourceGroup = viewModel.Groups.FirstOrDefault(g => g.Name == groupName);
             if (sourceGroup == null) return;
 
             // Calculate drop index based on Y position
@@ -496,10 +478,10 @@ public sealed partial class ColumnControl : UserControl
 
     private async Task HandleItemReorderOrGroupMoveAsync(ViewModels.ColumnViewModel columnViewModel, DragPayload dragPayload, string? targetGroupName)
     {
-        var fileName = Path.GetFileName(dragPayload.FilePath);
-        
+        string fileName = Path.GetFileName(dragPayload.FilePath);
+
         // Find the source item
-        var sourceItem = columnViewModel.Items.FirstOrDefault(i => i.FilePath.Equals(dragPayload.FilePath, StringComparison.OrdinalIgnoreCase));
+        KanbanItemViewModel? sourceItem = columnViewModel.Items.FirstOrDefault(i => i.FilePath.Equals(dragPayload.FilePath, StringComparison.OrdinalIgnoreCase));
         if (sourceItem == null) return;
 
         // Move to target group (or ungrouped if null)
@@ -513,21 +495,21 @@ public sealed partial class ColumnControl : UserControl
         // Get the position relative to the GroupsControlElement
         if (GroupsControlElement == null) return null;
 
-        var position = e.GetPosition(GroupsControlElement);
+        Point position = e.GetPosition(GroupsControlElement);
 
         // Iterate through groups to find which one the pointer is over
         for (int i = 0; i < GroupsControlElement.Items.Count; i++)
         {
-            var container = GroupsControlElement.ContainerFromIndex(i) as FrameworkElement;
+            FrameworkElement? container = GroupsControlElement.ContainerFromIndex(i) as FrameworkElement;
             if (container != null)
             {
-                var containerPosition = container.TransformToVisual(GroupsControlElement).TransformPoint(new Windows.Foundation.Point(0, 0));
-                var containerHeight = container.ActualHeight;
+                Point containerPosition = container.TransformToVisual(GroupsControlElement).TransformPoint(new Windows.Foundation.Point(0, 0));
+                double containerHeight = container.ActualHeight;
 
                 // Check if pointer is within this group's bounds
                 if (position.Y >= containerPosition.Y && position.Y < containerPosition.Y + containerHeight)
                 {
-                    var group = viewModel.Groups[i];
+                    GroupViewModel group = viewModel.Groups[i];
                     return group.Name;
                 }
             }
@@ -547,18 +529,18 @@ public sealed partial class ColumnControl : UserControl
         if (GroupsControlElement == null) return viewModel.Groups.Count;
 
         // Get the position relative to the GroupsControlElement
-        var position = e.GetPosition(GroupsControlElement);
+        Point position = e.GetPosition(GroupsControlElement);
 
         // Find which group the pointer is over
         int dropIndex = viewModel.Groups.Count;
 
         for (int i = 0; i < GroupsControlElement.Items.Count; i++)
         {
-            var container = GroupsControlElement.ContainerFromIndex(i) as FrameworkElement;
+            FrameworkElement? container = GroupsControlElement.ContainerFromIndex(i) as FrameworkElement;
             if (container != null)
             {
-                var containerPosition = container.TransformToVisual(GroupsControlElement).TransformPoint(new Windows.Foundation.Point(0, 0));
-                var containerHeight = container.ActualHeight;
+                Point containerPosition = container.TransformToVisual(GroupsControlElement).TransformPoint(new Windows.Foundation.Point(0, 0));
+                double containerHeight = container.ActualHeight;
 
                 // If pointer is in the top half of this group, insert before it
                 if (position.Y < containerPosition.Y + (containerHeight / 2))
@@ -577,13 +559,13 @@ public sealed partial class ColumnControl : UserControl
         if (_groupService == null) return;
 
         // Load current groups config
-        var groupsConfig = await _groupService.LoadGroupsAsync(viewModel.FolderPath);
-        
+        GroupsConfig groupsConfig = await _groupService.LoadGroupsAsync(viewModel.FolderPath);
+
         // Update the order to match the current collection
         groupsConfig.Groups.Clear();
-        foreach (var group in viewModel.Groups)
+        foreach (GroupViewModel group in viewModel.Groups)
         {
-            var groupConfig = new Group
+            Group groupConfig = new()
             {
                 Name = group.Name,
                 IsCollapsed = group.IsCollapsed,
@@ -603,19 +585,19 @@ public sealed partial class ColumnControl : UserControl
         }
 
         // Get the position relative to the UngroupedItemsControl
-        var position = e.GetPosition(UngroupedItemsControlElement);
-        
+        Point position = e.GetPosition(UngroupedItemsControlElement);
+
         // Find which item the pointer is over
         int dropIndex = viewModel.UngroupedItems.Count;
-        
+
         for (int i = 0; i < UngroupedItemsControlElement.Items.Count; i++)
         {
-            var container = UngroupedItemsControlElement.ContainerFromIndex(i) as FrameworkElement;
+            FrameworkElement? container = UngroupedItemsControlElement.ContainerFromIndex(i) as FrameworkElement;
             if (container != null)
             {
-                var containerPosition = container.TransformToVisual(UngroupedItemsControlElement).TransformPoint(new Windows.Foundation.Point(0, 0));
-                var containerHeight = container.ActualHeight;
-                
+                Point containerPosition = container.TransformToVisual(UngroupedItemsControlElement).TransformPoint(new Windows.Foundation.Point(0, 0));
+                double containerHeight = container.ActualHeight;
+
                 // If pointer is in the top half of this item, insert before it
                 if (position.Y < containerPosition.Y + (containerHeight / 2))
                 {
@@ -624,14 +606,14 @@ public sealed partial class ColumnControl : UserControl
                 }
             }
         }
-        
+
         return dropIndex;
     }
 
     private async Task HandleReorderAsync(ViewModels.ColumnViewModel columnViewModel, DragPayload dragPayload, int dropIndex)
     {
         // Find the source item
-        var sourceItem = columnViewModel.Items.FirstOrDefault(i => i.FilePath.Equals(dragPayload.FilePath, StringComparison.OrdinalIgnoreCase));
+        KanbanItemViewModel? sourceItem = columnViewModel.Items.FirstOrDefault(i => i.FilePath.Equals(dragPayload.FilePath, StringComparison.OrdinalIgnoreCase));
         if (sourceItem == null)
         {
             return;
@@ -667,7 +649,7 @@ public sealed partial class ColumnControl : UserControl
         try
         {
             // Get MainViewModel to find the source column
-            var mainViewModel = GetMainViewModel();
+            MainViewModel? mainViewModel = GetMainViewModel();
             if (mainViewModel == null)
             {
                 await ShowErrorAsync("Unable to access main board view.");
@@ -675,9 +657,9 @@ public sealed partial class ColumnControl : UserControl
             }
 
             // Find the source column
-            var sourceColumn = mainViewModel.Columns.FirstOrDefault(c => 
+            ColumnViewModel? sourceColumn = mainViewModel.Columns.FirstOrDefault(c =>
                 c.FolderPath.Equals(dragPayload.SourceColumnPath, StringComparison.OrdinalIgnoreCase));
-            
+
             if (sourceColumn == null)
             {
                 await ShowErrorAsync("Source column not found.");
@@ -685,9 +667,9 @@ public sealed partial class ColumnControl : UserControl
             }
 
             // Find the source item
-            var sourceItem = sourceColumn.Items.FirstOrDefault(i => 
+            KanbanItemViewModel? sourceItem = sourceColumn.Items.FirstOrDefault(i =>
                 i.FilePath.Equals(dragPayload.FilePath, StringComparison.OrdinalIgnoreCase));
-            
+
             if (sourceItem == null)
             {
                 await ShowErrorAsync("Source item not found.");
@@ -696,7 +678,7 @@ public sealed partial class ColumnControl : UserControl
 
             // Perform the move
             await targetColumnViewModel.MoveItemToColumnAsync(sourceItem, sourceColumn, dropIndex);
-            
+
             // Optional: Show brief success message (can be removed if too noisy)
             // await ShowSuccessAsync($"Moved '{sourceItem.Title}' to '{targetColumnViewModel.Name}'");
         }
@@ -718,17 +700,17 @@ public sealed partial class ColumnControl : UserControl
     {
         // Walk up the visual tree to find MainPage
         DependencyObject? current = this;
-        
+
         while (current != null)
         {
             if (current is Views.MainPage mainPage)
             {
                 return mainPage.DataContext as ViewModels.MainViewModel;
             }
-            
+
             current = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(current);
         }
-        
+
         return null;
     }
 

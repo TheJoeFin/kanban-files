@@ -211,27 +211,37 @@ public partial class ColumnViewModel : BaseViewModel
             string expectedNewPath = Path.Combine(FolderPath, sourceItem.FileName);
             _fileWatcherService?.SuppressNextEvent(expectedNewPath);
 
-            // Move the physical file
+            // Move the physical file first - if this fails, UI is unchanged
             string newFilePath = await _fileSystemService.MoveItemAsync(sourceItem.FilePath, FolderPath);
 
-            // Remove from source column (both flat and UI-bound collections)
-            sourceColumnViewModel.RemoveItem(sourceItem);
-
-            // Update the item's parent column and file path
-            sourceItem.UpdateParentColumn(this);
-            sourceItem.UpdateFilePath(newFilePath);
-
-            // Insert at target index in this column
-            if (targetIndex < 0 || targetIndex > Items.Count)
+            try
             {
-                targetIndex = Items.Count;
-            }
-            Items.Insert(targetIndex, sourceItem);
-            UngroupedItems.Add(sourceItem);
+                // Remove from source column (both flat and UI-bound collections)
+                sourceColumnViewModel.RemoveItem(sourceItem);
 
-            // Update item order in both columns
-            await sourceColumnViewModel.UpdateItemOrderAsync();
-            await UpdateItemOrderAsync();
+                // Update the item's parent column and file path
+                sourceItem.UpdateParentColumn(this);
+                sourceItem.UpdateFilePath(newFilePath);
+
+                // Insert at target index in this column
+                if (targetIndex < 0 || targetIndex > Items.Count)
+                {
+                    targetIndex = Items.Count;
+                }
+                Items.Insert(targetIndex, sourceItem);
+                UngroupedItems.Add(sourceItem);
+
+                // Update item order in both columns
+                await sourceColumnViewModel.UpdateItemOrderAsync();
+                await UpdateItemOrderAsync();
+            }
+            catch
+            {
+                // File was moved but UI update failed - refresh both columns from disk
+                await sourceColumnViewModel.Refresh();
+                await Refresh();
+                throw;
+            }
 
             return true;
         }

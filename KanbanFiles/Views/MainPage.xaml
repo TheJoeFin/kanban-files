@@ -53,9 +53,14 @@
                     Command="{x:Bind ViewModel.OpenFolderCommand}"
                     Icon="Folder"
                     Label="Open Folder" />
-                <AppBarButton Command="{x:Bind ViewModel.AddColumnCommand}" Label="+ New Column">
+                <AppBarButton Command="{x:Bind ViewModel.AddColumnCommand}" Label="New Column">
                     <AppBarButton.Icon>
                         <FontIcon Glyph="&#xE710;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Command="{x:Bind ViewModel.EditFileFilterCommand}" Label="File Filter">
+                    <AppBarButton.Icon>
+                        <FontIcon Glyph="&#xE71C;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
 

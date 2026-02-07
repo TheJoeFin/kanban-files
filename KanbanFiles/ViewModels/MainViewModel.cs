@@ -63,6 +63,7 @@ namespace KanbanFiles.ViewModels
 
         public event EventHandler? OpenFolderRequested;
         public event EventHandler<string>? AddColumnRequested;
+        public event EventHandler? EditFileFilterRequested;
 
         [RelayCommand]
         private void OpenFolder()

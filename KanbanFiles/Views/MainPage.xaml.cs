@@ -22,6 +22,7 @@ namespace KanbanFiles.Views
             this.InitializeComponent();
             ViewModel.OpenFolderRequested += OnOpenFolderRequested;
             ViewModel.AddColumnRequested += OnAddColumnRequested;
+            ViewModel.EditFileFilterRequested += OnEditFileFilterRequested;
             ItemDetailViewControl.CloseRequested += OnItemDetailCloseRequested;
 
             WeakReferenceMessenger.Default.Register<Messages.OpenItemDetailMessage>(this, (r, m) =>
@@ -107,14 +108,97 @@ namespace KanbanFiles.Views
         {
             var stackPanel = new StackPanel();
             stackPanel.Children.Add(new TextBlock { Text = label, Margin = new Microsoft.UI.Xaml.Thickness(0, 0, 0, 8) });
-            
+
             var textBox = new TextBox
             {
                 PlaceholderText = placeholder,
                 MinWidth = 300
             };
-            
+
             return textBox;
+        }
+
+        private async void OnEditFileFilterRequested(object? sender, EventArgs e)
+        {
+            if (!ViewModel.IsLoaded) return;
+
+            FileFilterConfig current = ViewModel.GetFileFilter();
+
+            var includeBox = new TextBox
+            {
+                PlaceholderText = "e.g.  .md, .txt, .cs",
+                Text = string.Join(", ", current.IncludeExtensions),
+                MinWidth = 360,
+                AcceptsReturn = false
+            };
+
+            var excludeBox = new TextBox
+            {
+                PlaceholderText = "e.g.  .exe, .dll, .bin",
+                Text = string.Join(", ", current.ExcludeExtensions),
+                MinWidth = 360,
+                AcceptsReturn = false
+            };
+
+            var panel = new StackPanel { Spacing = 12 };
+            panel.Children.Add(new TextBlock
+            {
+                Text = "Show only these extensions (leave empty to show all):",
+                TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap
+            });
+            panel.Children.Add(includeBox);
+            panel.Children.Add(new TextBlock
+            {
+                Text = "Exclude these extensions:",
+                TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap
+            });
+            panel.Children.Add(excludeBox);
+            panel.Children.Add(new TextBlock
+            {
+                Text = "Separate extensions with commas. Include list takes priority over exclude list.",
+                FontSize = 12,
+                Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+                TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap
+            });
+
+            var dialog = new ContentDialog
+            {
+                Title = "File Type Filter",
+                Content = panel,
+                PrimaryButtonText = "Apply",
+                SecondaryButtonText = "Clear Filter",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = this.XamlRoot
+            };
+
+            ContentDialogResult result = await dialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                var filter = new FileFilterConfig
+                {
+                    IncludeExtensions = ParseExtensions(includeBox.Text),
+                    ExcludeExtensions = ParseExtensions(excludeBox.Text)
+                };
+                await ViewModel.UpdateFileFilterAsync(filter);
+            }
+            else if (result == ContentDialogResult.Secondary)
+            {
+                // Clear filter
+                await ViewModel.UpdateFileFilterAsync(new FileFilterConfig());
+            }
+        }
+
+        private static List<string> ParseExtensions(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return [];
+
+            return text.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(ext => ext.StartsWith('.') ? ext : "." + ext)
+                .Where(ext => ext.Length > 1)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
 
         private async Task ShowErrorDialogAsync(string message)

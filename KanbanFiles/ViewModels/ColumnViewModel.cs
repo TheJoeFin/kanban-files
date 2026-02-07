@@ -69,7 +69,7 @@ public partial class ColumnViewModel : BaseViewModel
             }
 
             // Read the newly created item
-            List<KanbanItem> items = await _fileSystemService.EnumerateItemsAsync(FolderPath);
+            List<KanbanItem> items = await _fileSystemService.EnumerateItemsAsync(FolderPath, _board.FileFilter);
             KanbanItem? newItem = items.FirstOrDefault(i => i.FileName == fileName);
             if (newItem != null)
             {
@@ -302,7 +302,7 @@ public partial class ColumnViewModel : BaseViewModel
         }
 
         // Enumerate items from file system
-        List<KanbanItem> items = await _fileSystemService.EnumerateItemsAsync(FolderPath);
+        List<KanbanItem> items = await _fileSystemService.EnumerateItemsAsync(FolderPath, _board.FileFilter);
 
         // Clear existing items
         Items.Clear();

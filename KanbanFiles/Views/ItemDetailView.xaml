@@ -9,6 +9,7 @@
 
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
     </UserControl.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -56,13 +57,14 @@
                     TextTrimming="CharacterEllipsis" />
             </StackPanel>
 
-            <!--  Formatting toolbar  -->
+            <!--  Formatting toolbar (markdown files only)  -->
             <StackPanel
                 Grid.Column="1"
                 Margin="24,0,0,0"
                 HorizontalAlignment="Left"
                 Orientation="Horizontal"
-                Spacing="4">
+                Spacing="4"
+                Visibility="{Binding IsMarkdown, Converter={StaticResource BoolToVisibilityConverter}}">
                 <Button
                     Width="32"
                     Height="32"
@@ -95,11 +97,12 @@
                 </Button>
             </StackPanel>
 
-            <!--  Save status  -->
+            <!--  Save status (editable files only)  -->
             <StackPanel
                 Grid.Column="2"
                 Orientation="Horizontal"
-                Spacing="8">
+                Spacing="8"
+                Visibility="{Binding IsEditable, Converter={StaticResource BoolToVisibilityConverter}}">
                 <TextBlock
                     x:Name="SaveStatusText"
                     VerticalAlignment="Center"
@@ -118,14 +121,17 @@
         </Grid>
 
         <!--  Split Editor / Preview  -->
-        <Grid Grid.Row="1">
+        <Grid x:Name="EditorPreviewGrid" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!--  Markdown Editor  -->
-            <Grid Grid.Column="0" Padding="0">
+            <!--  Text Editor (text files only)  -->
+            <Grid
+                Grid.Column="0"
+                Padding="0"
+                Visibility="{Binding IsEditable, Converter={StaticResource BoolToVisibilityConverter}}">
                 <TextBox
                     x:Name="EditorTextBox"
                     Padding="16"
@@ -140,17 +146,50 @@
                     TextWrapping="Wrap" />
             </Grid>
 
-            <!--  Separator  -->
+            <!--  Separator (markdown only)  -->
             <Border
                 Grid.Column="0"
                 Width="1"
                 HorizontalAlignment="Right"
-                Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+                Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                Visibility="{Binding IsMarkdown, Converter={StaticResource BoolToVisibilityConverter}}" />
 
-            <!--  Markdown Preview  -->
-            <Grid Grid.Column="1" Padding="0">
+            <!--  Markdown Preview (markdown only)  -->
+            <Grid
+                Grid.Column="1"
+                Padding="0"
+                Visibility="{Binding IsMarkdown, Converter={StaticResource BoolToVisibilityConverter}}">
                 <WebView2 x:Name="PreviewWebView" Loaded="PreviewWebView_Loaded" />
             </Grid>
+
+            <!--  File Info Panel (non-text files)  -->
+            <StackPanel
+                Grid.ColumnSpan="2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="16"
+                Visibility="{Binding IsEditable, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                <FontIcon
+                    HorizontalAlignment="Center"
+                    FontSize="48"
+                    Glyph="&#xE7C3;" />
+                <TextBlock
+                    FontSize="24"
+                    FontWeight="SemiBold"
+                    Text="{Binding Title, Mode=OneWay}"
+                    TextAlignment="Center" />
+                <TextBlock
+                    FontSize="14"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{Binding FileInfoText, Mode=OneWay}"
+                    TextAlignment="Center" />
+                <Button
+                    x:Name="OpenExternalButton"
+                    HorizontalAlignment="Center"
+                    Click="OpenExternalButton_Click"
+                    Content="Open with Default App"
+                    Style="{StaticResource AccentButtonStyle}" />
+            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>

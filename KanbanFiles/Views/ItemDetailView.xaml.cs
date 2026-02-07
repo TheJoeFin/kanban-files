@@ -26,21 +26,37 @@ public sealed partial class ItemDetailView : UserControl
 
         DataContext = _viewModel;
 
-        await _viewModel.LoadContentAsync();
+        // Adjust layout based on file type
+        if (_viewModel.IsEditable && !_viewModel.IsMarkdown)
+        {
+            // Non-markdown text file: full-width editor, no preview
+            EditorPreviewGrid.ColumnDefinitions[1].Width = new GridLength(0);
+        }
+        else
+        {
+            EditorPreviewGrid.ColumnDefinitions[1].Width = new GridLength(1, GridUnitType.Star);
+        }
 
-        EditorTextBox.Text = _viewModel.Content;
+        if (_viewModel.IsEditable)
+        {
+            await _viewModel.LoadContentAsync();
+            EditorTextBox.Text = _viewModel.Content;
+        }
+
         UpdateSaveStatus();
 
         _viewModel.PropertyChanged += OnViewModelPropertyChanged;
 
-        if (_webViewReady)
+        if (_viewModel.IsMarkdown && _webViewReady)
         {
             PreviewWebView.NavigateToString(_viewModel.RenderedHtml);
         }
 
-        SubscribeFileWatcher();
-
-        EditorTextBox.Focus(FocusState.Programmatic);
+        if (_viewModel.IsEditable)
+        {
+            SubscribeFileWatcher();
+            EditorTextBox.Focus(FocusState.Programmatic);
+        }
     }
 
     public void Unload()
@@ -54,13 +70,16 @@ public sealed partial class ItemDetailView : UserControl
 
         _viewModel = null;
         _kanbanItemViewModel = null;
+
+        // Reset layout for next use
+        EditorPreviewGrid.ColumnDefinitions[1].Width = new GridLength(1, GridUnitType.Star);
     }
 
     public bool HasUnsavedChanges => _viewModel?.HasUnsavedChanges ?? false;
 
     private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(ItemDetailViewModel.RenderedHtml) && _webViewReady)
+        if (e.PropertyName == nameof(ItemDetailViewModel.RenderedHtml) && _webViewReady && _viewModel?.IsMarkdown == true)
         {
             PreviewWebView.NavigateToString(_viewModel!.RenderedHtml);
         }
@@ -143,6 +162,21 @@ public sealed partial class ItemDetailView : UserControl
     private void BackButton_Click(object sender, RoutedEventArgs e)
     {
         RequestClose();
+    }
+
+    private async void OpenExternalButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_viewModel == null) return;
+
+        try
+        {
+            var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(_viewModel.GetFilePath());
+            await Windows.System.Launcher.LaunchFileAsync(file);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to open file externally: {ex.Message}");
+        }
     }
 
     private async void SaveButton_Click(object sender, RoutedEventArgs e)

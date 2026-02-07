@@ -29,6 +29,12 @@ public partial class ItemDetailViewModel : ObservableObject
     [ObservableProperty]
     private bool _hasUnsavedChanges;
 
+    [ObservableProperty]
+    private string _fileInfoText;
+
+    public bool IsEditable { get; }
+    public bool IsMarkdown { get; }
+
     public ItemDetailViewModel(KanbanItem item, FileSystemService fileSystemService, FileWatcherService? fileWatcherService = null)
     {
         _fileSystemService = fileSystemService;
@@ -36,21 +42,36 @@ public partial class ItemDetailViewModel : ObservableObject
         _filePath = item.FilePath;
         _title = item.Title;
         _lastModified = item.LastModified;
-        
+
+        IsEditable = FileSystemService.IsTextFile(item.FilePath);
+        IsMarkdown = Path.GetExtension(item.FilePath).Equals(".md", StringComparison.OrdinalIgnoreCase);
+
         // Load content will be called separately
         _content = string.Empty;
         _originalContent = string.Empty;
         _renderedHtml = string.Empty;
+        _fileInfoText = IsEditable ? string.Empty : FileSystemService.GenerateFileTypePreview(item.FilePath);
     }
 
     partial void OnContentChanged(string value)
     {
         HasUnsavedChanges = value != _originalContent;
-        UpdateRenderedHtml();
+        if (IsMarkdown)
+        {
+            UpdateRenderedHtml();
+        }
     }
 
     public async Task LoadContentAsync()
     {
+        if (!IsEditable)
+        {
+            Content = string.Empty;
+            _originalContent = string.Empty;
+            HasUnsavedChanges = false;
+            return;
+        }
+
         try
         {
             Content = await File.ReadAllTextAsync(_filePath);
@@ -69,6 +90,12 @@ public partial class ItemDetailViewModel : ObservableObject
 
     private void UpdateRenderedHtml()
     {
+        if (!IsMarkdown)
+        {
+            RenderedHtml = string.Empty;
+            return;
+        }
+
         // Use Markdig to convert markdown to HTML with default pipeline
         var html = Markdig.Markdown.ToHtml(Content ?? string.Empty);
         RenderedHtml = WrapHtmlWithStyles(html);

@@ -202,4 +202,71 @@ public sealed partial class KanbanItemCardControl : UserControl
         };
         await dialog.ShowAsync();
     }
+
+    private void CardContextMenu_Opening(object sender, object e)
+    {
+        MoveToGroupSubMenu.Items.Clear();
+
+        if (ViewModel?.ParentColumn is not { } column || column.Groups.Count == 0)
+        {
+            MoveToGroupSubMenu.Visibility = Visibility.Collapsed;
+            GroupMenuSeparator.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        MoveToGroupSubMenu.Visibility = Visibility.Visible;
+        GroupMenuSeparator.Visibility = Visibility.Visible;
+
+        // Determine which group the item currently belongs to
+        string? currentGroupName = null;
+        foreach (GroupViewModel group in column.Groups)
+        {
+            if (group.Items.Contains(ViewModel))
+            {
+                currentGroupName = group.Name;
+                break;
+            }
+        }
+
+        // Add "Ungrouped" option if the item is currently in a group
+        if (currentGroupName != null)
+        {
+            var ungroupedItem = new MenuFlyoutItem
+            {
+                Text = "Ungrouped",
+                Icon = new FontIcon { Glyph = "\uE8B7" }
+            };
+            ungroupedItem.Click += (s, args) => MoveToGroup_Click(null);
+            MoveToGroupSubMenu.Items.Add(ungroupedItem);
+            MoveToGroupSubMenu.Items.Add(new MenuFlyoutSeparator());
+        }
+
+        // Add each group as a menu option
+        foreach (GroupViewModel group in column.Groups)
+        {
+            var menuItem = new MenuFlyoutItem { Text = group.Name };
+            if (group.Name == currentGroupName)
+            {
+                menuItem.Icon = new FontIcon { Glyph = "\uE73E" };
+                menuItem.IsEnabled = false;
+            }
+            string targetGroupName = group.Name;
+            menuItem.Click += (s, args) => MoveToGroup_Click(targetGroupName);
+            MoveToGroupSubMenu.Items.Add(menuItem);
+        }
+    }
+
+    private async void MoveToGroup_Click(string? targetGroupName)
+    {
+        if (ViewModel?.ParentColumn is not { } column) return;
+
+        try
+        {
+            await column.MoveItemToGroupAsync(ViewModel.FileName, targetGroupName);
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAsync($"Failed to move item to group: {ex.Message}");
+        }
+    }
 }

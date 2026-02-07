@@ -28,7 +28,7 @@
         </Border.Shadow>
 
         <Border.ContextFlyout>
-            <MenuFlyout>
+            <MenuFlyout x:Name="CardContextMenu" Opening="CardContextMenu_Opening">
                 <MenuFlyoutItem Command="{x:Bind ViewModel.OpenDetailCommand}" Text="Open">
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="&#xE8E5;" />
@@ -39,6 +39,12 @@
                         <FontIcon Glyph="&#xE8AC;" />
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
+                <MenuFlyoutSeparator x:Name="GroupMenuSeparator" Visibility="Collapsed" />
+                <MenuFlyoutSubItem x:Name="MoveToGroupSubMenu" Text="Move to Group">
+                    <MenuFlyoutSubItem.Icon>
+                        <FontIcon Glyph="&#xF168;" />
+                    </MenuFlyoutSubItem.Icon>
+                </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem Click="DeleteItem_Click" Text="Delete">
                     <MenuFlyoutItem.Icon>

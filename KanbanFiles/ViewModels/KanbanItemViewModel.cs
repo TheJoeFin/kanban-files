@@ -24,6 +24,7 @@ public partial class KanbanItemViewModel : BaseViewModel
     [ObservableProperty]
     private string _fullContent = string.Empty;
 
+    public ColumnViewModel ParentColumn => _parentColumn;
     public string SourceColumnPath => _parentColumn.FolderPath;
     public DateTime LastModified { get; set; }
     public string LastModifiedDisplay => LastModified.ToString("MMM d, yyyy");

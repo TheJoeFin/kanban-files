@@ -25,6 +25,7 @@ public partial class KanbanItemViewModel : BaseViewModel
     public string SourceColumnPath => _parentColumn.FolderPath;
     public DateTime LastModified { get; set; }
     public string LastModifiedDisplay => LastModified.ToString("MMM d, yyyy");
+    public bool IsTextFile { get; set; } = true;
 
     public event EventHandler? DeleteRequested;
     public event EventHandler? RenameRequested;
@@ -37,6 +38,7 @@ public partial class KanbanItemViewModel : BaseViewModel
         FileName = item.FileName;
         FullContent = item.FullContent;
         LastModified = item.LastModified;
+        IsTextFile = item.IsTextFile;
         _fileSystemService = fileSystemService;
         _boardConfigService = boardConfigService;
         _board = board;
@@ -104,48 +106,65 @@ public partial class KanbanItemViewModel : BaseViewModel
         {
             string folderPath = Path.GetDirectoryName(FilePath)!;
             string sanitizedTitle = SanitizeFileName(newTitle);
-            string newFileName = sanitizedTitle + ".md";
+            string extension = Path.GetExtension(FileName);
+            string newFileName = sanitizedTitle + extension;
             string newFilePath = Path.Combine(folderPath, newFileName);
 
             // Ensure unique filename
             int counter = 1;
             while (File.Exists(newFilePath) && newFilePath != FilePath)
             {
-                newFileName = $"{sanitizedTitle}-{counter}.md";
+                newFileName = $"{sanitizedTitle}-{counter}{extension}";
                 newFilePath = Path.Combine(folderPath, newFileName);
                 counter++;
             }
 
-            // Read content
-            string content = await _fileSystemService.ReadItemContentAsync(FilePath);
-
-            // Update first line if it's a heading
-            string[] lines = content.Split(['\r', '\n'], StringSplitOptions.None);
-            if (lines.Length > 0 && lines[0].StartsWith("# "))
+            if (IsTextFile)
             {
-                lines[0] = $"# {newTitle}";
-                content = string.Join(Environment.NewLine, lines);
-            }
+                // Read content
+                string content = await _fileSystemService.ReadItemContentAsync(FilePath);
 
-            // Suppress the file watcher events
-            _fileWatcherService?.SuppressNextEvent(newFilePath); // Write
-            if (newFilePath != FilePath)
-            {
-                _fileWatcherService?.SuppressNextEvent(FilePath); // Delete old
-                _fileWatcherService?.SuppressNextEvent(newFilePath); // Rename detection
+                // Update first line if it's a markdown heading
+                if (extension.Equals(".md", StringComparison.OrdinalIgnoreCase))
+                {
+                    string[] lines = content.Split(['\r', '\n'], StringSplitOptions.None);
+                    if (lines.Length > 0 && lines[0].StartsWith("# "))
+                    {
+                        lines[0] = $"# {newTitle}";
+                        content = string.Join(Environment.NewLine, lines);
+                    }
+                }
+
+                // Suppress the file watcher events
+                _fileWatcherService?.SuppressNextEvent(newFilePath); // Write
+                if (newFilePath != FilePath)
+                {
+                    _fileWatcherService?.SuppressNextEvent(FilePath); // Delete old
+                    _fileWatcherService?.SuppressNextEvent(newFilePath); // Rename detection
+                }
+                else
+                {
+                    _fileWatcherService?.SuppressNextEvent(FilePath); // Content change
+                }
+
+                // Write to new file
+                await _fileSystemService.WriteItemContentAsync(newFilePath, content);
+
+                // Delete old file if renamed
+                if (newFilePath != FilePath)
+                {
+                    await _fileSystemService.DeleteItemAsync(FilePath);
+                }
             }
             else
             {
-                _fileWatcherService?.SuppressNextEvent(FilePath); // Content change
-            }
-
-            // Write to new file
-            await _fileSystemService.WriteItemContentAsync(newFilePath, content);
-
-            // Delete old file if renamed
-            if (newFilePath != FilePath)
-            {
-                await _fileSystemService.DeleteItemAsync(FilePath);
+                // Non-text file: just rename via move
+                if (newFilePath != FilePath)
+                {
+                    _fileWatcherService?.SuppressNextEvent(FilePath);
+                    _fileWatcherService?.SuppressNextEvent(newFilePath);
+                    await Task.Run(() => File.Move(FilePath, newFilePath));
+                }
             }
 
             // Update config

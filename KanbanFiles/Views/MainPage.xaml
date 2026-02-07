@@ -11,6 +11,7 @@
     xmlns:views="using:KanbanFiles.Views"
     x:Name="RootPage"
     Background="Transparent"
+    KeyboardAcceleratorPlacementMode="Hidden"
     mc:Ignorable="d">
 
     <Page.DataContext>
@@ -252,11 +253,8 @@
         </StackPanel>
 
         <!--  Item Detail Overlay  -->
-        <Grid
-            x:Name="ItemDetailOverlay"
-            Visibility="Collapsed">
-            <views:ItemDetailView
-                x:Name="ItemDetailViewControl" />
+        <Grid x:Name="ItemDetailOverlay" Visibility="Collapsed">
+            <views:ItemDetailView x:Name="ItemDetailViewControl" />
         </Grid>
     </Grid>
 </Page>

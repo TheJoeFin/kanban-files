@@ -79,16 +79,8 @@ public partial class ColumnViewModel : BaseViewModel
                 var itemViewModel = new KanbanItemViewModel(newItem, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService);
                 Items.Add(itemViewModel);
                 
-                // Add to UI-bound collection based on group membership
-                if (!string.IsNullOrEmpty(newItem.GroupName))
-                {
-                    GroupViewModel? group = Groups.FirstOrDefault(g => g.Name == newItem.GroupName);
-                    group?.Items.Add(itemViewModel);
-                }
-                else
-                {
+                // New items always start as ungrouped
                     UngroupedItems.Add(itemViewModel);
-                }
             }
         }
         catch (UnauthorizedAccessException)
@@ -278,30 +270,54 @@ public partial class ColumnViewModel : BaseViewModel
 
     public async Task LoadItemsAsync()
     {
-        await LoadGroupsAsync();
+        // Load groups and build a fileName → groupName lookup
+        List<Group> loadedGroups = await _groupService.LoadGroupsAsync(FolderPath);
+        var fileToGroup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (Group g in loadedGroups)
+        {
+            foreach (string fileName in g.ItemFileNames)
+            {
+                fileToGroup[fileName] = g.Name;
+            }
+        }
+
+        // Rebuild group ViewModels
+        Groups.Clear();
+        foreach (Group group in loadedGroups)
+        {
+            var groupViewModel = new GroupViewModel(group.Name)
+            {
+                IsCollapsed = group.IsCollapsed
+            };
+            groupViewModel.RenameRequested += (sender, e) => GroupRenameRequested?.Invoke(this, groupViewModel);
+            groupViewModel.DeleteRequested += (sender, e) => GroupDeleteRequested?.Invoke(this, groupViewModel);
+            Groups.Add(groupViewModel);
+        }
 
         // Enumerate items from file system
         List<KanbanItem> items = await _fileSystemService.EnumerateItemsAsync(FolderPath);
-        
+
         // Clear existing items
         Items.Clear();
         UngroupedItems.Clear();
-        foreach (GroupViewModel group in Groups)
-        {
-            group.Items.Clear();
-        }
-        
-        // Create ViewModels and organize into groups
+
+        // Create ViewModels and organize into groups using the lookup
         foreach (KanbanItem item in items)
         {
             var itemViewModel = new KanbanItemViewModel(item, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService);
             Items.Add(itemViewModel);
 
-            // Organize into groups based on group membership
-            GroupViewModel? group = Groups.FirstOrDefault(g => g.Name == item.GroupName);
-            if (group != null)
+            if (fileToGroup.TryGetValue(item.FileName, out string? groupName))
             {
-                group.Items.Add(itemViewModel);
+                GroupViewModel? group = Groups.FirstOrDefault(g => g.Name == groupName);
+                if (group != null)
+                {
+                    group.Items.Add(itemViewModel);
+                }
+                else
+                {
+                    UngroupedItems.Add(itemViewModel);
+                }
             }
             else
             {
@@ -312,11 +328,11 @@ public partial class ColumnViewModel : BaseViewModel
 
     public async Task LoadGroupsAsync()
     {
-        GroupsConfig groupsConfig = await _groupService.LoadGroupsAsync(FolderPath);
-        
+        List<Group> loadedGroups = await _groupService.LoadGroupsAsync(FolderPath);
+
         Groups.Clear();
-        
-        foreach (Group group in groupsConfig.Groups)
+
+        foreach (Group group in loadedGroups)
         {
             var groupViewModel = new GroupViewModel(group.Name)
             {
@@ -333,19 +349,43 @@ public partial class ColumnViewModel : BaseViewModel
 
     public async Task CreateGroupAsync(string groupName)
     {
-        await _groupService.CreateGroupAsync(FolderPath, groupName);
-        await LoadGroupsAsync();
+        string sanitized = GroupService.SanitizeGroupName(groupName);
+        List<Group> existingGroups = await _groupService.LoadGroupsAsync(FolderPath);
+        string actualName = _groupService.GetUniqueGroupName(existingGroups, sanitized);
+
+        SuppressGroupFileWatcher(actualName);
+
+        var newGroup = new Group
+        {
+            Name = actualName,
+            SortOrder = existingGroups.Count > 0 ? existingGroups.Max(g => g.SortOrder) + 1 : 0,
+            ItemFileNames = [],
+            IsCollapsed = false
+        };
+        await _groupService.SaveGroupAsync(FolderPath, newGroup);
+
+        var groupViewModel = new GroupViewModel(actualName);
+        groupViewModel.RenameRequested += (sender, e) => GroupRenameRequested?.Invoke(this, groupViewModel);
+        groupViewModel.DeleteRequested += (sender, e) => GroupDeleteRequested?.Invoke(this, groupViewModel);
+        Groups.Add(groupViewModel);
     }
 
     public async Task RenameGroupAsync(string oldName, string newName)
     {
-        await _groupService.RenameGroupAsync(FolderPath, oldName, newName);
+        string sanitized = GroupService.SanitizeGroupName(newName);
+        List<Group> existingGroups = await _groupService.LoadGroupsAsync(FolderPath);
+        string actualNewName = _groupService.GetUniqueGroupName(existingGroups, sanitized, excludeGroupName: oldName);
+
+        SuppressGroupFileWatcher(oldName);
+        SuppressGroupFileWatcher(actualNewName);
+
+        await _groupService.RenameGroupFileAsync(FolderPath, oldName, actualNewName);
 
         // Update the group view model
         GroupViewModel? group = Groups.FirstOrDefault(g => g.Name == oldName);
         if (group != null)
         {
-            group.Name = newName;
+            group.Name = actualNewName;
         }
     }
 
@@ -353,20 +393,35 @@ public partial class ColumnViewModel : BaseViewModel
     {
         GroupViewModel? group = Groups.FirstOrDefault(g => g.Name == groupName);
         if (group == null) return;
-        
+
         // Move all items from group to ungrouped
         var itemsToMove = group.Items.ToList();
         foreach (KanbanItemViewModel? item in itemsToMove)
         {
             await MoveItemToGroupAsync(item.FileName, null);
         }
-        
-        await _groupService.DeleteGroupAsync(FolderPath, groupName);
+
+        SuppressGroupFileWatcher(groupName);
+        await _groupService.DeleteGroupFileAsync(FolderPath, groupName);
         Groups.Remove(group);
     }
 
     public async Task MoveItemToGroupAsync(string itemFileName, string? groupName)
     {
+        // Suppress affected group files
+        foreach (GroupViewModel group in Groups)
+        {
+            if (group.Items.Any(i => i.FileName == itemFileName))
+            {
+                SuppressGroupFileWatcher(group.Name);
+                break;
+            }
+        }
+        if (groupName != null)
+        {
+            SuppressGroupFileWatcher(groupName);
+        }
+
         if (groupName == null)
         {
             // Move to ungrouped
@@ -402,8 +457,113 @@ public partial class ColumnViewModel : BaseViewModel
         }
     }
 
+    public async Task ReorderGroupsAsync()
+    {
+        foreach (GroupViewModel group in Groups)
+        {
+            SuppressGroupFileWatcher(group.Name);
+        }
+
+        var orderedNames = Groups.Select(g => g.Name).ToList();
+        await _groupService.ReorderGroupsAsync(FolderPath, orderedNames);
+    }
+
+    public async Task MoveGroupFromColumnAsync(string groupName, ColumnViewModel sourceColumn)
+    {
+        try
+        {
+            // Load the group from the source column
+            List<Group> sourceGroups = await _groupService.LoadGroupsAsync(sourceColumn.FolderPath);
+            Group? sourceGroup = sourceGroups.FirstOrDefault(g => g.Name == groupName);
+            if (sourceGroup == null) return;
+
+            // Determine a unique group name in the target column
+            List<Group> targetGroups = await _groupService.LoadGroupsAsync(FolderPath);
+            string actualName = _groupService.GetUniqueGroupName(targetGroups, groupName);
+            int nextSortOrder = targetGroups.Count > 0 ? targetGroups.Max(g => g.SortOrder) + 1 : 0;
+
+            // Move each item file from source to target column
+            var movedFileNames = new List<string>();
+            GroupViewModel? sourceGroupVm = sourceColumn.Groups.FirstOrDefault(g => g.Name == groupName);
+            var itemsToMove = sourceGroupVm?.Items.ToList() ?? [];
+
+            foreach (KanbanItemViewModel item in itemsToMove)
+            {
+                _fileWatcherService?.SuppressNextEvent(item.FilePath);
+                var expectedNewPath = Path.Combine(FolderPath, item.FileName);
+                _fileWatcherService?.SuppressNextEvent(expectedNewPath);
+
+                var newFilePath = await _fileSystemService.MoveItemAsync(item.FilePath, FolderPath);
+                string newFileName = Path.GetFileName(newFilePath);
+
+                // Remove from source column UI
+                sourceColumn.RemoveItem(item);
+
+                // Update item state
+                item.UpdateParentColumn(this);
+                item.UpdateFilePath(newFilePath);
+
+                // Add to target column
+                Items.Add(item);
+
+                movedFileNames.Add(newFileName);
+            }
+
+            // Delete the group file from the source column
+            sourceColumn.SuppressGroupFileWatcher(groupName);
+            await _groupService.DeleteGroupFileAsync(sourceColumn.FolderPath, groupName);
+            if (sourceGroupVm != null)
+            {
+                sourceColumn.Groups.Remove(sourceGroupVm);
+            }
+
+            // Create the group file in the target column with the moved items
+            SuppressGroupFileWatcher(actualName);
+            var newGroup = new Group
+            {
+                Name = actualName,
+                SortOrder = nextSortOrder,
+                ItemFileNames = movedFileNames,
+                IsCollapsed = sourceGroup.IsCollapsed
+            };
+            await _groupService.SaveGroupAsync(FolderPath, newGroup);
+
+            // Create the group ViewModel in the target column and populate it
+            var newGroupVm = new GroupViewModel(actualName) { IsCollapsed = sourceGroup.IsCollapsed };
+            newGroupVm.RenameRequested += (sender, e) => GroupRenameRequested?.Invoke(this, newGroupVm);
+            newGroupVm.DeleteRequested += (sender, e) => GroupDeleteRequested?.Invoke(this, newGroupVm);
+
+            foreach (KanbanItemViewModel item in itemsToMove)
+            {
+                newGroupVm.Items.Add(item);
+            }
+            Groups.Add(newGroupVm);
+
+            // Update item order configs for both columns
+            await sourceColumn.UpdateItemOrderAsync();
+            await UpdateItemOrderAsync();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _notificationService?.ShowNotification("Permission Denied",
+                $"Cannot move group '{groupName}'. Check file permissions.",
+                InfoBarSeverity.Error);
+        }
+        catch (IOException ex)
+        {
+            _notificationService?.ShowNotification("Error Moving Group",
+                ex.Message,
+                InfoBarSeverity.Error);
+        }
+    }
+
     public async Task Refresh()
     {
         await LoadItemsAsync();
+    }
+
+    public void SuppressGroupFileWatcher(string groupName)
+    {
+        _fileWatcherService?.SuppressNextEvent(_groupService.GetGroupFilePath(FolderPath, groupName));
     }
 }

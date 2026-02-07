@@ -270,16 +270,8 @@ namespace KanbanFiles.ViewModels
             // Add to column
             columnViewModel.Items.Add(item);
 
-            // Add to UI-bound collection based on group membership
-            if (!string.IsNullOrEmpty(itemModel.GroupName))
-            {
-                GroupViewModel? group = columnViewModel.Groups.FirstOrDefault(g => g.Name == itemModel.GroupName);
-                group?.Items.Add(item);
-            }
-            else
-            {
-                columnViewModel.UngroupedItems.Add(item);
-            }
+            // New items always start as ungrouped
+            columnViewModel.UngroupedItems.Add(item);
 
             // Update ItemOrder in config
             string folderName = Path.GetFileName(columnPath);
@@ -306,7 +298,7 @@ namespace KanbanFiles.ViewModels
             KanbanItemViewModel? item = columnViewModel.Items.FirstOrDefault(i => i.FileName == fileName);
             if (item != null)
             {
-                columnViewModel.Items.Remove(item);
+                columnViewModel.RemoveItem(item);
 
                 // Update ItemOrder in config
                 string folderName = Path.GetFileName(columnPath);
@@ -377,8 +369,9 @@ namespace KanbanFiles.ViewModels
 
             string fileName = Path.GetFileName(e.FilePath);
 
-            // Handle groups.json changes
-            if (fileName == "groups.json")
+            // Handle group .json file changes (any .json in a column folder)
+            if (Path.GetExtension(e.FilePath).Equals(".json", StringComparison.OrdinalIgnoreCase)
+                && !fileName.Equals(".kanban.json", StringComparison.OrdinalIgnoreCase))
             {
                 string? columnPath = Path.GetDirectoryName(e.FilePath);
                 if (columnPath == null) return;
@@ -386,7 +379,7 @@ namespace KanbanFiles.ViewModels
                 ColumnViewModel? columnViewModel = Columns.FirstOrDefault(c => c.FolderPath == columnPath);
                 if (columnViewModel != null)
                 {
-                    await columnViewModel.LoadGroupsAsync();
+                    await columnViewModel.LoadItemsAsync();
                 }
                 return;
             }

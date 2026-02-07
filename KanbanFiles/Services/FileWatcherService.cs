@@ -128,18 +128,30 @@ public class FileWatcherService : IDisposable
         if (IsEventSuppressed(e.FullPath))
             return;
 
-        // Only handle .md files for item events
-        if (Path.GetExtension(e.FullPath) != ".md")
-            return;
+        string ext = Path.GetExtension(e.FullPath);
 
-        DebounceEvent(e.FullPath, async () =>
+        if (ext.Equals(".md", StringComparison.OrdinalIgnoreCase))
         {
-            await WaitForFileAvailableAsync(e.FullPath);
-            _dispatcherQueue.TryEnqueue(() =>
+            DebounceEvent(e.FullPath, async () =>
             {
-                ItemCreated?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
+                await WaitForFileAvailableAsync(e.FullPath);
+                _dispatcherQueue.TryEnqueue(() =>
+                {
+                    ItemCreated?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
+                });
             });
-        });
+        }
+        else if (ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        {
+            DebounceEvent(e.FullPath, async () =>
+            {
+                await WaitForFileAvailableAsync(e.FullPath);
+                _dispatcherQueue.TryEnqueue(() =>
+                {
+                    ItemContentChanged?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
+                });
+            });
+        }
     }
 
     private void OnFileDeleted(object sender, FileSystemEventArgs e)
@@ -147,14 +159,22 @@ public class FileWatcherService : IDisposable
         if (IsEventSuppressed(e.FullPath))
             return;
 
-        // Only handle .md files for item events
-        if (Path.GetExtension(e.FullPath) != ".md")
-            return;
+        string ext = Path.GetExtension(e.FullPath);
 
-        _dispatcherQueue.TryEnqueue(() =>
+        if (ext.Equals(".md", StringComparison.OrdinalIgnoreCase))
         {
-            ItemDeleted?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
-        });
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                ItemDeleted?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
+            });
+        }
+        else if (ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        {
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                ItemContentChanged?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
+            });
+        }
     }
 
     private void OnFileRenamed(object sender, RenamedEventArgs e)
@@ -162,16 +182,23 @@ public class FileWatcherService : IDisposable
         if (IsEventSuppressed(e.OldFullPath) || IsEventSuppressed(e.FullPath))
             return;
 
-        // Only handle .md files for item events
         var oldExt = Path.GetExtension(e.OldFullPath);
         var newExt = Path.GetExtension(e.FullPath);
-        if (oldExt != ".md" && newExt != ".md")
-            return;
 
-        _dispatcherQueue.TryEnqueue(() =>
+        if (oldExt.Equals(".md", StringComparison.OrdinalIgnoreCase) || newExt.Equals(".md", StringComparison.OrdinalIgnoreCase))
         {
-            ItemRenamed?.Invoke(this, new ItemRenamedEventArgs(e.OldFullPath, e.FullPath));
-        });
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                ItemRenamed?.Invoke(this, new ItemRenamedEventArgs(e.OldFullPath, e.FullPath));
+            });
+        }
+        else if (oldExt.Equals(".json", StringComparison.OrdinalIgnoreCase) || newExt.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        {
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                ItemContentChanged?.Invoke(this, new ItemChangedEventArgs(e.FullPath));
+            });
+        }
     }
 
     private void OnFileChanged(object sender, FileSystemEventArgs e)

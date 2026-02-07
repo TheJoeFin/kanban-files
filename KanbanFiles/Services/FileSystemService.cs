@@ -5,7 +5,7 @@ namespace KanbanFiles.Services;
 
 public class FileSystemService
 {
-    private static readonly string[] ExcludedFiles = { ".kanban.json", "groups.json" };
+    private static readonly string[] ExcludedFiles = { ".kanban.json" };
 
     public async Task<List<Column>> EnumerateColumnsAsync(Board board)
     {

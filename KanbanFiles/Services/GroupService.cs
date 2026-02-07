@@ -13,159 +13,137 @@ public class GroupService
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    private const string GroupsFileName = "groups.json";
+    private const string GroupFileExtension = ".json";
+    private const string LegacyGroupsFileName = "groups.json";
 
-    public async Task<GroupsConfig> LoadGroupsAsync(string columnFolderPath)
+    private static readonly HashSet<string> ReservedFileNames = new(StringComparer.OrdinalIgnoreCase)
     {
-        var groupsPath = Path.Combine(columnFolderPath, GroupsFileName);
+        ".kanban.json",
+        LegacyGroupsFileName
+    };
 
-        if (!File.Exists(groupsPath))
-        {
-            return new GroupsConfig();
-        }
+    public async Task<List<Group>> LoadGroupsAsync(string columnFolderPath)
+    {
+        if (!Directory.Exists(columnFolderPath))
+            return [];
 
-        try
+        await MigrateLegacyGroupsAsync(columnFolderPath);
+
+        var groups = new List<Group>();
+
+        var jsonFiles = Directory.GetFiles(columnFolderPath, $"*{GroupFileExtension}", SearchOption.TopDirectoryOnly)
+            .Where(f => !ReservedFileNames.Contains(Path.GetFileName(f)));
+
+        foreach (var filePath in jsonFiles)
         {
-            var json = await File.ReadAllTextAsync(groupsPath);
-            GroupsConfig? groupsConfig = JsonSerializer.Deserialize<GroupsConfig>(json, _jsonOptions);
-            if (groupsConfig != null)
+            try
             {
-                return groupsConfig;
+                var json = await File.ReadAllTextAsync(filePath);
+                var group = JsonSerializer.Deserialize<Group>(json, _jsonOptions);
+                if (group != null)
+                {
+                    group.Name = Path.GetFileNameWithoutExtension(filePath);
+                    groups.Add(group);
+                }
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"Warning: Could not read group file {filePath}: {ex.Message}");
             }
         }
-        catch (JsonException ex)
-        {
-            await BackupCorruptGroupsFileAsync(groupsPath);
-            Console.WriteLine($"Warning: Corrupt groups.json detected. Backed up and returning empty config. Error: {ex.Message}");
-        }
 
-        return new GroupsConfig();
+        groups.Sort((a, b) => a.SortOrder.CompareTo(b.SortOrder));
+        return groups;
     }
 
-    public async Task SaveGroupsAsync(string columnFolderPath, GroupsConfig groupsConfig)
+    public async Task SaveGroupAsync(string columnFolderPath, Group group)
     {
-        var groupsPath = Path.Combine(columnFolderPath, GroupsFileName);
-        var json = JsonSerializer.Serialize(groupsConfig, _jsonOptions);
-        await File.WriteAllTextAsync(groupsPath, json);
+        var filePath = GetGroupFilePath(columnFolderPath, group.Name);
+        var json = JsonSerializer.Serialize(group, _jsonOptions);
+        await File.WriteAllTextAsync(filePath, json);
     }
 
-    public async Task CreateGroupAsync(string columnFolderPath, string groupName)
+    public async Task DeleteGroupFileAsync(string columnFolderPath, string groupName)
     {
-        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
-
-        // Ensure unique name
-        var uniqueName = GetUniqueGroupName(groupsConfig, groupName);
-
-        groupsConfig.Groups.Add(new Group
+        var filePath = GetGroupFilePath(columnFolderPath, groupName);
+        if (File.Exists(filePath))
         {
-            Name = uniqueName,
-            ItemFileNames = new List<string>(),
-            IsCollapsed = false
-        });
-
-        await SaveGroupsAsync(columnFolderPath, groupsConfig);
-    }
-
-    public async Task DeleteGroupAsync(string columnFolderPath, string groupName)
-    {
-        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
-        Group? group = groupsConfig.Groups.FirstOrDefault(g => g.Name == groupName);
-        
-        if (group != null)
-        {
-            groupsConfig.Groups.Remove(group);
-            await SaveGroupsAsync(columnFolderPath, groupsConfig);
+            await Task.Run(() => File.Delete(filePath));
         }
     }
 
-    public async Task RenameGroupAsync(string columnFolderPath, string oldName, string newName)
+    public async Task RenameGroupFileAsync(string columnFolderPath, string oldName, string newName)
     {
-        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
-        Group? group = groupsConfig.Groups.FirstOrDefault(g => g.Name == oldName);
-        
+        var oldPath = GetGroupFilePath(columnFolderPath, oldName);
+        if (!File.Exists(oldPath)) return;
+
+        var json = await File.ReadAllTextAsync(oldPath);
+        var group = JsonSerializer.Deserialize<Group>(json, _jsonOptions);
         if (group != null)
         {
-            // Ensure unique name (excluding the group being renamed)
-            var uniqueName = GetUniqueGroupName(groupsConfig, newName, excludeGroup: group);
-            group.Name = uniqueName;
-            await SaveGroupsAsync(columnFolderPath, groupsConfig);
+            group.Name = newName;
+            await SaveGroupAsync(columnFolderPath, group);
+
+            var newPath = GetGroupFilePath(columnFolderPath, newName);
+            if (!oldPath.Equals(newPath, StringComparison.OrdinalIgnoreCase))
+            {
+                await Task.Run(() => File.Delete(oldPath));
+            }
         }
     }
 
     public async Task AddItemToGroupAsync(string columnFolderPath, string groupName, string fileName)
     {
-        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
-
         // Remove from any existing group first
-        foreach (Group group in groupsConfig.Groups)
-        {
-            group.ItemFileNames.Remove(fileName);
-        }
+        await RemoveItemFromGroupAsync(columnFolderPath, fileName);
 
         // Add to target group
-        Group? targetGroup = groupsConfig.Groups.FirstOrDefault(g => g.Name == groupName);
-        if (targetGroup != null && !targetGroup.ItemFileNames.Contains(fileName))
-        {
-            targetGroup.ItemFileNames.Add(fileName);
-        }
+        var filePath = GetGroupFilePath(columnFolderPath, groupName);
+        if (!File.Exists(filePath)) return;
 
-        await SaveGroupsAsync(columnFolderPath, groupsConfig);
+        var json = await File.ReadAllTextAsync(filePath);
+        var group = JsonSerializer.Deserialize<Group>(json, _jsonOptions);
+        if (group != null && !group.ItemFileNames.Contains(fileName))
+        {
+            group.Name = groupName;
+            group.ItemFileNames.Add(fileName);
+            await SaveGroupAsync(columnFolderPath, group);
+        }
     }
 
     public async Task RemoveItemFromGroupAsync(string columnFolderPath, string fileName)
     {
-        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
-        
-        foreach (Group group in groupsConfig.Groups)
+        var groups = await LoadGroupsAsync(columnFolderPath);
+        foreach (var group in groups)
         {
-            group.ItemFileNames.Remove(fileName);
+            if (group.ItemFileNames.Remove(fileName))
+            {
+                await SaveGroupAsync(columnFolderPath, group);
+            }
         }
-
-        await SaveGroupsAsync(columnFolderPath, groupsConfig);
-    }
-
-    public async Task MoveItemBetweenGroupsAsync(string columnFolderPath, string fileName, string targetGroupName)
-    {
-        await AddItemToGroupAsync(columnFolderPath, targetGroupName, fileName);
     }
 
     public async Task ReorderGroupsAsync(string columnFolderPath, List<string> orderedGroupNames)
     {
-        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
-        
-        var reorderedGroups = new List<Group>();
-        
-        // Add groups in the specified order
-        foreach (var groupName in orderedGroupNames)
+        var groups = await LoadGroupsAsync(columnFolderPath);
+
+        for (int i = 0; i < orderedGroupNames.Count; i++)
         {
-            Group? group = groupsConfig.Groups.FirstOrDefault(g => g.Name == groupName);
-            if (group != null)
+            var group = groups.FirstOrDefault(g => g.Name == orderedGroupNames[i]);
+            if (group != null && group.SortOrder != i)
             {
-                reorderedGroups.Add(group);
+                group.SortOrder = i;
+                await SaveGroupAsync(columnFolderPath, group);
             }
         }
-
-        // Add any groups not in the ordered list (shouldn't happen, but defensive)
-        foreach (Group group in groupsConfig.Groups)
-        {
-            if (!reorderedGroups.Contains(group))
-            {
-                reorderedGroups.Add(group);
-            }
-        }
-
-        groupsConfig.Groups = reorderedGroups;
-        await SaveGroupsAsync(columnFolderPath, groupsConfig);
     }
 
     public async Task CleanupStaleReferencesAsync(string columnFolderPath, IEnumerable<string> currentFileNames)
     {
-        GroupsConfig groupsConfig = await LoadGroupsAsync(columnFolderPath);
         var currentFileNameSet = new HashSet<string>(currentFileNames);
-        
-        bool hasChanges = false;
+        var groups = await LoadGroupsAsync(columnFolderPath);
 
-        foreach (Group group in groupsConfig.Groups)
+        foreach (var group in groups)
         {
             var staleFiles = group.ItemFileNames.Where(f => !currentFileNameSet.Contains(f)).ToList();
             if (staleFiles.Count > 0)
@@ -174,20 +152,20 @@ public class GroupService
                 {
                     group.ItemFileNames.Remove(staleFile);
                 }
-                hasChanges = true;
+                await SaveGroupAsync(columnFolderPath, group);
             }
-        }
-
-        if (hasChanges)
-        {
-            await SaveGroupsAsync(columnFolderPath, groupsConfig);
         }
     }
 
-    private string GetUniqueGroupName(GroupsConfig groupsConfig, string baseName, Group? excludeGroup = null)
+    public string GetGroupFilePath(string columnFolderPath, string groupName)
     {
-        var existingNames = groupsConfig.Groups
-            .Where(g => g != excludeGroup)
+        return Path.Combine(columnFolderPath, groupName + GroupFileExtension);
+    }
+
+    public string GetUniqueGroupName(IEnumerable<Group> existingGroups, string baseName, string? excludeGroupName = null)
+    {
+        var existingNames = existingGroups
+            .Where(g => !string.Equals(g.Name, excludeGroupName, StringComparison.OrdinalIgnoreCase))
             .Select(g => g.Name)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
@@ -207,14 +185,37 @@ public class GroupService
         return candidateName;
     }
 
-    private async Task BackupCorruptGroupsFileAsync(string groupsPath)
+    public static string SanitizeGroupName(string name)
     {
-        var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-        var timestampedBackupPath = $"{groupsPath}.{timestamp}.bak";
+        char[] invalid = Path.GetInvalidFileNameChars();
+        string sanitized = string.Join("", name.Split(invalid, StringSplitOptions.RemoveEmptyEntries));
+        return string.IsNullOrWhiteSpace(sanitized) ? "Group" : sanitized;
+    }
 
-        if (File.Exists(groupsPath))
+    private async Task MigrateLegacyGroupsAsync(string columnFolderPath)
+    {
+        var legacyPath = Path.Combine(columnFolderPath, LegacyGroupsFileName);
+        if (!File.Exists(legacyPath)) return;
+
+        try
         {
-            await Task.Run(() => File.Copy(groupsPath, timestampedBackupPath, overwrite: true));
+            var json = await File.ReadAllTextAsync(legacyPath);
+            var legacyConfig = JsonSerializer.Deserialize<GroupsConfig>(json, _jsonOptions);
+            if (legacyConfig?.Groups != null)
+            {
+                for (int i = 0; i < legacyConfig.Groups.Count; i++)
+                {
+                    var group = legacyConfig.Groups[i];
+                    group.SortOrder = i;
+                    await SaveGroupAsync(columnFolderPath, group);
+                }
+            }
+
+            File.Delete(legacyPath);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to migrate legacy groups.json in {columnFolderPath}: {ex.Message}");
         }
     }
 }

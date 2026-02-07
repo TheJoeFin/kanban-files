@@ -7,8 +7,6 @@ namespace KanbanFiles.Controls;
 
 public sealed partial class ColumnControl : UserControl
 {
-    private GroupService? _groupService;
-
     private bool _eventsSubscribed = false;
 
     public ColumnControl()
@@ -24,12 +22,6 @@ public sealed partial class ColumnControl : UserControl
 
         if (DataContext is ViewModels.ColumnViewModel viewModel)
         {
-            // Initialize GroupService if needed
-            if (_groupService == null)
-            {
-                _groupService = new GroupService();
-            }
-
             viewModel.AddItemRequested += OnAddItemRequested;
             viewModel.RenameRequested += OnRenameRequested;
             viewModel.DeleteRequested += OnDeleteRequested;
@@ -556,25 +548,7 @@ public sealed partial class ColumnControl : UserControl
 
     private async Task UpdateGroupOrderAsync(ViewModels.ColumnViewModel viewModel)
     {
-        if (_groupService == null) return;
-
-        // Load current groups config
-        GroupsConfig groupsConfig = await _groupService.LoadGroupsAsync(viewModel.FolderPath);
-
-        // Update the order to match the current collection
-        groupsConfig.Groups.Clear();
-        foreach (GroupViewModel group in viewModel.Groups)
-        {
-            Group groupConfig = new()
-            {
-                Name = group.Name,
-                IsCollapsed = group.IsCollapsed,
-                ItemFileNames = group.Items.Select(i => i.FileName).ToList()
-            };
-            groupsConfig.Groups.Add(groupConfig);
-        }
-
-        await _groupService.SaveGroupsAsync(viewModel.FolderPath, groupsConfig);
+        await viewModel.ReorderGroupsAsync();
     }
 
     private int GetDropIndex(DragEventArgs e)

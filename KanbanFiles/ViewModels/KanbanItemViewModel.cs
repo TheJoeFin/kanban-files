@@ -1,6 +1,3 @@
-using KanbanFiles.Services;
-using Microsoft.UI.Xaml.Controls;
-
 namespace KanbanFiles.ViewModels;
 
 public partial class KanbanItemViewModel : BaseViewModel
@@ -81,15 +78,15 @@ public partial class KanbanItemViewModel : BaseViewModel
         }
         catch (UnauthorizedAccessException)
         {
-            _notificationService?.ShowNotification("Permission Denied", 
-                $"Cannot delete '{FileName}'. Check file permissions.", 
+            _notificationService?.ShowNotification("Permission Denied",
+                $"Cannot delete '{FileName}'. Check file permissions.",
                 InfoBarSeverity.Error);
             throw;
         }
         catch (IOException ex)
         {
-            _notificationService?.ShowNotification("Error Deleting Item", 
-                ex.Message, 
+            _notificationService?.ShowNotification("Error Deleting Item",
+                ex.Message,
                 InfoBarSeverity.Error);
             throw;
         }
@@ -123,7 +120,7 @@ public partial class KanbanItemViewModel : BaseViewModel
             string content = await _fileSystemService.ReadItemContentAsync(FilePath);
 
             // Update first line if it's a heading
-            string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.None);
+            string[] lines = content.Split(['\r', '\n'], StringSplitOptions.None);
             if (lines.Length > 0 && lines[0].StartsWith("# "))
             {
                 lines[0] = $"# {newTitle}";
@@ -167,15 +164,15 @@ public partial class KanbanItemViewModel : BaseViewModel
         }
         catch (UnauthorizedAccessException)
         {
-            _notificationService?.ShowNotification("Permission Denied", 
-                $"Cannot rename '{FileName}'. Check file permissions.", 
+            _notificationService?.ShowNotification("Permission Denied",
+                $"Cannot rename '{FileName}'. Check file permissions.",
                 InfoBarSeverity.Error);
             throw;
         }
         catch (IOException ex)
         {
-            _notificationService?.ShowNotification("Error Renaming Item", 
-                ex.Message, 
+            _notificationService?.ShowNotification("Error Renaming Item",
+                ex.Message,
                 InfoBarSeverity.Error);
             throw;
         }
@@ -193,7 +190,7 @@ public partial class KanbanItemViewModel : BaseViewModel
         FileName = Path.GetFileName(newFilePath);
     }
 
-    private string SanitizeFileName(string fileName)
+    private static string SanitizeFileName(string fileName)
     {
         char[] invalid = Path.GetInvalidFileNameChars();
         string sanitized = string.Join("", fileName.Split(invalid, StringSplitOptions.RemoveEmptyEntries));

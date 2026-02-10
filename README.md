@@ -2,6 +2,8 @@
 
 > A local-first Kanban board powered by your file system. Organize markdown files as cards across columns, with full two-way synchronization.
 
+![KanbanFiles Screenshot](Images/Kanban-Files-Feb-2026.png)
+
 KanbanFiles is a native Windows desktop application that transforms folders and markdown files into an interactive Kanban board. Changes made in the app are reflected instantly on disk, and external file changes automatically sync back to the board.
 
 ![WinUI3](https://img.shields.io/badge/WinUI%203-blue?logo=windows)

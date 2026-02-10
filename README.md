@@ -274,7 +274,7 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 ## 📧 Contact
 
-**Joe Finneran** - [@TheJoeFin](https://github.com/TheJoeFin)
+**Joe Finney** - [@TheJoeFin](https://github.com/TheJoeFin) - joe at joefinapps dot com
 
 **Project Link**: [https://github.com/TheJoeFin/kanban-files](https://github.com/TheJoeFin/kanban-files)
 

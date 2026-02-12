@@ -97,7 +97,7 @@
                 </Button>
             </StackPanel>
 
-            <!--  Save status (editable files only)  -->
+            <!--  Save status and AI toggle (editable files only)  -->
             <StackPanel
                 Grid.Column="2"
                 Orientation="Horizontal"
@@ -117,14 +117,29 @@
                     Style="{StaticResource AccentButtonStyle}"
                     ToolTipService.ToolTip="Save (Ctrl+S)"
                     Visibility="Collapsed" />
+                <Border Width="1" Height="20" Margin="4,0" VerticalAlignment="Center"
+                        Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+                <ToggleButton
+                    x:Name="AiToggleButton"
+                    Width="36"
+                    Height="36"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Click="AiToggleButton_Click"
+                    ToolTipService.ToolTip="Toggle AI Chat">
+                    <FontIcon FontSize="16" Glyph="&#xE945;" />
+                </ToggleButton>
             </StackPanel>
         </Grid>
 
-        <!--  Split Editor / Preview  -->
+        <!--  Split Editor / Preview / AI  -->
         <Grid x:Name="EditorPreviewGrid" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition x:Name="AiPaneColumn" Width="0" />
             </Grid.ColumnDefinitions>
 
             <!--  Text Editor (text files only)  -->
@@ -190,6 +205,173 @@
                     Content="Open with Default App"
                     Style="{StaticResource AccentButtonStyle}" />
             </StackPanel>
+
+            <!--  AI Chat Pane separator  -->
+            <Border
+                Grid.Column="1"
+                Width="1"
+                HorizontalAlignment="Right"
+                Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                x:Name="AiPaneSeparator"
+                Visibility="Collapsed" />
+
+            <!--  AI Chat Pane  -->
+            <Grid
+                x:Name="AiChatPane"
+                Grid.Column="2"
+                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!--  AI Pane Header  -->
+                <Grid Grid.Row="0" Padding="12,8"
+                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                      BorderThickness="0,0,0,1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE945;" />
+                        <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="AI Chat" />
+                    </StackPanel>
+                    <Button
+                        Grid.Column="1"
+                        x:Name="AiClearButton"
+                        Width="28" Height="28"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="AiClearButton_Click"
+                        ToolTipService.ToolTip="Clear chat">
+                        <FontIcon FontSize="12" Glyph="&#xE74D;" />
+                    </Button>
+                </Grid>
+
+                <!--  Quick Actions  -->
+                <StackPanel Grid.Row="1" Padding="8,8,8,4" Spacing="4">
+                    <Button
+                        x:Name="QuickActionPlanButton"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Left"
+                        Click="QuickActionPlan_Click"
+                        Content="💡 Help me plan what to do next"
+                        FontSize="12" />
+                    <Button
+                        x:Name="QuickActionTodayButton"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Left"
+                        Click="QuickActionToday_Click"
+                        Content="📋 What can I do on this today?"
+                        FontSize="12" />
+                </StackPanel>
+
+                <!--  Messages  -->
+                <ScrollViewer
+                    x:Name="AiMessagesScrollViewer"
+                    Grid.Row="2"
+                    Padding="8,4">
+                    <ItemsControl x:Name="AiMessagesItemsControl">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    Margin="0,4"
+                                    Padding="10,8"
+                                    CornerRadius="8"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock
+                                            FontSize="11"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="{Binding Role}" />
+                                        <TextBlock
+                                            FontSize="13"
+                                            IsTextSelectionEnabled="True"
+                                            TextWrapping="Wrap"
+                                            Text="{Binding Text}" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!--  Status / Loading  -->
+                <StackPanel
+                    x:Name="AiStatusPanel"
+                    Grid.Row="2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="Collapsed">
+                    <ProgressRing
+                        x:Name="AiLoadingRing"
+                        Width="32" Height="32"
+                        IsActive="False" />
+                    <TextBlock
+                        x:Name="AiStatusText"
+                        Margin="0,8,0,0"
+                        FontSize="12"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        TextAlignment="Center" />
+                </StackPanel>
+
+                <!--  Input area  -->
+                <Grid Grid.Row="3" Padding="8"
+                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                      BorderThickness="0,1,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!--  Apply button  -->
+                    <Button
+                        x:Name="AiApplyButton"
+                        Grid.Row="0"
+                        Margin="0,0,0,6"
+                        HorizontalAlignment="Stretch"
+                        Click="AiApplyButton_Click"
+                        Style="{StaticResource AccentButtonStyle}"
+                        Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon FontSize="12" Glyph="&#xE710;" />
+                            <TextBlock Text="Append to editor" />
+                        </StackPanel>
+                    </Button>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox
+                            x:Name="AiInputTextBox"
+                            Grid.Column="0"
+                            AcceptsReturn="False"
+                            KeyDown="AiInputTextBox_KeyDown"
+                            PlaceholderText="Ask about this file..."
+                            TextWrapping="Wrap" />
+                        <Button
+                            x:Name="AiSendButton"
+                            Grid.Column="1"
+                            Width="36" Height="36"
+                            Margin="4,0,0,0"
+                            Padding="0"
+                            VerticalAlignment="Bottom"
+                            Click="AiSendButton_Click"
+                            Style="{StaticResource AccentButtonStyle}"
+                            ToolTipService.ToolTip="Send">
+                            <FontIcon FontSize="14" Glyph="&#xE724;" />
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>

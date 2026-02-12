@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+        <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
         <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
         <OutputType>WinExe</OutputType>
 
         <!-- WinUI 3 -->
         <UseWinUI>true</UseWinUI>
         <EnableMsixTooling>true</EnableMsixTooling>
-        <WindowsPackageType>None</WindowsPackageType>
         <!-- <WindowsSdkPackageVersion>10.0.19041.38</WindowsSdkPackageVersion> -->
-
+        
         <!-- Project Options -->
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
@@ -41,8 +40,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Markdig" Version="0.44.0" />
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.*" />
+        <PackageReference Include="Markdig" Version="0.45.0" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.0-experimental4" />
+        <PackageReference Include="Microsoft.WindowsAppSDK.AI" Version="2.0.130-experimental" />
         <PackageReference Include="Microsoft.Web.WebView2" Version="1.*" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.*" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
@@ -71,5 +71,19 @@
     -->
     <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
         <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+        <!-- Prevent MSIX tooling from overriding manifest version requirements -->
+        <AppxOSMinVersionReplaceManifestVersion>false</AppxOSMinVersionReplaceManifestVersion>
+        <AppxOSMaxVersionTestedReplaceManifestVersion>false</AppxOSMaxVersionTestedReplaceManifestVersion>
     </PropertyGroup>
+
+    <!-- Copy WebView2Loader.dll to output directory for unpackaged app -->
+    <Target Name="CopyWebView2Loader" AfterTargets="Build">
+        <PropertyGroup>
+            <WebView2RID Condition="'$(Platform)' == 'x86'">win-x86</WebView2RID>
+            <WebView2RID Condition="'$(Platform)' == 'x64'">win-x64</WebView2RID>
+            <WebView2RID Condition="'$(Platform)' == 'ARM64'">win-arm64</WebView2RID>
+            <WebView2RID Condition="'$(WebView2RID)' == ''">win-x64</WebView2RID>
+        </PropertyGroup>
+        <Copy SourceFiles="$(OutputPath)runtimes\$(WebView2RID)\native\WebView2Loader.dll" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)runtimes\$(WebView2RID)\native\WebView2Loader.dll')" />
+    </Target>
 </Project>

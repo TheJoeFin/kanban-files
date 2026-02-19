@@ -10,12 +10,12 @@ public class FileWatcherService : IDisposable
     private FileSystemWatcher? _folderWatcher;
     private FileSystemWatcher? _fileWatcher;
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _debouncers = new();
-    private readonly HashSet<string> _suppressedPaths = new();
-    private readonly object _suppressLock = new();
-    
+    private readonly ConcurrentDictionary<string, long> _suppressedPaths = new();
+
     private const int DebounceDelayMs = 300;
     private const int FileAccessRetries = 3;
     private const int FileAccessRetryDelayMs = 500;
+    private const int SuppressWindowMs = 2000;
 
     public event EventHandler<ItemChangedEventArgs>? ItemCreated;
     public event EventHandler<ItemChangedEventArgs>? ItemDeleted;
@@ -89,21 +89,19 @@ public class FileWatcherService : IDisposable
 
     public void SuppressNextEvent(string path)
     {
-        lock (_suppressLock)
-        {
-            _suppressedPaths.Add(Path.GetFullPath(path));
-        }
+        _suppressedPaths[Path.GetFullPath(path)] = Environment.TickCount64;
     }
 
     private bool IsEventSuppressed(string path)
     {
-        lock (_suppressLock)
+        string fullPath = Path.GetFullPath(path);
+        if (_suppressedPaths.TryGetValue(fullPath, out long suppressedAt))
         {
-            var fullPath = Path.GetFullPath(path);
-            if (_suppressedPaths.Remove(fullPath))
+            if (Environment.TickCount64 - suppressedAt < SuppressWindowMs)
             {
                 return true;
             }
+            _suppressedPaths.TryRemove(fullPath, out _);
         }
         return false;
     }

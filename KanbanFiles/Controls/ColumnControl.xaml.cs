@@ -8,6 +8,7 @@ namespace KanbanFiles.Controls;
 public sealed partial class ColumnControl : UserControl
 {
     private bool _eventsSubscribed = false;
+    private Microsoft.UI.Xaml.Media.Brush? _defaultBorderBrush;
 
     public ColumnControl()
     {
@@ -18,6 +19,11 @@ public sealed partial class ColumnControl : UserControl
 
     private void ColumnControl_Loaded(object sender, RoutedEventArgs e)
     {
+        if (_defaultBorderBrush == null && Content is Grid columnGrid)
+        {
+            _defaultBorderBrush = columnGrid.BorderBrush;
+        }
+
         if (_eventsSubscribed) return;
 
         if (DataContext is ViewModels.ColumnViewModel viewModel)
@@ -350,11 +356,33 @@ public sealed partial class ColumnControl : UserControl
 
     private void ItemsControl_DragOver(object sender, DragEventArgs e)
     {
-        e.AcceptedOperation = DataPackageOperation.Move;
+        if (e.DataView.Contains(StandardDataFormats.Text))
+        {
+            e.AcceptedOperation = DataPackageOperation.Move;
+            UpdateDropIndicator(e);
+            SetColumnDragHighlight(true);
+        }
+        else
+        {
+            e.AcceptedOperation = DataPackageOperation.None;
+        }
+    }
+
+    private void Column_DragLeave(object sender, DragEventArgs e)
+    {
+        if (sender is not FrameworkElement element) return;
+
+        Point pos = e.GetPosition(element);
+        if (pos.X < 0 || pos.Y < 0 || pos.X > element.ActualWidth || pos.Y > element.ActualHeight)
+        {
+            HideDropIndicator();
+        }
     }
 
     private async void ItemsControl_Drop(object sender, DragEventArgs e)
     {
+        HideDropIndicator();
+
         if (DataContext is not ColumnViewModel targetColumnViewModel)
         {
             return;
@@ -462,6 +490,27 @@ public sealed partial class ColumnControl : UserControl
         {
             // Reorder within the same column or move between groups
             await HandleItemReorderOrGroupMoveAsync(targetColumnViewModel, dragPayload, targetGroupName);
+
+            // Also reorder within the ungrouped list if dropping into ungrouped area
+            if (targetGroupName == null)
+            {
+                int dropIndex = GetDropIndex(e);
+                string fileName = Path.GetFileName(dragPayload.FilePath);
+                KanbanItemViewModel? sourceItem = targetColumnViewModel.UngroupedItems.FirstOrDefault(i => i.FileName == fileName);
+                if (sourceItem != null)
+                {
+                    int currentIndex = targetColumnViewModel.UngroupedItems.IndexOf(sourceItem);
+                    if (currentIndex >= 0)
+                    {
+                        if (dropIndex > currentIndex) dropIndex--;
+                        if (currentIndex != dropIndex && dropIndex >= 0 && dropIndex < targetColumnViewModel.UngroupedItems.Count)
+                        {
+                            targetColumnViewModel.UngroupedItems.Move(currentIndex, dropIndex);
+                            await targetColumnViewModel.UpdateItemOrderAsync();
+                        }
+                    }
+                }
+            }
         }
         else
         {
@@ -484,6 +533,65 @@ public sealed partial class ColumnControl : UserControl
         {
             itemsControl.DragOver += ItemsControl_DragOver;
             itemsControl.Drop += ItemsControl_Drop;
+        }
+    }
+
+    private void UpdateDropIndicator(DragEventArgs e)
+    {
+        if (ItemsScrollViewer == null || UngroupedItemsControlElement == null) return;
+
+        Point dragPos = e.GetPosition(ItemsScrollViewer);
+        double indicatorY = GetDropIndicatorY(dragPos);
+
+        DropIndicatorTransform.Y = indicatorY - 1.5;
+        DropIndicator.Visibility = Visibility.Visible;
+    }
+
+    private double GetDropIndicatorY(Point dragPos)
+    {
+        int itemCount = UngroupedItemsControlElement.Items.Count;
+
+        if (itemCount == 0)
+        {
+            Point itemsPos = UngroupedItemsControlElement.TransformToVisual(ItemsScrollViewer).TransformPoint(new Point(0, 0));
+            return itemsPos.Y;
+        }
+
+        double lastBottom = 0;
+        for (int i = 0; i < itemCount; i++)
+        {
+            if (UngroupedItemsControlElement.ContainerFromIndex(i) is not FrameworkElement container)
+                continue;
+
+            Point containerPos = container.TransformToVisual(ItemsScrollViewer).TransformPoint(new Point(0, 0));
+
+            if (dragPos.Y < containerPos.Y + (container.ActualHeight / 2))
+            {
+                return containerPos.Y;
+            }
+            lastBottom = containerPos.Y + container.ActualHeight;
+        }
+
+        return lastBottom;
+    }
+
+    private void HideDropIndicator()
+    {
+        DropIndicator.Visibility = Visibility.Collapsed;
+        SetColumnDragHighlight(false);
+    }
+
+    private void SetColumnDragHighlight(bool highlight)
+    {
+        if (Content is not Grid columnGrid) return;
+
+        if (highlight)
+        {
+            columnGrid.BorderBrush = DropIndicator.Background;
+        }
+        else if (_defaultBorderBrush != null)
+        {
+            columnGrid.BorderBrush = _defaultBorderBrush;
         }
     }
 

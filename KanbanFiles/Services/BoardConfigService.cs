@@ -14,7 +14,9 @@ public class BoardConfigService
     };
 
     private const string ConfigFileName = ".kanban.json";
-    
+
+    public FileWatcherService? FileWatcher { get; set; }
+
     public bool WasConfigCorrupted { get; private set; }
     
     public void ResetCorruptionFlag() => WasConfigCorrupted = false;
@@ -51,6 +53,7 @@ public class BoardConfigService
     public async Task SaveAsync(Board board)
     {
         var configPath = Path.Combine(board.RootPath, ConfigFileName);
+        FileWatcher?.SuppressNextEvent(configPath);
         var json = JsonSerializer.Serialize(board, _jsonOptions);
         await File.WriteAllTextAsync(configPath, json);
     }

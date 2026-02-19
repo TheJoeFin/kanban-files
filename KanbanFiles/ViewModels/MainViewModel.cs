@@ -105,6 +105,7 @@ namespace KanbanFiles.ViewModels
             if (dispatcher != null)
             {
                 _fileWatcherService = new FileWatcherService(_board.RootPath, dispatcher);
+                _boardConfigService.FileWatcher = _fileWatcherService;
                 _fileWatcherService.ItemCreated += OnItemCreated;
                 _fileWatcherService.ItemDeleted += OnItemDeleted;
                 _fileWatcherService.ItemRenamed += OnItemRenamed;

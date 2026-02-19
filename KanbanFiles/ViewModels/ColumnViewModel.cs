@@ -236,7 +236,24 @@ public partial class ColumnViewModel : BaseViewModel
                     targetIndex = Items.Count;
                 }
                 Items.Insert(targetIndex, sourceItem);
-                UngroupedItems.Add(sourceItem);
+
+                // Insert at the corresponding position in UngroupedItems
+                int ungroupedIndex = 0;
+                for (int i = 0; i < targetIndex && i < Items.Count; i++)
+                {
+                    if (UngroupedItems.Contains(Items[i]))
+                    {
+                        ungroupedIndex++;
+                    }
+                }
+                if (ungroupedIndex >= UngroupedItems.Count)
+                {
+                    UngroupedItems.Add(sourceItem);
+                }
+                else
+                {
+                    UngroupedItems.Insert(ungroupedIndex, sourceItem);
+                }
 
                 // Update item order in both columns
                 await sourceColumnViewModel.UpdateItemOrderAsync();

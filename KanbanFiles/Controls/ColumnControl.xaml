@@ -15,6 +15,7 @@
         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
         BorderThickness="1"
         CornerRadius="8"
+        DragLeave="Column_DragLeave"
         DragOver="ItemsControl_DragOver"
         Drop="ItemsControl_Drop">
 
@@ -74,64 +75,100 @@
         </Grid>
 
         <!--  Items Area  -->
-        <ScrollViewer
-            Grid.Row="1"
-            AllowDrop="True"
-            HorizontalScrollBarVisibility="Disabled"
-            VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <!--  Ungrouped Items Section  -->
-                <ItemsControl
-                    x:Name="UngroupedItemsControlElement"
-                    AllowDrop="True"
-                    Background="Transparent"
-                    DragOver="ItemsControl_DragOver"
-                    Drop="ItemsControl_Drop"
-                    ItemsSource="{Binding UngroupedItems, Mode=OneWay}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <controls:KanbanItemCardControl Margin="0,0,0,8" Visibility="{Binding IsVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+        <Grid Grid.Row="1">
+            <ScrollViewer
+                x:Name="ItemsScrollViewer"
+                AllowDrop="True"
+                HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!--  Ungrouped Items Section  -->
+                    <ItemsControl
+                        x:Name="UngroupedItemsControlElement"
+                        AllowDrop="True"
+                        Background="Transparent"
+                        DragOver="ItemsControl_DragOver"
+                        Drop="ItemsControl_Drop"
+                        ItemsSource="{Binding UngroupedItems, Mode=OneWay}">
+                        <ItemsControl.ItemContainerTransitions>
+                            <TransitionCollection>
+                                <AddDeleteThemeTransition />
+                                <RepositionThemeTransition />
+                            </TransitionCollection>
+                        </ItemsControl.ItemContainerTransitions>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <controls:KanbanItemCardControl Margin="0,0,0,8" Visibility="{Binding IsVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
-                <!--  Groups Section  -->
-                <ItemsControl x:Name="GroupsControlElement" ItemsSource="{Binding Groups, Mode=OneWay}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border
-                                Margin="0,0,0,8"
-                                Padding="4"
-                                BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
-                                BorderThickness="1.5"
-                                CornerRadius="8"
-                                Visibility="{Binding IsVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <StackPanel>
-                                    <!--  Group Header  -->
-                                    <controls:GroupHeaderControl />
+                    <!--  Groups Section  -->
+                    <ItemsControl x:Name="GroupsControlElement" ItemsSource="{Binding Groups, Mode=OneWay}">
+                        <ItemsControl.ItemContainerTransitions>
+                            <TransitionCollection>
+                                <AddDeleteThemeTransition />
+                                <RepositionThemeTransition />
+                            </TransitionCollection>
+                        </ItemsControl.ItemContainerTransitions>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    Margin="0,0,0,8"
+                                    Padding="4"
+                                    BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+                                    BorderThickness="1.5"
+                                    CornerRadius="8"
+                                    Visibility="{Binding IsVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <StackPanel>
+                                        <!--  Group Header  -->
+                                        <controls:GroupHeaderControl />
 
-                                    <!--  Group Items (visible when not collapsed)  -->
-                                    <ItemsControl
-                                        MinHeight="40"
-                                        Margin="0,8,0,0"
-                                        Padding="4,0"
-                                        AllowDrop="True"
-                                        ItemsSource="{Binding Items, Mode=OneWay}"
-                                        Loaded="GroupItemsControl_Loaded"
-                                        Visibility="{Binding IsCollapsed, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-                                                            <ItemsControl.ItemTemplate>
-                                                                    <DataTemplate>
-                                                                        <controls:KanbanItemCardControl Margin="0,0,0,8" Visibility="{Binding IsVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                                                    </DataTemplate>
-                                                                </ItemsControl.ItemTemplate>
-                                                            </ItemsControl>
-                                                        </StackPanel>
-                                                    </Border>
+                                        <!--  Group Items (visible when not collapsed)  -->
+                                        <ItemsControl
+                                            MinHeight="40"
+                                            Margin="0,8,0,0"
+                                            Padding="4,0"
+                                            AllowDrop="True"
+                                            ItemsSource="{Binding Items, Mode=OneWay}"
+                                            Loaded="GroupItemsControl_Loaded"
+                                            Visibility="{Binding IsCollapsed, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                            <ItemsControl.ItemContainerTransitions>
+                                                <TransitionCollection>
+                                                    <AddDeleteThemeTransition />
+                                                    <RepositionThemeTransition />
+                                                </TransitionCollection>
+                                            </ItemsControl.ItemContainerTransitions>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <controls:KanbanItemCardControl Margin="0,0,0,8" Visibility="{Binding IsVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-            </StackPanel>
-        </ScrollViewer>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!--  Drop position indicator  -->
+            <Border
+                x:Name="DropIndicator"
+                Height="3"
+                Margin="4,0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top"
+                Background="{ThemeResource AccentFillColorDefaultBrush}"
+                CornerRadius="1.5"
+                IsHitTestVisible="False"
+                Visibility="Collapsed">
+                <Border.RenderTransform>
+                    <TranslateTransform x:Name="DropIndicatorTransform" />
+                </Border.RenderTransform>
+            </Border>
+        </Grid>
 
         <!--  Footer  -->
         <StackPanel Grid.Row="2" Margin="0,12,0,0">

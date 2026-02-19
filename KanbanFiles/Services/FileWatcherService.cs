@@ -74,8 +74,15 @@ public class FileWatcherService : IDisposable
         // Cancel all pending debounces
         foreach (CancellationTokenSource cts in _debouncers.Values)
         {
-            cts.Cancel();
-            cts.Dispose();
+            try
+            {
+                cts.Cancel();
+                cts.Dispose();
+            }
+            catch (ObjectDisposedException)
+            {
+                // Already disposed by DebounceEvent's finally block
+            }
         }
         _debouncers.Clear();
     }
@@ -232,8 +239,15 @@ public class FileWatcherService : IDisposable
         // Cancel any existing debounce for this file
         if (_debouncers.TryGetValue(path, out CancellationTokenSource? existingCts))
         {
-            existingCts.Cancel();
-            existingCts.Dispose();
+            try
+            {
+                existingCts.Cancel();
+                existingCts.Dispose();
+            }
+            catch (ObjectDisposedException)
+            {
+                // Already disposed by a concurrent Stop() call
+            }
         }
 
         var cts = new CancellationTokenSource();

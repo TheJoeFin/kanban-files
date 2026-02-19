@@ -16,9 +16,17 @@
     <Grid Padding="24">
         <ScrollViewer>
             <StackPanel MaxWidth="600" Spacing="16">
-                <TextBlock
-                    Style="{StaticResource TitleTextBlockStyle}"
-                    Text="Settings" />
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button
+                        VerticalAlignment="Center"
+                        Click="BackButton_Click"
+                        Style="{StaticResource NavigationBackButtonNormalStyle}"
+                        ToolTipService.ToolTip="Back" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Style="{StaticResource TitleTextBlockStyle}"
+                        Text="Settings" />
+                </StackPanel>
 
                 <!--  Appearance  -->
                 <TextBlock

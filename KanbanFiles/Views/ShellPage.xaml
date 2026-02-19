@@ -7,25 +7,5 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <NavigationView
-        x:Name="NavigationViewControl"
-        BackRequested="NavigationViewControl_BackRequested"
-        IsBackButtonVisible="Auto"
-        IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
-        IsSettingsVisible="True"
-        ItemInvoked="NavigationViewControl_ItemInvoked"
-        PaneDisplayMode="LeftCompact">
-
-        <NavigationView.MenuItems>
-            <NavigationViewItem
-                Content="Board"
-                Tag="KanbanFiles.ViewModels.MainViewModel">
-                <NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE80F;" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-        </NavigationView.MenuItems>
-
-        <Frame x:Name="NavigationFrame" />
-    </NavigationView>
+    <Frame x:Name="NavigationFrame" />
 </Page>

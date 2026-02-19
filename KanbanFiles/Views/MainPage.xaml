@@ -76,11 +76,14 @@
                         <FontIcon Glyph="&#xE1CB;" />
                     </AppBarButton.Icon>
                 </AppBarButton>
-                <AppBarButton Command="{x:Bind ViewModel.ManageTagsCommand}" Label="Manage Tags">
-                    <AppBarButton.Icon>
-                        <FontIcon Glyph="&#xE115;" />
-                    </AppBarButton.Icon>
-                </AppBarButton>
+
+                <CommandBar.SecondaryCommands>
+                    <AppBarButton Click="SettingsButton_Click" Label="Settings">
+                        <AppBarButton.Icon>
+                            <FontIcon Glyph="&#xE713;" />
+                        </AppBarButton.Icon>
+                    </AppBarButton>
+                </CommandBar.SecondaryCommands>
 
                 <CommandBar.Content>
                     <TextBlock

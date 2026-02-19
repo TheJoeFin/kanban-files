@@ -63,6 +63,28 @@ namespace KanbanFiles.Views
             }
         }
 
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            App.NavigationService.NavigateTo(typeof(SettingsViewModel).FullName!, ViewModel.Board?.RootPath);
+        }
+
+        protected override async void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            if (e.Parameter is string folderPath && !string.IsNullOrEmpty(folderPath))
+            {
+                try
+                {
+                    await ViewModel.LoadBoardAsync(folderPath);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error restoring board on navigation: {ex}");
+                }
+            }
+        }
+
         private async void OnAddColumnRequested(object? sender, string e)
         {
             var dialog = new ContentDialog
@@ -236,6 +258,15 @@ namespace KanbanFiles.Views
                     flyout.Items.Add(item);
                 }
             }
+
+            flyout.Items.Add(new MenuFlyoutSeparator());
+            MenuFlyoutItem manageItem = new()
+            {
+                Text = "Manage Tags...",
+                Icon = new FontIcon { Glyph = "\uE115" }
+            };
+            manageItem.Click += (s, args) => OnManageTagsRequested(this, EventArgs.Empty);
+            flyout.Items.Add(manageItem);
 
             if (sender is FrameworkElement element)
             {

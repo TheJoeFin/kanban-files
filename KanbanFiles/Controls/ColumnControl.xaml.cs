@@ -86,12 +86,14 @@ public sealed partial class ColumnControl : UserControl
         AddItemTextBox.Focus(FocusState.Programmatic);
     }
 
-    private void AddItemTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
+    private async void AddItemTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == Windows.System.VirtualKey.Enter)
         {
             e.Handled = true;
-            AddItemConfirm_Click(sender, e);
+            bool ctrlDown = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Control)
+                .HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
+            await ConfirmAddItemAsync(openAfterCreate: ctrlDown);
         }
         else if (e.Key == Windows.System.VirtualKey.Escape)
         {
@@ -101,6 +103,11 @@ public sealed partial class ColumnControl : UserControl
     }
 
     private async void AddItemConfirm_Click(object sender, RoutedEventArgs e)
+    {
+        await ConfirmAddItemAsync(openAfterCreate: false);
+    }
+
+    private async Task ConfirmAddItemAsync(bool openAfterCreate)
     {
         string title = AddItemTextBox.Text?.Trim() ?? string.Empty;
 
@@ -114,11 +121,16 @@ public sealed partial class ColumnControl : UserControl
         {
             try
             {
-                await viewModel.CreateItemAsync(title);
+                KanbanItemViewModel? newItem = await viewModel.CreateItemAsync(title);
 
                 // Hide inline entry, show button
                 AddItemPanel.Visibility = Visibility.Collapsed;
                 AddItemButton.Visibility = Visibility.Visible;
+
+                if (openAfterCreate && newItem != null)
+                {
+                    newItem.OpenDetailCommand.Execute(null);
+                }
             }
             catch (Exception ex)
             {

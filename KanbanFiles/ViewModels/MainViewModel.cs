@@ -11,6 +11,7 @@ namespace KanbanFiles.ViewModels
         private readonly INotificationService _notificationService;
         private readonly IFocusManagerService _focusManagerService;
         private readonly IRecentFoldersService _recentFoldersService;
+        private readonly TagService _tagService;
         private FileWatcherService? _fileWatcherService;
         private Models.Board? _board;
 
@@ -24,6 +25,7 @@ namespace KanbanFiles.ViewModels
             ((NotificationService)_notificationService).SetMainViewModel(this);
             _focusManagerService = new FocusManagerService();
             _recentFoldersService = new RecentFoldersService();
+            _tagService = new TagService(_boardConfigService);
             Columns = [];
             RecentFolders = [];
             _ = LoadRecentFoldersAsync();
@@ -34,6 +36,12 @@ namespace KanbanFiles.ViewModels
         public ObservableCollection<string> RecentFolders { get; }
 
         public bool HasRecentFolders => RecentFolders.Count > 0;
+
+        public ObservableCollection<TagDefinition> AvailableTags { get; } = [];
+
+        public ObservableCollection<TagDefinition> ActiveTagFilters { get; } = [];
+
+        public bool HasActiveTagFilter => ActiveTagFilters.Count > 0;
 
         [ObservableProperty]
         private string _boardName = "Kanban Board";
@@ -64,6 +72,10 @@ namespace KanbanFiles.ViewModels
         public event EventHandler? OpenFolderRequested;
         public event EventHandler<string>? AddColumnRequested;
         public event EventHandler? EditFileFilterRequested;
+        public event EventHandler? ManageTagsRequested;
+
+        public TagService TagService => _tagService;
+        public Models.Board? Board => _board;
 
         [RelayCommand]
         private void OpenFolder()
@@ -107,7 +119,7 @@ namespace KanbanFiles.ViewModels
             Columns.Clear();
             foreach (Column column in columns)
             {
-                ColumnViewModel columnViewModel = new(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService, _notificationService);
+                ColumnViewModel columnViewModel = new(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService, _notificationService, _tagService);
                 columnViewModel.DeleteRequested += OnColumnDeleteRequested;
 
                 // Load groups and populate UngroupedItems/Groups collections
@@ -118,6 +130,7 @@ namespace KanbanFiles.ViewModels
 
             BoardName = _board.Name;
             IsLoaded = true;
+            RefreshAvailableTags();
 
             // Add to recent folders after successful load
             try
@@ -197,7 +210,7 @@ namespace KanbanFiles.ViewModels
                     SortOrder = newColumnConfig.SortOrder
                 };
 
-                ColumnViewModel columnViewModel = new(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService, _notificationService);
+                ColumnViewModel columnViewModel = new(column, _fileSystemService, _boardConfigService, _groupService, _board, _fileWatcherService, _notificationService, _tagService);
                 columnViewModel.DeleteRequested += OnColumnDeleteRequested;
                 Columns.Add(columnViewModel);
             }
@@ -303,7 +316,7 @@ namespace KanbanFiles.ViewModels
             };
 
             // Create the item viewmodel
-            KanbanItemViewModel item = new(itemModel, _fileSystemService, _boardConfigService, _board, columnViewModel, _fileWatcherService, _notificationService);
+            KanbanItemViewModel item = new(itemModel, _fileSystemService, _boardConfigService, _board, columnViewModel, _fileWatcherService, _notificationService, _tagService);
 
             // Add to column
             columnViewModel.Items.Add(item);
@@ -502,6 +515,138 @@ namespace KanbanFiles.ViewModels
             IsItemDetailOpen = false;
             CurrentItemDetail = null;
             _currentKanbanItem = null;
+        }
+
+        public void RefreshAvailableTags()
+        {
+            AvailableTags.Clear();
+            if (_board == null) return;
+
+            List<TagDefinition> definitions = _tagService.GetTagDefinitions(_board);
+            foreach (TagDefinition tag in definitions)
+            {
+                AvailableTags.Add(tag);
+            }
+
+            // Remove stale filters
+            List<TagDefinition> staleFilters = ActiveTagFilters
+                .Where(f => !definitions.Any(d => d.Name == f.Name))
+                .ToList();
+            foreach (TagDefinition stale in staleFilters)
+            {
+                ActiveTagFilters.Remove(stale);
+            }
+            OnPropertyChanged(nameof(HasActiveTagFilter));
+        }
+
+        public void ToggleTagFilter(TagDefinition tag)
+        {
+            TagDefinition? existing = ActiveTagFilters.FirstOrDefault(t => t.Name == tag.Name);
+            if (existing != null)
+            {
+                ActiveTagFilters.Remove(existing);
+            }
+            else
+            {
+                ActiveTagFilters.Add(tag);
+            }
+            OnPropertyChanged(nameof(HasActiveTagFilter));
+            ApplyTagFilter();
+        }
+
+        [RelayCommand]
+        private void ClearTagFilters()
+        {
+            ActiveTagFilters.Clear();
+            OnPropertyChanged(nameof(HasActiveTagFilter));
+            ApplyTagFilter();
+        }
+
+        [RelayCommand]
+        private void ManageTags()
+        {
+            ManageTagsRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        public async Task CreateTagAsync(string name, string color)
+        {
+            if (_board == null) return;
+            await _tagService.CreateTagAsync(_board, name, color);
+            RefreshAvailableTags();
+        }
+
+        public async Task DeleteTagAsync(string tagName)
+        {
+            if (_board == null) return;
+            await _tagService.DeleteTagAsync(_board, tagName);
+            RefreshAvailableTags();
+
+            // Reload tags on all items and groups
+            ReloadAllTags();
+        }
+
+        public async Task RenameTagAsync(string oldName, string newName)
+        {
+            if (_board == null) return;
+            await _tagService.RenameTagAsync(_board, oldName, newName);
+            RefreshAvailableTags();
+            ReloadAllTags();
+        }
+
+        public async Task UpdateTagColorAsync(string tagName, string newColor)
+        {
+            if (_board == null) return;
+            await _tagService.UpdateTagColorAsync(_board, tagName, newColor);
+            RefreshAvailableTags();
+            ReloadAllTags();
+        }
+
+        private void ReloadAllTags()
+        {
+            foreach (ColumnViewModel column in Columns)
+            {
+                foreach (KanbanItemViewModel item in column.Items)
+                {
+                    item.LoadTags();
+                }
+                foreach (GroupViewModel group in column.Groups)
+                {
+                    group.LoadTags();
+                }
+            }
+            ApplyTagFilter();
+        }
+
+        public bool ItemPassesTagFilter(KanbanItemViewModel item)
+        {
+            if (ActiveTagFilters.Count == 0) return true;
+            return ActiveTagFilters.All(filter => item.Tags.Any(t => t.Name == filter.Name));
+        }
+
+        public bool GroupPassesTagFilter(GroupViewModel group)
+        {
+            if (ActiveTagFilters.Count == 0) return true;
+
+            // A group passes if the group itself is tagged, or any of its items pass
+            bool groupTagged = ActiveTagFilters.All(filter => group.Tags.Any(t => t.Name == filter.Name));
+            if (groupTagged) return true;
+
+            return group.Items.Any(item => ItemPassesTagFilter(item));
+        }
+
+        public void ApplyTagFilter()
+        {
+            foreach (ColumnViewModel column in Columns)
+            {
+                foreach (KanbanItemViewModel item in column.Items)
+                {
+                    item.IsVisible = ItemPassesTagFilter(item);
+                }
+                foreach (GroupViewModel group in column.Groups)
+                {
+                    group.IsVisible = GroupPassesTagFilter(group);
+                }
+            }
         }
 
         public void ShowNotification(string title, string message, InfoBarSeverity severity)

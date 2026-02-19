@@ -10,6 +10,7 @@ public partial class ColumnViewModel : BaseViewModel
     private readonly Board _board;
     private readonly FileWatcherService? _fileWatcherService;
     private readonly INotificationService? _notificationService;
+    private readonly TagService? _tagService;
 
     [ObservableProperty]
     private string _name = string.Empty;
@@ -19,6 +20,7 @@ public partial class ColumnViewModel : BaseViewModel
     public ObservableCollection<GroupViewModel> Groups { get; } = [];
 
     public string FolderPath { get; }
+    public string FolderName => Path.GetFileName(FolderPath);
 
     public event EventHandler<string>? DeleteRequested;
     public event EventHandler? AddItemRequested;
@@ -26,7 +28,7 @@ public partial class ColumnViewModel : BaseViewModel
     public event EventHandler<GroupViewModel>? GroupRenameRequested;
     public event EventHandler<GroupViewModel>? GroupDeleteRequested;
 
-    public ColumnViewModel(Column column, FileSystemService fileSystemService, BoardConfigService boardConfigService, GroupService groupService, Board board, FileWatcherService? fileWatcherService = null, INotificationService? notificationService = null)
+    public ColumnViewModel(Column column, FileSystemService fileSystemService, BoardConfigService boardConfigService, GroupService groupService, Board board, FileWatcherService? fileWatcherService = null, INotificationService? notificationService = null, TagService? tagService = null)
     {
         Name = column.Name;
         FolderPath = column.FolderPath;
@@ -36,10 +38,11 @@ public partial class ColumnViewModel : BaseViewModel
         _board = board;
         _fileWatcherService = fileWatcherService;
         _notificationService = notificationService;
+        _tagService = tagService;
 
         foreach (KanbanItem item in column.Items)
         {
-            KanbanItemViewModel itemViewModel = new(item, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService);
+            KanbanItemViewModel itemViewModel = new(item, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService, _tagService);
             Items.Add(itemViewModel);
         }
     }
@@ -50,7 +53,7 @@ public partial class ColumnViewModel : BaseViewModel
         AddItemRequested?.Invoke(this, EventArgs.Empty);
     }
 
-    public async Task CreateItemAsync(string title)
+    public async Task<KanbanItemViewModel?> CreateItemAsync(string title)
     {
         try
         {
@@ -73,11 +76,13 @@ public partial class ColumnViewModel : BaseViewModel
             KanbanItem? newItem = items.FirstOrDefault(i => i.FileName == fileName);
             if (newItem != null)
             {
-                KanbanItemViewModel itemViewModel = new(newItem, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService);
-                Items.Add(itemViewModel);
+                KanbanItemViewModel itemViewModel = new(newItem, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService, _tagService);
+                    Items.Add(itemViewModel);
 
                 // New items always start as ungrouped
                 UngroupedItems.Add(itemViewModel);
+
+                return itemViewModel;
             }
         }
         catch (UnauthorizedAccessException)
@@ -92,6 +97,8 @@ public partial class ColumnViewModel : BaseViewModel
                 ex.Message,
                 InfoBarSeverity.Error);
         }
+
+        return null;
     }
 
     [RelayCommand]
@@ -234,6 +241,13 @@ public partial class ColumnViewModel : BaseViewModel
                 // Update item order in both columns
                 await sourceColumnViewModel.UpdateItemOrderAsync();
                 await UpdateItemOrderAsync();
+
+                // Update tag assignment key for the moved item
+                if (_tagService != null)
+                {
+                    await _tagService.UpdateItemKeyAsync(_board, sourceColumnViewModel.FolderName, sourceItem.FileName, FolderName, Path.GetFileName(newFilePath));
+                    sourceItem.LoadTags();
+                }
             }
             catch
             {
@@ -292,7 +306,7 @@ public partial class ColumnViewModel : BaseViewModel
         Groups.Clear();
         foreach (Group group in loadedGroups)
         {
-            GroupViewModel groupViewModel = new(group.Name)
+            GroupViewModel groupViewModel = new(group.Name, _tagService, _board, FolderName)
             {
                 IsCollapsed = group.IsCollapsed
             };
@@ -311,7 +325,7 @@ public partial class ColumnViewModel : BaseViewModel
         // Create ViewModels and organize into groups using the lookup
         foreach (KanbanItem item in items)
         {
-            KanbanItemViewModel itemViewModel = new(item, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService);
+            KanbanItemViewModel itemViewModel = new(item, _fileSystemService, _boardConfigService, _board, this, _fileWatcherService, _notificationService, _tagService);
             Items.Add(itemViewModel);
 
             if (fileToGroup.TryGetValue(item.FileName, out string? groupName))
@@ -341,7 +355,7 @@ public partial class ColumnViewModel : BaseViewModel
 
         foreach (Group group in loadedGroups)
         {
-            GroupViewModel groupViewModel = new(group.Name)
+            GroupViewModel groupViewModel = new(group.Name, _tagService, _board, FolderName)
             {
                 IsCollapsed = group.IsCollapsed
             };
@@ -371,7 +385,7 @@ public partial class ColumnViewModel : BaseViewModel
         };
         await GroupService.SaveGroupAsync(FolderPath, newGroup);
 
-        GroupViewModel groupViewModel = new(actualName);
+        GroupViewModel groupViewModel = new(actualName, _tagService, _board, FolderName);
         groupViewModel.RenameRequested += (sender, e) => GroupRenameRequested?.Invoke(this, groupViewModel);
         groupViewModel.DeleteRequested += (sender, e) => GroupDeleteRequested?.Invoke(this, groupViewModel);
         Groups.Add(groupViewModel);
@@ -388,9 +402,19 @@ public partial class ColumnViewModel : BaseViewModel
 
         await GroupService.RenameGroupFileAsync(FolderPath, oldName, actualNewName);
 
+        // Update tag assignment key for the group
+        if (_tagService != null)
+        {
+            await _tagService.UpdateGroupKeyAsync(_board, FolderName, oldName, actualNewName);
+        }
+
         // Update the group view model
         GroupViewModel? group = Groups.FirstOrDefault(g => g.Name == oldName);
-        group?.Name = actualNewName;
+        if (group != null)
+        {
+            group.Name = actualNewName;
+            group.LoadTags();
+        }
     }
 
     public async Task DeleteGroupAsync(string groupName)
@@ -533,7 +557,7 @@ public partial class ColumnViewModel : BaseViewModel
             await GroupService.SaveGroupAsync(FolderPath, newGroup);
 
             // Create the group ViewModel in the target column and populate it
-            GroupViewModel newGroupVm = new(actualName) { IsCollapsed = sourceGroup.IsCollapsed };
+            GroupViewModel newGroupVm = new(actualName, _tagService, _board, FolderName) { IsCollapsed = sourceGroup.IsCollapsed };
             newGroupVm.RenameRequested += (sender, e) => GroupRenameRequested?.Invoke(this, newGroupVm);
             newGroupVm.DeleteRequested += (sender, e) => GroupDeleteRequested?.Invoke(this, newGroupVm);
 

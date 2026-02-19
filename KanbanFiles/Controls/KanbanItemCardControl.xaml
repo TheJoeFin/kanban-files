@@ -2,11 +2,17 @@
     x:Class="KanbanFiles.Controls.KanbanItemCardControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:KanbanFiles.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:KanbanFiles.Models"
     xmlns:viewmodels="using:KanbanFiles.ViewModels"
     d:DataContext="{d:DesignInstance Type=viewmodels:KanbanItemViewModel}"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <converters:TagColorToBrushConverter x:Key="TagColorToBrushConverter" />
+    </UserControl.Resources>
 
     <Border
         x:Name="CardBorder"
@@ -72,11 +78,69 @@
                 TextTrimming="CharacterEllipsis"
                 TextWrapping="Wrap" />
 
-            <TextBlock
-                HorizontalAlignment="Right"
-                FontSize="10"
-                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                Text="{x:Bind ViewModel.LastModifiedDisplay, Mode=OneWay}" />
+            <!--  Bottom row: date left, tags + tag button right  -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontSize="10"
+                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                    Text="{x:Bind ViewModel.LastModifiedDisplay, Mode=OneWay}" />
+
+                <!--  Tags area: pills + add button, right-aligned  -->
+                <StackPanel
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal"
+                    Spacing="4">
+
+                    <!--  Tag pills  -->
+                    <ItemsControl
+                        VerticalAlignment="Center"
+                        ItemsSource="{x:Bind ViewModel.Tags, Mode=OneWay}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:TagDefinition">
+                                <Border
+                                    Padding="6,1"
+                                    Background="{x:Bind Color, Converter={StaticResource TagColorToBrushConverter}}"
+                                    CornerRadius="8"
+                                    Opacity="0.85">
+                                    <TextBlock
+                                        FontSize="10"
+                                        FontWeight="SemiBold"
+                                        Foreground="White"
+                                        Text="{x:Bind Name}" />
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!--  Add tag button (visible on hover)  -->
+                    <Button
+                        x:Name="AddTagButton"
+                        Width="22"
+                        Height="22"
+                        Padding="0"
+                        VerticalAlignment="Center"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="AddTagButton_Click"
+                        Opacity="0"
+                        ToolTipService.ToolTip="Manage tags">
+                        <FontIcon FontSize="12" Glyph="&#xE1CB;" />
+                    </Button>
+                </StackPanel>
+            </Grid>
         </StackPanel>
     </Border>
 </UserControl>

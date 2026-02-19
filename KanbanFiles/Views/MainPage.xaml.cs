@@ -23,6 +23,7 @@ namespace KanbanFiles.Views
             ViewModel.OpenFolderRequested += OnOpenFolderRequested;
             ViewModel.AddColumnRequested += OnAddColumnRequested;
             ViewModel.EditFileFilterRequested += OnEditFileFilterRequested;
+            ViewModel.ManageTagsRequested += OnManageTagsRequested;
             ItemDetailViewControl.CloseRequested += OnItemDetailCloseRequested;
 
             WeakReferenceMessenger.Default.Register<Messages.OpenItemDetailMessage>(this, (r, m) =>
@@ -199,6 +200,177 @@ namespace KanbanFiles.Views
                 .Where(ext => ext.Length > 1)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
+        }
+
+        private void TagFilterButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!ViewModel.IsLoaded) return;
+
+            MenuFlyout flyout = new();
+            System.Collections.ObjectModel.ObservableCollection<TagDefinition> availableTags = ViewModel.AvailableTags;
+            HashSet<string> activeNames = new(ViewModel.ActiveTagFilters.Select(t => t.Name));
+
+            if (availableTags.Count == 0)
+            {
+                MenuFlyoutItem noTags = new() { Text = "No tags defined", IsEnabled = false };
+                flyout.Items.Add(noTags);
+            }
+            else
+            {
+                foreach (TagDefinition tag in availableTags)
+                {
+                    ToggleMenuFlyoutItem item = new()
+                    {
+                        Text = tag.Name,
+                        IsChecked = activeNames.Contains(tag.Name),
+                        Icon = new FontIcon
+                        {
+                            Glyph = "\u25CF",
+                            FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Segoe UI"),
+                            FontSize = 16,
+                            Foreground = ParseTagColorBrush(tag.Color)
+                        }
+                    };
+                    TagDefinition capturedTag = tag;
+                    item.Click += (s, args) => ViewModel.ToggleTagFilter(capturedTag);
+                    flyout.Items.Add(item);
+                }
+            }
+
+            if (sender is FrameworkElement element)
+            {
+                flyout.ShowAt(element);
+            }
+        }
+
+        private void RemoveTagFilter_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is string tagName)
+            {
+                TagDefinition? tag = ViewModel.ActiveTagFilters.FirstOrDefault(t => t.Name == tagName);
+                if (tag != null)
+                {
+                    ViewModel.ToggleTagFilter(tag);
+                }
+            }
+        }
+
+        private async void OnManageTagsRequested(object? sender, EventArgs e)
+        {
+            if (!ViewModel.IsLoaded || ViewModel.Board == null) return;
+
+            try
+            {
+                await ShowManageTagsDialogAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in OnManageTagsRequested: {ex}");
+            }
+        }
+
+        private async Task ShowManageTagsDialogAsync()
+        {
+            List<TagDefinition> tags = ViewModel.TagService.GetTagDefinitions(ViewModel.Board!);
+
+            StackPanel panel = new() { Spacing = 8, MinWidth = 360 };
+
+            if (tags.Count == 0)
+            {
+                panel.Children.Add(new TextBlock
+                {
+                    Text = "No tags defined yet. Use the tag button on items or groups to create tags.",
+                    TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap,
+                    Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"]
+                });
+            }
+            else
+            {
+                foreach (TagDefinition tag in tags)
+                {
+                    Grid row = new();
+                    row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+                    row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+
+                    // Color dot
+                    Border colorDot = new()
+                    {
+                        Width = 16,
+                        Height = 16,
+                        CornerRadius = new CornerRadius(8),
+                        Margin = new Thickness(0, 0, 8, 0),
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Background = ParseTagColorBrush(tag.Color)
+                    };
+                    Grid.SetColumn(colorDot, 0);
+                    row.Children.Add(colorDot);
+
+                    // Name
+                    TextBlock nameText = new()
+                    {
+                        Text = tag.Name,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        FontSize = 14
+                    };
+                    Grid.SetColumn(nameText, 1);
+                    row.Children.Add(nameText);
+
+                    // Delete button
+                    string capturedName = tag.Name;
+                    Button deleteBtn = new()
+                    {
+                        Content = new FontIcon { Glyph = "\uE74D", FontSize = 12 },
+                        Width = 28,
+                        Height = 28,
+                        Padding = new Thickness(0),
+                        Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent),
+                        BorderThickness = new Thickness(0)
+                    };
+                    ToolTipService.SetToolTip(deleteBtn, "Delete tag");
+                    deleteBtn.Click += async (s, args) =>
+                    {
+                        try
+                        {
+                            await ViewModel.DeleteTagAsync(capturedName);
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Failed to delete tag: {ex.Message}");
+                        }
+                    };
+                    Grid.SetColumn(deleteBtn, 2);
+                    row.Children.Add(deleteBtn);
+
+                    panel.Children.Add(row);
+                }
+            }
+
+            ContentDialog dialog = new()
+            {
+                Title = "Manage Tags",
+                Content = panel,
+                CloseButtonText = "Close",
+                XamlRoot = this.XamlRoot
+            };
+
+            await dialog.ShowAsync();
+        }
+
+        private static Microsoft.UI.Xaml.Media.SolidColorBrush ParseTagColorBrush(string hex)
+        {
+            try
+            {
+                hex = hex.TrimStart('#');
+                byte r = Convert.ToByte(hex[..2], 16);
+                byte g = Convert.ToByte(hex[2..4], 16);
+                byte b = Convert.ToByte(hex[4..6], 16);
+                return new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, r, g, b));
+            }
+            catch
+            {
+                return new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, 52, 152, 219));
+            }
         }
 
         private async Task ShowErrorDialogAsync(string message)

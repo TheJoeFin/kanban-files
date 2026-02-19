@@ -8,6 +8,7 @@ public partial class KanbanItemViewModel : BaseViewModel
     private ColumnViewModel _parentColumn;
     private readonly FileWatcherService? _fileWatcherService;
     private readonly INotificationService? _notificationService;
+    private readonly TagService? _tagService;
 
     [ObservableProperty]
     private string _contentPreview = string.Empty;
@@ -27,10 +28,15 @@ public partial class KanbanItemViewModel : BaseViewModel
     public string LastModifiedDisplay => LastModified.ToString("MMM d, yyyy");
     public bool IsTextFile { get; set; } = true;
 
+    [ObservableProperty]
+    private bool _isVisible = true;
+
+    public System.Collections.ObjectModel.ObservableCollection<TagDefinition> Tags { get; } = [];
+
     public event EventHandler? DeleteRequested;
     public event EventHandler? RenameRequested;
 
-    public KanbanItemViewModel(KanbanItem item, FileSystemService fileSystemService, BoardConfigService boardConfigService, Board board, ColumnViewModel parentColumn, FileWatcherService? fileWatcherService = null, INotificationService? notificationService = null)
+    public KanbanItemViewModel(KanbanItem item, FileSystemService fileSystemService, BoardConfigService boardConfigService, Board board, ColumnViewModel parentColumn, FileWatcherService? fileWatcherService = null, INotificationService? notificationService = null, TagService? tagService = null)
     {
         Title = item.Title;
         ContentPreview = item.ContentPreview;
@@ -45,6 +51,37 @@ public partial class KanbanItemViewModel : BaseViewModel
         _parentColumn = parentColumn;
         _fileWatcherService = fileWatcherService;
         _notificationService = notificationService;
+        _tagService = tagService;
+
+        LoadTags();
+    }
+
+    public void LoadTags()
+    {
+        Tags.Clear();
+        if (_tagService == null) return;
+
+        string columnFolderName = Path.GetFileName(_parentColumn.FolderPath);
+        List<string> tagNames = _tagService.GetTagsForItem(_board, columnFolderName, FileName);
+        List<TagDefinition> definitions = _tagService.GetTagDefinitions(_board);
+
+        foreach (string tagName in tagNames)
+        {
+            TagDefinition? def = definitions.FirstOrDefault(d => d.Name == tagName);
+            if (def != null)
+            {
+                Tags.Add(def);
+            }
+        }
+    }
+
+    public async Task ToggleTagAsync(string tagName)
+    {
+        if (_tagService == null) return;
+
+        string columnFolderName = Path.GetFileName(_parentColumn.FolderPath);
+        await _tagService.ToggleItemTagAsync(_board, columnFolderName, FileName, tagName);
+        LoadTags();
     }
 
     [RelayCommand]
@@ -69,11 +106,18 @@ public partial class KanbanItemViewModel : BaseViewModel
             await _fileSystemService.DeleteItemAsync(FilePath);
 
             // Update item order in config
-            ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(Path.GetDirectoryName(FilePath)));
+            ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetDirectoryName(FilePath));
             if (columnConfig != null)
             {
                 columnConfig.ItemOrder.Remove(FileName);
                 await _boardConfigService.SaveAsync(_board);
+            }
+
+            // Clean up tag assignments
+            string columnFolderName = Path.GetFileName(Path.GetDirectoryName(FilePath) ?? string.Empty);
+            if (_tagService != null)
+            {
+                await _tagService.RemoveAssignmentAsync(_board, columnFolderName, FileName);
             }
 
             _parentColumn.RemoveItem(this);
@@ -168,7 +212,7 @@ public partial class KanbanItemViewModel : BaseViewModel
             }
 
             // Update config
-            ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == Path.GetFileName(folderPath));
+            ColumnConfig? columnConfig = _board.Columns.FirstOrDefault(c => Path.Combine(_board.RootPath, c.FolderName) == folderPath);
             if (columnConfig != null)
             {
                 int index = columnConfig.ItemOrder.IndexOf(FileName);
@@ -179,7 +223,16 @@ public partial class KanbanItemViewModel : BaseViewModel
                 await _boardConfigService.SaveAsync(_board);
             }
 
+            // Update tag assignment key
+            string columnFolderName = Path.GetFileName(folderPath);
+            if (_tagService != null && newFileName != FileName)
+            {
+                await _tagService.UpdateItemKeyAsync(_board, columnFolderName, FileName, columnFolderName, newFileName);
+            }
+
             Title = newTitle;
+            UpdateFilePath(newFilePath);
+            LoadTags();
         }
         catch (UnauthorizedAccessException)
         {

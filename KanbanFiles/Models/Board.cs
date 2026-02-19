@@ -6,4 +6,5 @@ public class Board
     public string RootPath { get; set; } = string.Empty;
     public List<ColumnConfig> Columns { get; set; } = new();
     public FileFilterConfig? FileFilter { get; set; }
+    public TagsConfig? Tags { get; set; }
 }

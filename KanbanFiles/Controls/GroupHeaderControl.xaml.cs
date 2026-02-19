@@ -181,4 +181,182 @@ public sealed partial class GroupHeaderControl : UserControl
         };
         await dialog.ShowAsync();
     }
+
+    private void GroupAddTagButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel == null) return;
+
+        MenuFlyout flyout = BuildGroupTagFlyout();
+        flyout.ShowAt(GroupAddTagButton);
+    }
+
+    private MenuFlyout BuildGroupTagFlyout()
+    {
+        MenuFlyout flyout = new();
+
+        MainViewModel? mainVm = FindMainViewModel();
+        if (mainVm?.Board == null) return flyout;
+
+        List<TagDefinition> allTags = mainVm.TagService.GetTagDefinitions(mainVm.Board);
+
+        if (allTags.Count > 0)
+        {
+            HashSet<string> currentTagNames = new(ViewModel!.Tags.Select(t => t.Name));
+
+            foreach (TagDefinition tag in allTags)
+            {
+                ToggleMenuFlyoutItem menuItem = new()
+                {
+                    Text = tag.Name,
+                    IsChecked = currentTagNames.Contains(tag.Name),
+                    Icon = new FontIcon
+                    {
+                        Glyph = "\u25CF",
+                        FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Segoe UI"),
+                        FontSize = 16,
+                        Foreground = ParseTagColorBrush(tag.Color)
+                    }
+                };
+                string tagName = tag.Name;
+                menuItem.Click += async (s, args) =>
+                {
+                    try
+                    {
+                        await ViewModel!.ToggleTagAsync(tagName);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Failed to toggle group tag: {ex.Message}");
+                    }
+                };
+                flyout.Items.Add(menuItem);
+            }
+
+            flyout.Items.Add(new MenuFlyoutSeparator());
+        }
+
+        MenuFlyoutItem createItem = new()
+        {
+            Text = "Create new tag...",
+            Icon = new FontIcon { Glyph = "\uE710" }
+        };
+        createItem.Click += async (s, args) =>
+        {
+            try
+            {
+                await ShowCreateTagDialogAsync(mainVm);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to create tag: {ex.Message}");
+            }
+        };
+        flyout.Items.Add(createItem);
+
+        return flyout;
+    }
+
+    private async Task ShowCreateTagDialogAsync(MainViewModel mainVm)
+    {
+        TextBox nameBox = new()
+        {
+            PlaceholderText = "Tag name",
+            MinWidth = 260
+        };
+
+        GridView colorGrid = new()
+        {
+            ItemsSource = TagDefinition.DefaultColors,
+            SelectedIndex = 0,
+            SelectionMode = ListViewSelectionMode.Single
+        };
+        colorGrid.ItemTemplate = (DataTemplate)Microsoft.UI.Xaml.Markup.XamlReader.Load(
+            @"<DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">
+                <Border Width=""28"" Height=""28"" CornerRadius=""14"" Margin=""2"">
+                    <Border.Background>
+                        <SolidColorBrush Color=""{Binding}"" />
+                    </Border.Background>
+                </Border>
+            </DataTemplate>");
+
+        StackPanel panel = new() { Spacing = 12 };
+        panel.Children.Add(nameBox);
+        panel.Children.Add(new TextBlock
+        {
+            Text = "Color:",
+            FontSize = 13,
+            Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"]
+        });
+        panel.Children.Add(colorGrid);
+
+        ContentDialog dialog = new()
+        {
+            Title = "Create New Tag",
+            Content = panel,
+            PrimaryButtonText = "Create",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = this.XamlRoot
+        };
+
+        ContentDialogResult result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            string tagName = nameBox.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(tagName))
+            {
+                await ShowErrorAsync("Tag name cannot be empty.");
+                return;
+            }
+
+            string color = colorGrid.SelectedItem as string ?? TagDefinition.DefaultColors[0];
+            await mainVm.CreateTagAsync(tagName, color);
+
+            // Auto-assign to this group
+            await ViewModel!.ToggleTagAsync(tagName);
+        }
+    }
+
+    private static Microsoft.UI.Xaml.Media.SolidColorBrush ParseTagColorBrush(string hex)
+    {
+        try
+        {
+            hex = hex.TrimStart('#');
+            byte r = Convert.ToByte(hex[..2], 16);
+            byte g = Convert.ToByte(hex[2..4], 16);
+            byte b = Convert.ToByte(hex[4..6], 16);
+            return new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, r, g, b));
+        }
+        catch
+        {
+            return new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, 52, 152, 219));
+        }
+    }
+
+    private MainViewModel? FindMainViewModel()
+    {
+        DependencyObject? current = this;
+        while (current != null)
+        {
+            if (current is FrameworkElement fe && fe.DataContext is MainViewModel mainVm)
+            {
+                return mainVm;
+            }
+            current = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(current);
+        }
+
+        if (App.MainWindow?.Content is FrameworkElement rootElement)
+        {
+            if (rootElement is Frame frame && frame.Content is FrameworkElement page && page.DataContext is MainViewModel pageMainVm)
+            {
+                return pageMainVm;
+            }
+            if (rootElement.DataContext is MainViewModel directMainVm)
+            {
+                return directMainVm;
+            }
+        }
+
+        return null;
+    }
 }

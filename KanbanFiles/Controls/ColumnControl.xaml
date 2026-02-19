@@ -90,7 +90,7 @@
                     ItemsSource="{Binding UngroupedItems, Mode=OneWay}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <controls:KanbanItemCardControl Margin="0,0,0,8" />
+                            <controls:KanbanItemCardControl Margin="0,0,0,8" Visibility="{Binding IsVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -104,7 +104,8 @@
                                 Padding="4"
                                 BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
                                 BorderThickness="1.5"
-                                CornerRadius="8">
+                                CornerRadius="8"
+                                Visibility="{Binding IsVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <StackPanel>
                                     <!--  Group Header  -->
                                     <controls:GroupHeaderControl />
@@ -118,17 +119,17 @@
                                         ItemsSource="{Binding Items, Mode=OneWay}"
                                         Loaded="GroupItemsControl_Loaded"
                                         Visibility="{Binding IsCollapsed, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <controls:KanbanItemCardControl Margin="0,0,0,8" />
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                                                            <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <controls:KanbanItemCardControl Margin="0,0,0,8" Visibility="{Binding IsVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
             </StackPanel>
         </ScrollViewer>
 

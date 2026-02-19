@@ -2,6 +2,8 @@ using Microsoft.UI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.Windows.AppLifecycle;
+using Windows.ApplicationModel.Activation;
 using Windows.Graphics;
 using Windows.Storage;
 using WinRT.Interop;
@@ -23,6 +25,8 @@ public partial class App : Application
     public static IPageService PageService { get; } = new PageService();
     public static INavigationService NavigationService { get; } = new NavigationService(PageService);
     public static ISettingsService SettingsService { get; } = new SettingsService();
+
+    public static string? ActivationFolderPath { get; private set; }
 
     private const string WINDOW_WIDTH_KEY = "WindowWidth";
     private const string WINDOW_HEIGHT_KEY = "WindowHeight";
@@ -46,8 +50,10 @@ public partial class App : Application
     /// will be used such as when the application is launched to open a specific file.
     /// </summary>
     /// <param name="e">Details about the launch request and process.</param>
-    protected override void OnLaunched(LaunchActivatedEventArgs e)
+    protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs e)
     {
+        CheckFileActivation();
+
         if (window == null)
         {
             var mainWindow = new MainWindow();
@@ -60,6 +66,32 @@ public partial class App : Application
         }
 
         window.Activate();
+    }
+
+    private void CheckFileActivation()
+    {
+        try
+        {
+            AppActivationArguments activatedEventArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+            if (activatedEventArgs.Kind == ExtendedActivationKind.File &&
+                activatedEventArgs.Data is IFileActivatedEventArgs fileArgs &&
+                fileArgs.Files.Count > 0)
+            {
+                string filePath = fileArgs.Files[0].Path;
+                if (filePath.EndsWith(".kanban", StringComparison.OrdinalIgnoreCase))
+                {
+                    string? folderPath = Path.GetDirectoryName(filePath);
+                    if (!string.IsNullOrEmpty(folderPath))
+                    {
+                        ActivationFolderPath = folderPath;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error checking file activation: {ex.Message}");
+        }
     }
 
     private void InitializeWindowState()

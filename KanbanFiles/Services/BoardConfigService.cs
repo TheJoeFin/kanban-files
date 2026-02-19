@@ -13,7 +13,7 @@ public class BoardConfigService
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    private const string ConfigFileName = ".kanban.json";
+    private const string ConfigFileName = ".kanban";
 
     public FileWatcherService? FileWatcher { get; set; }
 
@@ -42,7 +42,7 @@ public class BoardConfigService
                 // Corrupt config - backup and regenerate
                 await BackupCorruptConfigAsync(configPath);
                 WasConfigCorrupted = true;
-                Console.WriteLine($"Warning: Corrupt .kanban.json detected. Backed up and regenerating. Error: {ex.Message}");
+                Console.WriteLine($"Warning: Corrupt .kanban config detected. Backed up and regenerating. Error: {ex.Message}");
             }
         }
 

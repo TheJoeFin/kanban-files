@@ -136,7 +136,7 @@ public class FileWatcherService : IDisposable
         string ext = Path.GetExtension(e.FullPath);
         string fileName = Path.GetFileName(e.FullPath);
 
-        if (ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        if (ext.Equals(".json", StringComparison.OrdinalIgnoreCase) || ext.Equals(".kanban", StringComparison.OrdinalIgnoreCase))
         {
             DebounceEvent(e.FullPath, async () =>
             {
@@ -170,7 +170,7 @@ public class FileWatcherService : IDisposable
         string ext = Path.GetExtension(e.FullPath);
         string fileName = Path.GetFileName(e.FullPath);
 
-        if (ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        if (ext.Equals(".json", StringComparison.OrdinalIgnoreCase) || ext.Equals(".kanban", StringComparison.OrdinalIgnoreCase))
         {
             _dispatcherQueue.TryEnqueue(() =>
             {
@@ -196,8 +196,9 @@ public class FileWatcherService : IDisposable
         var oldExt = Path.GetExtension(e.OldFullPath);
         var newExt = Path.GetExtension(e.FullPath);
 
-        // JSON file changes → content change (group config)
-        if (oldExt.Equals(".json", StringComparison.OrdinalIgnoreCase) || newExt.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        // JSON/kanban file changes → content change (group/board config)
+        if (oldExt.Equals(".json", StringComparison.OrdinalIgnoreCase) || newExt.Equals(".json", StringComparison.OrdinalIgnoreCase) ||
+            oldExt.Equals(".kanban", StringComparison.OrdinalIgnoreCase) || newExt.Equals(".kanban", StringComparison.OrdinalIgnoreCase))
         {
             _dispatcherQueue.TryEnqueue(() =>
             {

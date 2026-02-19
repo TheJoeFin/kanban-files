@@ -17,7 +17,7 @@ public class GroupService
 
     private static readonly HashSet<string> ReservedFileNames = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".kanban.json",
+        ".kanban",
         LegacyGroupsFileName
     };
 

@@ -13,6 +13,6 @@ public sealed partial class ShellPage : Page
 
         App.NavigationService.Frame = NavigationFrame;
 
-        App.NavigationService.NavigateTo(typeof(MainViewModel).FullName!);
+        App.NavigationService.NavigateTo(typeof(MainViewModel).FullName!, App.ActivationFolderPath);
     }
 }

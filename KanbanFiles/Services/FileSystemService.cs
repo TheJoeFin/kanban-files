@@ -5,8 +5,8 @@ namespace KanbanFiles.Services;
 
 public class FileSystemService
 {
-    private static readonly string[] ExcludedFiles = { ".kanban.json" };
-    private static readonly HashSet<string> ExcludedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".json" };
+    private static readonly string[] ExcludedFiles = { ".kanban" };
+    private static readonly HashSet<string> ExcludedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".json", ".kanban" };
 
     private static readonly HashSet<string> TextFileExtensions = new(StringComparer.OrdinalIgnoreCase)
     {

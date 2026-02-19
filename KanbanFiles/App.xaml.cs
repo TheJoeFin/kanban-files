@@ -20,6 +20,9 @@ public partial class App : Application
     public static Window? MainWindow { get; private set; }
     public static DispatcherQueue? MainDispatcher => MainWindow?.DispatcherQueue;
 
+    public static IPageService PageService { get; } = new PageService();
+    public static INavigationService NavigationService { get; } = new NavigationService(PageService);
+
     private const string WINDOW_WIDTH_KEY = "WindowWidth";
     private const string WINDOW_HEIGHT_KEY = "WindowHeight";
     private const string WINDOW_X_KEY = "WindowX";
@@ -52,7 +55,7 @@ public partial class App : Application
 
             mainWindow.NavigationFrame.NavigationFailed += OnNavigationFailed;
             InitializeWindowState();
-            _ = mainWindow.NavigationFrame.Navigate(typeof(MainPage), e.Arguments);
+            _ = mainWindow.NavigationFrame.Navigate(typeof(ShellPage), e.Arguments);
         }
 
         window.Activate();

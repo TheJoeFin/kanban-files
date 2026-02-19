@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="KanbanFiles.Views.ShellPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <NavigationView
+        x:Name="NavigationViewControl"
+        BackRequested="NavigationViewControl_BackRequested"
+        IsBackButtonVisible="Auto"
+        IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
+        IsSettingsVisible="True"
+        ItemInvoked="NavigationViewControl_ItemInvoked"
+        PaneDisplayMode="LeftCompact">
+
+        <NavigationView.MenuItems>
+            <NavigationViewItem
+                Content="Board"
+                Tag="KanbanFiles.ViewModels.MainViewModel">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE80F;" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+        </NavigationView.MenuItems>
+
+        <Frame x:Name="NavigationFrame" />
+    </NavigationView>
+</Page>

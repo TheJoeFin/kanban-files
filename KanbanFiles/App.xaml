@@ -17,6 +17,7 @@
             <!--  Other app resources here  -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
             <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
+            <converters:PathToFolderNameConverter x:Key="PathToFolderNameConverter" />
 
             <Color x:Key="Primary">#512BD4</Color>
 

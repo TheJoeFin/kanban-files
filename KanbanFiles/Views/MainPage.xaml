@@ -227,80 +227,74 @@
                 <ItemsControl ItemsSource="{x:Bind ViewModel.RecentFolders, Mode=OneWay}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="x:String">
-                            <Border
-                                Margin="0,0,0,4"
-                                Padding="12,8"
-                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                CornerRadius="4">
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <!--  Clickable folder path  -->
-                                    <Button
-                                        Grid.Column="0"
-                                        Padding="0"
-                                        HorizontalAlignment="Stretch"
-                                        HorizontalContentAlignment="Left"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Click="RecentFolderButton_Click"
-                                        CommandParameter="{x:Bind}">
-                                        <Button.Resources>
-                                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent" />
-                                            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent" />
-                                        </Button.Resources>
-
+                                <!--  Clickable folder button  -->
+                                <Button
+                                    Grid.Column="0"
+                                    Padding="12,8"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch"
+                                    Click="RecentFolderButton_Click"
+                                    CommandParameter="{x:Bind}"
+                                    CornerRadius="4">
+                                    <StackPanel>
                                         <TextBlock
-                                            FontSize="13"
-                                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                                            Text="{x:Bind}"
-                                            TextTrimming="CharacterEllipsis">
-                                            <ToolTipService.ToolTip>
-                                                <ToolTip Content="{x:Bind}" />
-                                            </ToolTipService.ToolTip>
-                                        </TextBlock>
-                                    </Button>
-
-                                    <!--  Remove button  -->
-                                    <Button
-                                        Grid.Column="1"
-                                        Width="28"
-                                        Height="28"
-                                        Margin="8,0,0,0"
-                                        Padding="0"
-                                        VerticalAlignment="Center"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Click="RemoveRecentFolderButton_Click"
-                                        CommandParameter="{x:Bind}">
-                                        <Button.Resources>
-                                            <SolidColorBrush
-                                                x:Key="ButtonBackgroundPointerOver"
-                                                Opacity="0.1"
-                                                Color="{ThemeResource SystemErrorColor}" />
-                                            <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{ThemeResource SystemErrorColor}" />
-                                            <SolidColorBrush
-                                                x:Key="ButtonBackgroundPressed"
-                                                Opacity="0.2"
-                                                Color="{ThemeResource SystemErrorColor}" />
-                                            <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{ThemeResource SystemErrorColor}" />
-                                        </Button.Resources>
-
-                                        <FontIcon
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            Text="{x:Bind Converter={StaticResource PathToFolderNameConverter}}"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <TextBlock
                                             FontSize="12"
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            Glyph="&#xE711;" />
+                                            Opacity="0.8"
+                                            Text="{x:Bind}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <ToolTipService.ToolTip>
+                                        <ToolTip Content="{x:Bind}" />
+                                    </ToolTipService.ToolTip>
+                                </Button>
 
-                                        <ToolTipService.ToolTip>
-                                            <ToolTip Content="Remove from recent folders" />
-                                        </ToolTipService.ToolTip>
-                                    </Button>
-                                </Grid>
-                            </Border>
+                                <!--  Remove button  -->
+                                <Button
+                                    Grid.Column="1"
+                                    Width="28"
+                                    Height="28"
+                                    Margin="8,0,0,0"
+                                    Padding="0"
+                                    VerticalAlignment="Center"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Click="RemoveRecentFolderButton_Click"
+                                    CommandParameter="{x:Bind}">
+                                    <Button.Resources>
+                                        <SolidColorBrush
+                                            x:Key="ButtonBackgroundPointerOver"
+                                            Opacity="0.1"
+                                            Color="{ThemeResource SystemErrorColor}" />
+                                        <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="{ThemeResource SystemErrorColor}" />
+                                        <SolidColorBrush
+                                            x:Key="ButtonBackgroundPressed"
+                                            Opacity="0.2"
+                                            Color="{ThemeResource SystemErrorColor}" />
+                                        <SolidColorBrush x:Key="ButtonForegroundPressed" Color="{ThemeResource SystemErrorColor}" />
+                                    </Button.Resources>
+
+                                    <FontIcon
+                                        FontSize="12"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Glyph="&#xE711;" />
+
+                                    <ToolTipService.ToolTip>
+                                        <ToolTip Content="Remove from recent folders" />
+                                    </ToolTipService.ToolTip>
+                                </Button>
+                            </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

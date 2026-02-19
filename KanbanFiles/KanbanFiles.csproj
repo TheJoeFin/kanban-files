@@ -40,6 +40,11 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Page Remove="Views\SettingsPage.xaml" />
+      <Page Remove="Views\ShellPage.xaml" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Markdig" Version="0.45.0" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.0-experimental4" />
         <PackageReference Include="Microsoft.WindowsAppSDK.AI" Version="2.0.130-experimental" />
@@ -57,6 +62,14 @@
     -->
     <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
         <ProjectCapability Include="Msix" />
+    </ItemGroup>
+    <ItemGroup>
+      <Page Include="Views\SettingsPage.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+      <Page Include="Views\ShellPage.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
     <ItemGroup>
       <Page Update="MainWindow.xaml">

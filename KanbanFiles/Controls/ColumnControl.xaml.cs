@@ -13,6 +13,7 @@ public sealed partial class ColumnControl : UserControl
     public ColumnControl()
     {
         this.InitializeComponent();
+        this.Width = App.SettingsService.ColumnWidth;
         this.Loaded += ColumnControl_Loaded;
         this.Unloaded += ColumnControl_Unloaded;
     }
@@ -25,6 +26,11 @@ public sealed partial class ColumnControl : UserControl
         }
 
         if (_eventsSubscribed) return;
+
+        WeakReferenceMessenger.Default.Register<ColumnWidthChangedMessage>(this, (r, m) =>
+        {
+            ((ColumnControl)r).Width = m.Width;
+        });
 
         if (DataContext is ViewModels.ColumnViewModel viewModel)
         {
@@ -40,6 +46,8 @@ public sealed partial class ColumnControl : UserControl
 
     private void ColumnControl_Unloaded(object sender, RoutedEventArgs e)
     {
+        WeakReferenceMessenger.Default.Unregister<ColumnWidthChangedMessage>(this);
+
         if (!_eventsSubscribed) return;
 
         if (DataContext is ViewModels.ColumnViewModel viewModel)

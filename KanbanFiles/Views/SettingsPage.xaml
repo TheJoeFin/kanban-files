@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="KanbanFiles.Views.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -20,11 +20,32 @@
                     Style="{StaticResource TitleTextBlockStyle}"
                     Text="Settings" />
 
+                <!--  Appearance  -->
                 <TextBlock
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Style="{StaticResource BodyTextBlockStyle}"
-                    Text="App settings will appear here."
-                    TextWrapping="Wrap" />
+                    Margin="0,8,0,0"
+                    Style="{StaticResource SubtitleTextBlockStyle}"
+                    Text="Appearance" />
+
+                <StackPanel Spacing="4">
+                    <TextBlock
+                        Style="{StaticResource BodyStrongTextBlockStyle}"
+                        Text="Column width" />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="Set the width of each column on the board." />
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Slider
+                            Width="300"
+                            Maximum="600"
+                            Minimum="200"
+                            StepFrequency="10"
+                            Value="{x:Bind ViewModel.ColumnWidth, Mode=TwoWay}" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="{x:Bind ViewModel.ColumnWidth, Mode=OneWay}" />
+                    </StackPanel>
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
     </Grid>

@@ -22,6 +22,7 @@ public partial class App : Application
 
     public static IPageService PageService { get; } = new PageService();
     public static INavigationService NavigationService { get; } = new NavigationService(PageService);
+    public static ISettingsService SettingsService { get; } = new SettingsService();
 
     private const string WINDOW_WIDTH_KEY = "WindowWidth";
     private const string WINDOW_HEIGHT_KEY = "WindowHeight";
